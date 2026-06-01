@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Air Manifest Send (KR) — 개발정의서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DEV SPEC WRAPPER STYLES (원본과 충돌 없도록 prefix: ds-)
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  height: 100%;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #EEF1F4;
+  overflow: hidden;
+}
+
+/* 최상단 DEV BAR */
+#ds-devbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 36px;
+  background: #0d1526;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 10px;
+  z-index: 99999;
+  border-bottom: 2px solid #1e3a6e;
+}
+#ds-devbar .ds-badge {
+  background: #1a5ccf;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
+#ds-devbar .ds-title {
+  font-size: 12px;
+  color: #8eaee8;
+  flex: 1;
+}
+#ds-devbar .ds-title strong { color: #c8d8f8; }
+#ds-btn-toggle {
+  background: #1e3a6e;
+  border: 1px solid #2d5498;
+  color: #8eaee8;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+#ds-btn-toggle:hover { background: #2d4f8a; color: #b8d0f8; }
+#ds-btn-toggle.open { background: #3b6de8; border-color: #5585f0; color: #fff; }
+
+/* 본문 레이아웃 */
+#ds-layout {
+  display: flex;
+  position: fixed;
+  top: 36px; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+
+/* 원본 화면 영역 */
+#ds-screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: margin-right 0.3s ease;
+  min-width: 0;
+}
+#ds-screen.panel-open {
+  margin-right: 500px;
+}
+
+/* 개발정의서 패널 */
+#ds-panel {
+  position: fixed;
+  top: 36px; right: 0; bottom: 0;
+  width: 500px;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  background: #fff;
+  border-left: 1px solid #d0d8eb;
+  display: flex;
+  flex-direction: column;
+  z-index: 9998;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+}
+#ds-panel.open {
+  transform: translateX(0);
+}
+
+/* 패널 헤더 */
+.ds-panel-hd {
+  background: #0d1526;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+.ds-panel-hd h2 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 2px;
+}
+.ds-panel-hd p {
+  font-size: 10px;
+  color: #6070a0;
+  margin: 0;
+}
+
+/* 탭 */
+.ds-tabs {
+  display: flex;
+  background: #f0f3fa;
+  border-bottom: 1px solid #d8dce8;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.ds-tabs::-webkit-scrollbar { height: 0; }
+.ds-tab {
+  padding: 9px 13px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8090b0;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.12s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.ds-tab.active { color: #1a5ccf; border-bottom-color: #1a5ccf; background: #fff; }
+.ds-tab:hover:not(.active) { color: #3a4a6a; }
+
+/* 탭 본문 */
+.ds-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+}
+.ds-body::-webkit-scrollbar { width: 4px; }
+.ds-body::-webkit-scrollbar-thumb { background: #c0cce0; border-radius: 2px; }
+
+.ds-tc { display: none; }
+.ds-tc.active { display: block; }
+
+/* 섹션 */
+.ds-sec { margin-bottom: 20px; }
+.ds-sec-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #7888a8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eaeef8;
+}
+
+/* 카드 */
+.ds-card {
+  background: #f6f9ff;
+  border: 1px solid #dce6f8;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.ds-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0d1a36;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ds-card p {
+  font-size: 11px;
+  color: #3a4e70;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* 배지 */
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.ds-b-blue   { background: #dce8fb; color: #1040a0; }
+.ds-b-green  { background: #d4f0e0; color: #145e30; }
+.ds-b-amber  { background: #fef0d0; color: #8a5000; }
+.ds-b-red    { background: #fde8e8; color: #a01818; }
+.ds-b-gray   { background: #eaeef8; color: #3a4e70; }
+.ds-b-purple { background: #ece8fe; color: #5020a0; }
+
+/* 필드 테이블 */
+.ds-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.ds-tbl th {
+  background: #eaeff8;
+  color: #3a4e70;
+  font-weight: 600;
+  padding: 5px 7px;
+  text-align: left;
+  font-size: 10px;
+  border-bottom: 1px solid #d0d8eb;
+}
+.ds-tbl td {
+  padding: 6px 7px;
+  border-bottom: 1px solid #eaeef8;
+  color: #1a2840;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.ds-tbl tr:last-child td { border-bottom: none; }
+.ds-tbl tr:hover td { background: #f0f5ff; }
+.ds-req { color: #c41818; font-weight: 700; }
+.ds-ro  { color: #7888a8; font-style: italic; font-size: 10px; }
+
+/* API 박스 */
+.ds-api {
+  background: #0a1020;
+  border-radius: 6px;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 11px;
+}
+.ds-method {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 9px;
+  margin-right: 7px;
+}
+.ds-method.get  { background: #0f3020; color: #34d068; }
+.ds-method.post { background: #0a2040; color: #4dabf7; }
+.ds-api-url { color: #90bcf8; }
+.ds-api-desc {
+  color: #5060808;
+  font-size: 10px;
+  margin-top: 5px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #6878a0;
+}
+
+/* 플로우 스텝 */
+.ds-step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.ds-step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #1a5ccf;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ds-step-body { flex: 1; }
+.ds-step-body strong {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0d1a36;
+  display: block;
+  margin-bottom: 2px;
+}
+.ds-step-body p {
+  font-size: 11px;
+  color: #3a4e70;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 상태 흐름 */
+.ds-flow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+.ds-flow-arrow { color: #8090b0; font-size: 12px; }
+
+/* 규칙 목록 */
+.ds-rules { list-style: none; padding: 0; margin: 0; }
+.ds-rules li {
+  font-size: 11px;
+  color: #1a2840;
+  padding: 5px 0 5px 18px;
+  border-bottom: 1px solid #eaeef8;
+  position: relative;
+  line-height: 1.55;
+}
+.ds-rules li:before {
+  content: '▸';
+  position: absolute;
+  left: 3px;
+  color: #1a5ccf;
+  font-size: 9px;
+  top: 7px;
+}
+.ds-rules li:last-child { border-bottom: none; }
+
+/* 주석 */
+.ds-note {
+  background: #fffbea;
+  border-left: 3px solid #f0b429;
+  padding: 7px 10px;
+  border-radius: 0 4px 4px 0;
+  margin: 6px 0;
+}
+.ds-note p {
+  font-size: 10px;
+  color: #6b4a00;
+  line-height: 1.65;
+  margin: 0;
+}
+
+code {
+  background: #eaeef8;
+  color: #1a5ccf;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-family: 'Consolas', monospace;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     DEV BAR (최상단 고정)
+══════════════════════════════════ -->
+<div id="ds-devbar">
+  <span class="ds-badge">DEV SPEC</span>
+  <span class="ds-title"><strong>Air Manifest Send (KR)</strong> — 개발정의서 검토 모드</span>
+  <button id="ds-btn-toggle" onclick="dsTogglePanel()">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
+      <rect x="1" y="2" width="12" height="1.5" rx="0.75"/>
+      <rect x="1" y="6" width="8"  height="1.5" rx="0.75"/>
+      <rect x="1" y="10" width="10" height="1.5" rx="0.75"/>
+    </svg>
+    개발정의서 열기
+  </button>
+</div>
+
+<!-- ══════════════════════════════════
+     LAYOUT
+══════════════════════════════════ -->
+<div id="ds-layout">
+
+  <!-- 원본 화면 영역 -->
+  <div id="ds-screen">
+
+    <!-- ══════════════════════════════════
+         ↓↓↓ 원본 HTML 시작 (스타일 포함)
+    ══════════════════════════════════ -->
+    <style>
+    /* 원본 스타일 — ds-screen 스코프 내에서만 동작 */
+    #ds-screen *{box-sizing:border-box}
+    #ds-screen .top-bar{background:#1a2233;display:flex;align-items:center;padding:0 8px;height:32px;gap:0}
+    #ds-screen .tab-item{display:flex;align-items:center;gap:6px;padding:0 14px;height:32px;font-size:11px;color:#aab;cursor:pointer;border-right:1px solid #2a3450;white-space:nowrap}
+    #ds-screen .tab-item.active{background:#fff;color:#1a2233;font-weight:600}
+    #ds-screen .tab-item .tab-x{color:#888;font-size:10px;margin-left:2px}
+    #ds-screen .tab-item.active .tab-x{color:#555}
+    #ds-screen .breadcrumb{font-size:11px;color:#666;padding:5px 12px;background:#fff;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:4px}
+    #ds-screen .breadcrumb .sep{color:#bbb}
+    #ds-screen .breadcrumb .cur{color:#1a2233;font-weight:500}
+    #ds-screen .page{display:none}
+    #ds-screen .page.active{display:block}
+    #ds-screen .search-wrap{background:#fff;border:1px solid #d8dce3;margin:8px;border-radius:3px;padding:8px 12px 10px;transition:padding .2s}
+    #ds-screen .search-wrap.collapsed .search-grid{display:none}
+    #ds-screen .search-wrap.collapsed{padding-bottom:8px}
+    #ds-screen .search-actions{display:flex;justify-content:flex-end;align-items:center;gap:5px;margin-bottom:7px}
+    #ds-screen .search-wrap.collapsed .search-actions{margin-bottom:0}
+    #ds-screen .search-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px 10px}
+    #ds-screen .sf{display:flex;flex-direction:column;gap:2px;min-width:0}
+    #ds-screen .sf label{font-size:10px;color:#555;font-weight:500;white-space:nowrap}
+    #ds-screen .sf input,#ds-screen .sf select{height:24px;border:1px solid #c8cdd6;border-radius:2px;font-size:11px;padding:0 6px;color:#2c3e50;background:#fff;outline:none;font-family:'Noto Sans KR',sans-serif;min-width:0;width:100%}
+    #ds-screen .sf input:focus,#ds-screen .sf select:focus{border-color:#4a90d9}
+    #ds-screen .sf .multi-input{height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;align-items:center;padding:0 4px;gap:3px;background:#fff;min-width:0}
+    #ds-screen .sf .multi-input input{border:none;height:20px;flex:1;font-size:11px;padding:0 2px;outline:none;min-width:0;font-family:'Noto Sans KR',sans-serif}
+    #ds-screen .sf .multi-input .add-btn{background:#e8edf4;border:1px solid #c8cdd6;border-radius:2px;font-size:10px;padding:1px 5px;cursor:pointer;color:#555;white-space:nowrap;flex-shrink:0}
+    #ds-screen .sf .date-range{height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;align-items:center;padding:0 3px;gap:1px;font-size:10px;color:#2c3e50;background:#fff;min-width:0;overflow:hidden}
+    #ds-screen .sf .date-range input[type=date]{border:none;font-size:10px;width:86px;min-width:60px;flex:1;outline:none;color:#2c3e50;font-family:'Noto Sans KR',sans-serif;padding:0 1px}
+    #ds-screen .sf .date-range .sep{color:#999;flex-shrink:0;font-size:10px;padding:0 1px}
+    #ds-screen .sf .search-pop{height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;align-items:center;padding:0 4px;gap:3px;background:#fff;min-width:0}
+    #ds-screen .sf .search-pop input{border:none;flex:1;font-size:11px;outline:none;min-width:0;font-family:'Noto Sans KR',sans-serif}
+    #ds-screen .sf .search-pop .ico{color:#888;font-size:13px;cursor:pointer;flex-shrink:0}
+    #ds-screen .disabled .sf input,#ds-screen .disabled .sf select,#ds-screen .disabled .sf .multi-input,#ds-screen .disabled .sf .date-range{opacity:0.38;pointer-events:none;background:#f5f5f5}
+    #ds-screen .disabled label{color:#aaa}
+    #ds-screen .btn{height:24px;padding:0 10px;border-radius:2px;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid #c8cdd6;background:#fff;color:#333;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+    #ds-screen .btn:hover{background:#EEF1F4}
+    #ds-screen .btn.primary{background:#1a73e8;border-color:#1a73e8;color:#fff}
+    #ds-screen .btn.primary:hover{background:#1557b0}
+    #ds-screen .btn.reset{color:#666;font-size:14px;padding:0 8px}
+    #ds-screen .btn.search-btn{background:#181F29;border:1px solid #2C323B;color:#18A6C6;font-weight:600;box-shadow:0 1px 3px rgba(44,50,59,.5);padding:0 16px;outline:2px solid #BABCBF;outline-offset:-2px}
+    #ds-screen .btn.search-btn:hover{background:#1e2736;color:#1dbfdb}
+    #ds-screen .btn.collapse-btn{width:24px;height:24px;padding:0;justify-content:center;border:1px solid #c8cdd6;background:#fff;color:#555;border-radius:2px;font-size:13px;line-height:1;transition:transform .25s ease}
+    #ds-screen .btn.collapse-btn.collapsed{transform:rotate(180deg)}
+    #ds-screen .btn.collapse-btn:hover{background:#EEF1F4}
+    #ds-screen .btn.link-btn{color:#3FA2E4;border-color:#9ec5f5;font-size:10px}
+    #ds-screen .btn.link-btn:hover{background:#e8f0fe}
+    #ds-screen .btn.blue-btn{background:#1a73e8;border-color:#1a73e8;color:#fff}
+    #ds-screen .btn.blue-btn:hover{background:#1557b0}
+    #ds-screen .btn.icon-btn{width:26px;height:22px;padding:0;justify-content:center;color:#444;border:1px solid #c8cdd6;background:#fff;border-radius:3px;font-size:13px}
+    #ds-screen .btn.icon-btn:hover{background:#EEF1F4;color:#1a2233}
+    #ds-screen .btn.sm{height:22px;font-size:10px;padding:0 8px}
+    #ds-screen .btn-sep{width:1px;height:14px;background:#ddd;margin:0 2px}
+    #ds-screen .grid-area{margin:0 8px 8px;display:flex;flex-direction:column;gap:6px}
+    #ds-screen .grid-panel{background:#F8F8F9;border:1px solid #d8dce3;border-radius:3px;overflow:hidden}
+    #ds-screen .grid-hd{border-bottom:1px solid #d8dce3}
+    #ds-screen .grid-hd-link{display:flex;justify-content:flex-end;padding:3px 8px;background:#f7f8fa;border-bottom:1px solid #e8eaed}
+    #ds-screen .grid-hd-main{display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:#D9EBFF}
+    #ds-screen .grid-hd-simple{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:#D9EBFF;border-bottom:1px solid #d8dce3}
+    #ds-screen .grid-title{font-size:11px;font-weight:600;color:#1a2233;display:flex;align-items:center;gap:6px}
+    #ds-screen .grid-title .cnt{font-size:10px;color:#666;font-weight:400}
+    #ds-screen .grid-title .ctx{font-size:10px;color:#888;font-weight:400}
+    #ds-screen .grid-btns{display:flex;align-items:center;gap:3px}
+    #ds-screen .readonly-label{font-size:10px;color:#888;font-style:italic}
+    #ds-screen .tbl-wrap{overflow-x:auto;max-height:220px;overflow-y:auto}
+    #ds-screen .tbl-wrap.short{max-height:160px}
+    #ds-screen table{width:100%;border-collapse:collapse;font-size:11px}
+    #ds-screen thead{position:sticky;top:0;z-index:2}
+    #ds-screen thead tr{background:#D9EBFF}
+    #ds-screen thead th{padding:4px 7px;text-align:left;font-weight:600;color:#3a4a5c;white-space:nowrap;border-bottom:1px solid #d0d5dd;border-right:1px solid #e0e4ea;font-size:10px;user-select:none;cursor:pointer}
+    #ds-screen thead th:last-child{border-right:none}
+    #ds-screen thead th.right{text-align:right}
+    #ds-screen thead th.center{text-align:center}
+    #ds-screen thead th:hover{background:#c6dff7}
+    #ds-screen thead th .sort{font-size:9px;color:#aaa;margin-left:2px}
+    #ds-screen thead th .sort.asc{color:#3FA2E4}
+    #ds-screen thead th .sort.desc{color:#3FA2E4}
+    #ds-screen tbody tr{border-bottom:1px solid #eef0f3;cursor:pointer;transition:background .1s;background:#F8F8F9}
+    #ds-screen tbody tr:nth-child(even){background:#fff}
+    #ds-screen tbody tr:last-child{border-bottom:none}
+    #ds-screen tbody tr:hover{background:#e8f4ff}
+    #ds-screen tbody tr.selected{background:#fff!important}
+    #ds-screen tbody tr.selected td{color:#1a2233;font-weight:500}
+    #ds-screen tbody td{padding:4px 7px;color:#2c3e50;white-space:nowrap;border-right:1px solid #eef0f3;font-size:11px}
+    #ds-screen tbody td:last-child{border-right:none}
+    #ds-screen tbody td.right{text-align:right}
+    #ds-screen tbody td.center{text-align:center}
+    #ds-screen tbody td.muted{color:#aaa}
+    #ds-screen tbody tr.empty td{text-align:center;color:#999;font-size:11px;padding:20px;cursor:default}
+    #ds-screen .chk{width:13px;height:13px;cursor:pointer;vertical-align:middle}
+    #ds-screen .lnk{color:#3FA2E4;text-decoration:underline;cursor:pointer}
+    #ds-screen .lnk:hover{color:#1a7fc4}
+    #ds-screen .ec select,#ds-screen .ec input[type=text]{height:20px;border:1px solid #c8cdd6;border-radius:2px;font-size:10px;padding:0 4px;background:#fff;outline:none;width:100%;font-family:'Noto Sans KR',sans-serif}
+    #ds-screen .ec select:focus,#ds-screen .ec input[type=text]:focus{border-color:#4a90d9}
+    #ds-screen .ec-num input{width:60px}
+    #ds-screen .badge{display:inline-flex;align-items:center;height:17px;padding:0 6px;border-radius:2px;font-size:10px;font-weight:600;white-space:nowrap}
+    #ds-screen .b-new{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+    #ds-screen .b-epninf{background:#e3f0fc;color:#0d5bab;border:1px solid #aaceed}
+    #ds-screen .b-fwbfhl{background:#c5dff8;color:#083b80;border:1px solid #7ab3e8}
+    #ds-screen .b-na{background:#f0f0f0;color:#666;border:1px solid #ddd}
+    #ds-screen .b-proc{background:#fff4e0;color:#8a5700;border:1px solid #f0c070}
+    #ds-screen .b-complete{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+    #ds-screen .b-error{background:#fce8e6;color:#b31412;border:1px solid #f0a8a6}
+    #ds-screen .b-resend{background:#fce8e6;color:#b31412;border:1px solid #f0a8a6}
+    #ds-screen .b-sent{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+    #ds-screen .b-normal{background:#f0f0f0;color:#666;border:1px solid #ddd}
+    #ds-screen .connector{display:flex;align-items:center;gap:8px;padding:0 12px;color:#aaa;font-size:10px}
+    #ds-screen .connector::before,#ds-screen .connector::after{content:'';flex:1;height:1px;background:#dde1ea;border-top:1px dashed #d0d5e0}
+    #ds-screen .toast-wrap{position:fixed;top:56px;right:16px;z-index:99998;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+    #ds-screen .toast{background:#323232;color:#fff;font-size:12px;padding:10px 16px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:0;transform:translateY(-8px);transition:all .25s;pointer-events:none}
+    #ds-screen .toast.show{opacity:1;transform:translateY(0)}
+    #ds-screen .toast.success{background:#1e7e34}
+    #ds-screen .toast.error{background:#b31412}
+    #ds-screen .readonly-tint tbody td{background:rgba(248,248,249,0.7)}
+    #ds-screen .readonly-note{font-size:10px;color:#888;font-style:italic;padding:3px 8px 4px;border-top:1px solid #eef0f3;background:#fafafa}
+    /* 모달/팝업 */
+    #ds-screen .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:90000;display:none;align-items:center;justify-content:center;top:36px}
+    #ds-screen .modal-overlay.open{display:flex}
+    #ds-screen .modal{background:#fff;border-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,.2);width:340px;max-height:80vh;display:flex;flex-direction:column}
+    #ds-screen .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e0e4ea;background:#D9EBFF}
+    #ds-screen .modal-hd h3{font-size:12px;font-weight:600;color:#1a2233}
+    #ds-screen .modal-close{background:none;border:none;font-size:16px;cursor:pointer;color:#666;line-height:1;padding:2px 4px}
+    #ds-screen .modal-close:hover{color:#333}
+    #ds-screen .modal-body{padding:12px 14px;overflow-y:auto;flex:1}
+    #ds-screen .modal-body p{font-size:10px;color:#888;margin-bottom:8px}
+    #ds-screen .col-item{display:flex;align-items:center;gap:8px;padding:5px 6px;border:1px solid #e8eaed;border-radius:3px;margin-bottom:4px;cursor:grab;background:#fff;transition:background .1s}
+    #ds-screen .col-item:hover{background:#f5f8ff}
+    #ds-screen .col-item.dragging{opacity:.4}
+    #ds-screen .col-item .drag-handle{color:#ccc;font-size:14px;flex-shrink:0}
+    #ds-screen .col-item label{font-size:11px;color:#2c3e50;cursor:pointer;flex:1}
+    #ds-screen .col-item input[type=checkbox]{width:13px;height:13px;flex-shrink:0}
+    #ds-screen .modal-ft{padding:8px 14px;border-top:1px solid #e0e4ea;display:flex;justify-content:flex-end;gap:5px}
+    /* Carrier 탭 */
+    #ds-screen .type-toggle-group{display:flex;gap:3px;flex-wrap:wrap;min-height:24px;align-items:center}
+    #ds-screen .type-btn{height:22px;padding:0 10px;border-radius:2px;font-size:10px;cursor:pointer;border:1px solid #c8cdd6;background:#fff;color:#555;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+    #ds-screen .type-btn:hover{background:#EEF1F4}
+    #ds-screen .type-btn.sel{background:#1a73e8;border-color:#1a73e8;color:#fff}
+    #ds-screen .tag-wrap{min-height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;flex-wrap:wrap;align-items:center;padding:2px 4px;gap:3px;background:#fff;cursor:text;min-width:0}
+    #ds-screen .tag-wrap:focus-within{border-color:#4a90d9}
+    #ds-screen .tag-wrap input{border:none;outline:none;font-size:11px;min-width:50px;flex:1;height:18px;font-family:'Noto Sans KR',sans-serif;background:transparent}
+    #ds-screen .chip{display:inline-flex;align-items:center;gap:3px;background:#e3f0fc;border:1px solid #aaceed;border-radius:2px;padding:0 5px;height:18px;font-size:10px;color:#0d5bab;white-space:nowrap;flex-shrink:0}
+    #ds-screen .chip-x{cursor:pointer;font-size:11px;color:#0d5bab;line-height:1;margin-left:2px}
+    #ds-screen .chip-x:hover{color:#b31412}
+    /* Carrier Search Popup */
+    #ds-screen .cpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:91000;display:none;align-items:center;justify-content:center;top:36px}
+    #ds-screen .cpop-overlay.open{display:flex}
+    #ds-screen .cpop-box{background:#fff;border-radius:4px;box-shadow:0 6px 28px rgba(0,0,0,.22);width:720px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+    #ds-screen .cpop-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid #d8dce3;background:#D9EBFF;border-radius:4px 4px 0 0;flex-shrink:0}
+    #ds-screen .cpop-hd-title{font-size:15px;font-weight:700;color:#1a2233}
+    #ds-screen .cpop-hd-close{background:none;border:none;font-size:18px;cursor:pointer;color:#666;line-height:1;padding:2px 5px;border-radius:2px}
+    #ds-screen .cpop-hd-close:hover{background:#e0e6f0;color:#333}
+    #ds-screen .cpop-search{background:#fff;border-bottom:1px solid #d8dce3;padding:8px 12px 10px;flex-shrink:0}
+    #ds-screen .cpop-search-actions{display:flex;justify-content:flex-end;align-items:center;gap:5px;margin-bottom:7px}
+    #ds-screen .cpop-search-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px 10px}
+    #ds-screen .cpop-body{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0}
+    #ds-screen .cpop-tbl-hd{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#D9EBFF;border-bottom:1px solid #d8dce3;flex-shrink:0}
+    #ds-screen .cpop-tbl-title{font-size:11px;font-weight:600;color:#1a2233;display:flex;align-items:center;gap:6px}
+    #ds-screen .cpop-tbl-title .cnt{font-size:10px;color:#666;font-weight:400}
+    #ds-screen .cpop-tbl-wrap{overflow-y:auto;overflow-x:auto;flex:1;min-height:0;max-height:320px}
+    #ds-screen .cpop-ft{display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:10px 14px;border-top:1px solid #d8dce3;flex-shrink:0;background:#fafbfc}
+    #ds-screen .btn.confirm-btn{background:#1a73e8;border-color:#1a73e8;color:#fff;font-weight:600}
+    #ds-screen .btn.confirm-btn:hover{background:#1557b0}
+    #ds-screen .btn.cancel-btn{background:#fff;border-color:#c8cdd6;color:#555}
+    #ds-screen .btn.cancel-btn:hover{background:#EEF1F4}
+    /* HAWB/MAWB History */
+    #ds-screen .hpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:92000;display:none;align-items:center;justify-content:center;top:36px}
+    #ds-screen .hpop-overlay.open{display:flex}
+    #ds-screen .hpop-box{background:#fff;border-radius:4px;box-shadow:0 6px 32px rgba(0,0,0,.24);width:820px;max-width:97vw;max-height:92vh;display:flex;flex-direction:column;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+    #ds-screen .hpop-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid #d8dce3;background:#D9EBFF;border-radius:4px 4px 0 0;flex-shrink:0}
+    #ds-screen .hpop-hd-title{font-size:14px;font-weight:700;color:#1a2233}
+    #ds-screen .hpop-hd-close{background:none;border:none;font-size:18px;cursor:pointer;color:#555;line-height:1;padding:2px 5px;border-radius:2px}
+    #ds-screen .hpop-hd-close:hover{background:#c6dff7;color:#1a2233}
+    #ds-screen .hpop-date-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #e0e4ea;background:#f7f9fc;flex-shrink:0}
+    #ds-screen .hpop-date-bar label{font-size:11px;font-weight:600;color:#3a4a5c;white-space:nowrap}
+    #ds-screen .hpop-date-bar select{height:26px;border:1px solid #c8cdd6;border-radius:2px;font-size:11px;padding:0 8px;color:#2c3e50;background:#fff;outline:none;min-width:180px;font-family:'Noto Sans KR',sans-serif;cursor:pointer}
+    #ds-screen .hpop-date-bar select:focus{border-color:#4a90d9}
+    #ds-screen .hpop-date-bar .hpop-date-hint{font-size:10px;color:#999;font-style:italic}
+    #ds-screen .hpop-body{flex:1;overflow-y:auto;padding:0 0 4px;min-height:0}
+    #ds-screen .hpop-section{margin:10px 14px 0}
+    #ds-screen .hpop-sec-title{font-size:11px;font-weight:700;color:#1a2233;padding:5px 8px;background:#D9EBFF;border:1px solid #d0d5dd;border-bottom:none;border-radius:2px 2px 0 0;display:flex;align-items:center;gap:6px}
+    #ds-screen .hpop-sec-title .ro-tag{font-size:9px;font-weight:400;color:#888;font-style:italic;margin-left:4px}
+    #ds-screen .hpop-tbl-wrap{border:1px solid #d0d5dd;border-radius:0 0 2px 2px;overflow-x:auto;background:#F8F8F9}
+    #ds-screen .hpop-tbl-wrap table{width:100%;border-collapse:collapse;font-size:11px}
+    #ds-screen .hpop-tbl-wrap thead tr{background:#D9EBFF}
+    #ds-screen .hpop-tbl-wrap thead th{padding:4px 8px;text-align:left;font-weight:600;color:#3a4a5c;white-space:nowrap;border-bottom:1px solid #d0d5dd;border-right:1px solid #e0e4ea;font-size:10px}
+    #ds-screen .hpop-tbl-wrap thead th:last-child{border-right:none}
+    #ds-screen .hpop-tbl-wrap tbody tr{background:#F8F8F9}
+    #ds-screen .hpop-tbl-wrap tbody tr:nth-child(even){background:#fff}
+    #ds-screen .hpop-tbl-wrap tbody td{padding:4px 8px;color:#2c3e50;white-space:nowrap;border-right:1px solid #eef0f3;font-size:11px}
+    #ds-screen .hpop-tbl-wrap tbody td:last-child{border-right:none}
+    #ds-screen .hpop-party-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 14px 0}
+    #ds-screen .hpop-party-box{display:flex;flex-direction:column;border:1px solid #d0d5dd;border-radius:2px;overflow:hidden}
+    #ds-screen .hpop-party-label{font-size:10px;font-weight:700;color:#3a4a5c;padding:4px 8px;background:#D9EBFF;border-bottom:1px solid #d0d5dd;white-space:nowrap}
+    #ds-screen .hpop-party-text{background:#F8F8F9;padding:6px 8px;font-size:11px;color:#2c3e50;line-height:1.6;min-height:90px;overflow-y:auto;resize:vertical;white-space:pre-wrap;word-break:break-all;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+    #ds-screen .hpop-ft{display:flex;justify-content:flex-end;padding:9px 14px;border-top:1px solid #d8dce3;flex-shrink:0;background:#fafbfc}
+    #ds-screen .mpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:93000;display:none;align-items:center;justify-content:center;top:36px}
+    #ds-screen .mpop-overlay.open{display:flex}
+    #ds-screen .mpop-box{background:#fff;border-radius:4px;box-shadow:0 6px 32px rgba(0,0,0,.24);width:860px;max-width:97vw;max-height:92vh;display:flex;flex-direction:column;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+    </style>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="tab-item active" id="tab-manifest" onclick="switchTab('manifest')">Air Manifest Send (KR) <span class="tab-x">&#x2715;</span></div>
+      <div class="tab-item" id="tab-carrier" onclick="switchTab('carrier')">Carrier <span class="tab-x">&#x2715;</span></div>
+    </div>
+
+    <div class="breadcrumb" id="bc-manifest">
+      Global Freight <span class="sep">&#x203A;</span> Air Forwarding <span class="sep">&#x203A;</span> <span class="cur">Air Manifest Send (KR)</span>
+    </div>
+    <div class="breadcrumb" id="bc-carrier" style="display:none">
+      Global Freight <span class="sep">&#x203A;</span> Master Data <span class="sep">&#x203A;</span> <span class="cur">Carrier</span>
+    </div>
+
+    <!-- PAGE: MANIFEST -->
+    <div class="page active" id="page-manifest">
+      <div class="search-wrap" id="sw-manifest">
+        <div class="search-actions">
+          <button class="btn collapse-btn" id="cb-manifest" onclick="toggleCollapse('sw-manifest','cb-manifest')">&#x2227;</button>
+          <button class="btn reset" onclick="resetSearch()" title="초기화">&#x21BA;</button>
+          <button class="btn search-btn" onclick="doSearch()">Search</button>
+        </div>
+        <div class="search-grid">
+          <div class="sf">
+            <label>MAWB Status</label>
+            <select id="s-mawb-status">
+              <option value="">All</option>
+              <option value="New">New</option>
+              <option value="EPNINF Sent">EPNINF Sent</option>
+              <option value="FWB/FHL Sent">FWB/FHL Sent</option>
+            </select>
+          </div>
+          <div class="sf">
+            <label>MAWB No.</label>
+            <div class="multi-input" id="mawb-input-wrap">
+              <input type="text" id="s-mawb-no" placeholder="MAWB No." oninput="onMawbInput()">
+              <span class="add-btn">+</span>
+            </div>
+          </div>
+          <div class="sf" id="sf-hawb">
+            <label>HAWB No.</label>
+            <div class="multi-input" id="hawb-input-wrap">
+              <input type="text" id="s-hawb-no" placeholder="HAWB No." oninput="onHawbInput()">
+              <span class="add-btn">+</span>
+            </div>
+          </div>
+          <div class="sf">
+            <label>Carrier</label>
+            <div class="search-pop">
+              <input type="text" id="s-carrier" placeholder="ID/Name">
+              <span class="ico" onclick="openCarrierPopup()" style="cursor:pointer" title="Carrier 검색">&#128269;</span>
+            </div>
+          </div>
+          <div class="sf" id="sf-etd">
+            <label>ETD</label>
+            <div class="date-range">
+              <input type="date" id="s-etd-from" value="2026-05-29">
+              <span class="sep">~</span>
+              <input type="date" id="s-etd-to" value="2026-06-12">
+            </div>
+          </div>
+          <div class="sf">
+            <label>EDI Send Status</label>
+            <select id="s-edi-status">
+              <option value="">All</option>
+              <option value="N/A">N/A</option>
+              <option value="Processing">Processing</option>
+              <option value="Complete">Complete</option>
+              <option value="Error">Error</option>
+            </select>
+          </div>
+          <div class="sf">
+            <label>Need Resend</label>
+            <select id="s-need-resend">
+              <option value="">All</option>
+              <option value="Need Resend">Yes</option>
+              <option value="Normal">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-area">
+        <div class="grid-panel">
+          <div class="grid-hd">
+            <div class="grid-hd-link">
+              <a href="https://www.ulogishub.com/" target="_blank" style="text-decoration:none">
+                <button class="btn link-btn">&#128279; KTNET/uLogisHub</button>
+              </a>
+            </div>
+            <div class="grid-hd-main">
+              <div class="grid-title">MAWB Info. <span class="cnt" id="mawb-count">총 0건</span></div>
+              <div class="grid-btns">
+                <button class="btn sm" onclick="mawbHistory()">MAWB History</button>
+                <button class="btn sm" onclick="epninfSend()">EPNINF Send</button>
+                <button class="btn sm blue-btn" onclick="fwbFhlSend()">FWB/FHL Send</button>
+                <span class="btn-sep"></span>
+                <button class="btn icon-btn" title="엑셀 다운로드" onclick="downloadExcel('mawb')">&#x2B07;</button>
+                <button class="btn icon-btn" title="개인화" onclick="openPersonalize('mawb')">&#9881;</button>
+              </div>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table id="mawb-table">
+              <thead><tr></tr></thead>
+              <tbody id="mawb-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="connector">&#x25BC; MAWB 1건 선택 시 HAWB 목록 연계 조회</div>
+
+        <div class="grid-panel">
+          <div class="grid-hd">
+            <div class="grid-hd-simple">
+              <div class="grid-title">HAWB Info. <span class="cnt" id="hawb-count">총 0건</span> <span class="ctx" id="hawb-ctx"></span></div>
+              <div class="grid-btns">
+                <button class="btn sm" onclick="hawbHistory()">HAWB History</button>
+                <button class="btn sm" onclick="amendManifest()">Amend Manifest</button>
+                <button class="btn sm" onclick="addressAmend()">Address Amend</button>
+                <span class="btn-sep"></span>
+                <button class="btn icon-btn" title="엑셀 다운로드" onclick="downloadExcel('hawb')">&#x2B07;</button>
+                <button class="btn icon-btn" title="개인화" onclick="openPersonalize('hawb')">&#9881;</button>
+              </div>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table id="hawb-table">
+              <thead><tr></tr></thead>
+              <tbody id="hawb-tbody">
+                <tr class="empty"><td colspan="16">&#x2190; MAWB를 선택하면 HAWB 목록이 표시됩니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="connector">&#x25BC; HAWB 1건 선택 시 Export Declaration 정보 연계 조회</div>
+
+        <div class="grid-panel">
+          <div class="grid-hd">
+            <div class="grid-hd-simple">
+              <div class="grid-title">Export Declaration Info. <span class="ctx" id="edi-ctx"></span></div>
+              <div class="grid-btns"><span class="readonly-label">Read Only — HBL Detail &gt; Others탭 연동</span></div>
+            </div>
+          </div>
+          <div class="tbl-wrap short readonly-tint">
+            <table>
+              <thead><tr>
+                <th>Export Declaration No.</th>
+                <th class="right">Pkg Qty.</th><th>Pkg Unit</th>
+                <th class="right">Gross Weight</th><th>GW Unit</th>
+                <th class="center">Same Pkg Code</th>
+                <th class="right">Same Pkg Qty.</th><th>Same Pkg Unit</th>
+                <th class="center">Split Shipment</th>
+                <th class="right">Split Order By</th>
+              </tr></thead>
+              <tbody id="edi-tbody">
+                <tr class="empty"><td colspan="10">&#x2190; HAWB를 선택하면 수출신고 정보가 표시됩니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="readonly-note">* HBL Detail &gt; Others 탭에서 입력된 정보를 Read Only로 표시합니다.</div>
+        </div>
+      </div>
+    </div><!-- /page-manifest -->
+
+    <!-- PAGE: CARRIER -->
+    <div class="page" id="page-carrier">
+      <div class="search-wrap" id="sw-carrier">
+        <div class="search-actions">
+          <button class="btn collapse-btn" id="cb-carrier" onclick="toggleCollapse('sw-carrier','cb-carrier')">&#x2227;</button>
+          <button class="btn reset" onclick="resetCarrierSearch()" title="초기화">&#x21BA;</button>
+          <button class="btn search-btn" onclick="doCarrierSearch()">Search</button>
+        </div>
+        <div class="search-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="sf">
+            <label>Carrier Type</label>
+            <div class="type-toggle-group" id="ctype-group">
+              <button class="type-btn sel" data-val="AIR" onclick="toggleType(this)">AIR</button>
+              <button class="type-btn" data-val="SHIP" onclick="toggleType(this)">SHIP</button>
+              <button class="type-btn" data-val="FWDR" onclick="toggleType(this)">FWDR</button>
+              <button class="type-btn" data-val="ROAD" onclick="toggleType(this)">ROAD</button>
+            </div>
+          </div>
+          <div class="sf">
+            <label>Carrier</label>
+            <div class="tag-wrap" id="tw-carrier" onclick="this.querySelector('input').focus()">
+              <input type="text" placeholder="입력 후 Enter" onkeydown="addChip(event,'carrier')">
+            </div>
+          </div>
+          <div class="sf">
+            <label>Carrier ID</label>
+            <div class="tag-wrap" id="tw-cid" onclick="this.querySelector('input').focus()">
+              <input type="text" placeholder="입력 후 Enter" onkeydown="addChip(event,'cid')">
+            </div>
+          </div>
+          <div class="sf">
+            <label>SCAC</label>
+            <div class="tag-wrap" id="tw-scac" onclick="this.querySelector('input').focus()">
+              <input type="text" placeholder="입력 후 Enter" onkeydown="addChip(event,'scac')">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-area">
+        <div class="grid-panel">
+          <div class="grid-hd">
+            <div class="grid-hd-simple">
+              <div class="grid-title">Carrier <span class="cnt" id="carrier-count">총 0건</span></div>
+              <div class="grid-btns">
+                <button class="btn icon-btn" title="엑셀 다운로드" onclick="downloadCarrierExcel()">&#x2B07;</button>
+                <button class="btn icon-btn" title="개인화" onclick="openPersonalize('carrier')">&#9881;</button>
+              </div>
+            </div>
+          </div>
+          <div class="tbl-wrap" style="max-height:400px">
+            <table id="carrier-table">
+              <thead><tr></tr></thead>
+              <tbody id="carrier-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /page-carrier -->
+
+    <!-- MODAL (컬럼 설정) -->
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closePersonalize()">
+      <div class="modal">
+        <div class="modal-hd">
+          <h3 id="modal-title">컬럼 설정</h3>
+          <button class="modal-close" onclick="closePersonalize()">&#x2715;</button>
+        </div>
+        <div class="modal-body">
+          <p>표시할 컬럼을 선택하고 드래그로 순서를 조정하세요.</p>
+          <div id="modal-col-list"></div>
+        </div>
+        <div class="modal-ft">
+          <button class="btn sm" onclick="resetPersonalize()">초기화</button>
+          <button class="btn sm blue-btn" onclick="applyPersonalize()">적용</button>
+          <button class="btn sm" onclick="closePersonalize()">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAWB HISTORY POPUP -->
+    <div class="mpop-overlay" id="mpop-overlay">
+      <div class="mpop-box">
+        <div class="hpop-hd">
+          <span class="hpop-hd-title">MAWB Manifest History</span>
+          <button class="hpop-hd-close" onclick="closeMawbHistory()" title="닫기">&#x2715;</button>
+        </div>
+        <div class="hpop-date-bar">
+          <label>Manifest Send Date</label>
+          <select id="mpop-date-sel" onchange="loadMawbHistory(this.value)"></select>
+          <span class="hpop-date-hint">&#x25B6; 전송 시점 선택 시 해당 시점의 데이터가 표시됩니다</span>
+        </div>
+        <div class="hpop-body">
+          <div class="hpop-section">
+            <div class="hpop-sec-title">MAWB Info. <span class="ro-tag">Read Only</span></div>
+            <div class="hpop-tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>MAWB No.</th><th>Carrier</th><th>Flight Name</th>
+                  <th>POL</th><th>POD</th>
+                  <th class="right">Package Qty.</th>
+                  <th class="right">Gross Weight (KG)</th>
+                  <th class="right">Chargeable Weight (KG)</th>
+                </tr></thead>
+                <tbody id="mpop-mawb-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="hpop-section">
+            <div class="hpop-tbl-wrap" style="border-radius:2px">
+              <table>
+                <thead><tr>
+                  <th>Rate Class</th><th class="right">Charge Rate</th>
+                  <th>OC Code1</th><th class="right">OC Amt1</th>
+                  <th>OC Code2</th><th class="right">OC Amt2</th>
+                  <th>OC Code3</th><th class="right">OC Amt3</th>
+                </tr></thead>
+                <tbody id="mpop-rate-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="hpop-party-row" style="margin-bottom:10px">
+            <div class="hpop-party-box"><div class="hpop-party-label">Shipper</div><div class="hpop-party-text" id="mpop-shipper"></div></div>
+            <div class="hpop-party-box"><div class="hpop-party-label">Consignee</div><div class="hpop-party-text" id="mpop-consignee"></div></div>
+            <div class="hpop-party-box"><div class="hpop-party-label">Notify</div><div class="hpop-party-text" id="mpop-notify"></div></div>
+          </div>
+        </div>
+        <div class="hpop-ft">
+          <button class="btn cancel-btn" onclick="closeMawbHistory()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HAWB HISTORY POPUP -->
+    <div class="hpop-overlay" id="hpop-overlay">
+      <div class="hpop-box">
+        <div class="hpop-hd">
+          <span class="hpop-hd-title">HAWB Manifest History</span>
+          <button class="hpop-hd-close" onclick="closeHawbHistory()" title="닫기">&#x2715;</button>
+        </div>
+        <div class="hpop-date-bar">
+          <label>Manifest Send Date</label>
+          <select id="hpop-date-sel" onchange="loadHawbHistory(this.value)"></select>
+          <span class="hpop-date-hint">&#x25B6; 전송 시점 선택 시 해당 시점의 데이터가 표시됩니다</span>
+        </div>
+        <div class="hpop-body" id="hpop-body">
+          <div class="hpop-section">
+            <div class="hpop-sec-title">MAWB Info. <span class="ro-tag">Read Only</span></div>
+            <div class="hpop-tbl-wrap">
+              <table><thead><tr><th>MAWB No.</th><th>Carrier</th></tr></thead>
+              <tbody id="hpop-mawb-tbody"></tbody></table>
+            </div>
+          </div>
+          <div class="hpop-section">
+            <div class="hpop-sec-title">HAWB Info. <span class="ro-tag">Read Only</span></div>
+            <div class="hpop-tbl-wrap">
+              <table><thead><tr>
+                <th>Business Type</th><th>HAWB No.</th><th class="right">Package Qty.</th><th>Unit</th>
+                <th class="right">Gross Weight (KG)</th><th class="right">Volume (CBM)</th>
+                <th>Cargo Description</th><th>Loading Place</th>
+              </tr></thead>
+              <tbody id="hpop-hawb-tbody"></tbody></table>
+            </div>
+          </div>
+          <div class="hpop-party-row" id="hpop-party-row">
+            <div class="hpop-party-box"><div class="hpop-party-label">Shipper</div><div class="hpop-party-text" id="hpop-shipper"></div></div>
+            <div class="hpop-party-box"><div class="hpop-party-label">Consignee</div><div class="hpop-party-text" id="hpop-consignee"></div></div>
+            <div class="hpop-party-box"><div class="hpop-party-label">Notify</div><div class="hpop-party-text" id="hpop-notify"></div></div>
+          </div>
+          <div class="hpop-section" style="margin-bottom:10px">
+            <div class="hpop-sec-title">Export Declaration Info. <span class="ro-tag">Read Only</span></div>
+            <div class="hpop-tbl-wrap">
+              <table><thead><tr>
+                <th>Export Declaration No.</th><th class="right">Pkg Qty.</th><th>Pkg Unit</th>
+                <th class="right">Gross Weight</th><th>GW Unit</th><th class="center">Same Pkg Code</th>
+                <th class="right">Same Pkg Qty.</th><th>Same Pkg Unit</th>
+                <th class="center">Split Shipment</th><th class="right">Split Order By</th>
+              </tr></thead>
+              <tbody id="hpop-edi-tbody"></tbody></table>
+            </div>
+          </div>
+        </div>
+        <div class="hpop-ft">
+          <button class="btn cancel-btn" onclick="closeHawbHistory()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARRIER SEARCH POPUP -->
+    <div class="cpop-overlay" id="cpop-overlay">
+      <div class="cpop-box">
+        <div class="cpop-hd">
+          <span class="cpop-hd-title">Search Carrier</span>
+          <button class="cpop-hd-close" onclick="closeCarrierPopup()" title="닫기">&#x2715;</button>
+        </div>
+        <div class="cpop-search">
+          <div class="cpop-search-actions">
+            <button class="btn collapse-btn" id="cpop-cb" onclick="toggleCollapse('cpop-search-body','cpop-cb')">&#x2227;</button>
+            <button class="btn reset" onclick="resetCpopSearch()" title="초기화">&#x21BA;</button>
+            <button class="btn search-btn" onclick="doCpopSearch()">Search</button>
+          </div>
+          <div class="cpop-search-grid" id="cpop-search-body">
+            <div class="sf">
+              <label>Carrier Type</label>
+              <div class="type-toggle-group" id="cpop-type-group">
+                <button class="type-btn sel" data-val="AIR" onclick="this.classList.toggle('sel')">AIR</button>
+                <button class="type-btn" data-val="SHIP" onclick="this.classList.toggle('sel')">SHIP</button>
+                <button class="type-btn" data-val="FWDR" onclick="this.classList.toggle('sel')">FWDR</button>
+                <button class="type-btn" data-val="ROAD" onclick="this.classList.toggle('sel')">ROAD</button>
+              </div>
+            </div>
+            <div class="sf">
+              <label>Carrier</label>
+              <div class="tag-wrap" id="cpop-tw-carrier" onclick="this.querySelector('input').focus()">
+                <input type="text" placeholder="입력 후 Enter" onkeydown="addCpopChip(event,'carrier')">
+              </div>
+            </div>
+            <div class="sf">
+              <label>Carrier ID</label>
+              <div class="tag-wrap" id="cpop-tw-cid" onclick="this.querySelector('input').focus()">
+                <input type="text" placeholder="입력 후 Enter" onkeydown="addCpopChip(event,'cid')">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cpop-body">
+          <div class="cpop-tbl-hd">
+            <div class="cpop-tbl-title">Carrier <span class="cnt" id="cpop-count">총 0건</span></div>
+            <div class="grid-btns">
+              <button class="btn icon-btn" title="개인화" onclick="openPersonalize('cpop')">&#9881;</button>
+            </div>
+          </div>
+          <div class="cpop-tbl-wrap">
+            <table id="cpop-table">
+              <thead><tr></tr></thead>
+              <tbody id="cpop-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="cpop-ft">
+          <button class="btn cancel-btn" onclick="closeCarrierPopup()">Cancel</button>
+          <button class="btn confirm-btn" onclick="confirmCarrierPopup()">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-wrap" id="toast-wrap"></div>
+
+    <!-- ══ 원본 JS (그대로) ══ -->
+    <script>
+    const RC=['Q','N','M','C','R','U','B','X'];
+    const OC=['','PP','CC','CA','CX','PX'];
+    const mawbData=[{id:1,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',mawbNo:'180-12345678',carrier:'KE',flightName:'KE123',pol:'ICN',pod:'LAX',etd:'2026-05-30',pkgQty:10,grossWt:250.0,chgWt:300.0,rateClass:'Q',chargeRate:5.5,ocCode1:'PP',ocAmt1:100.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},{id:2,checked:false,status:'EPNINF Sent',ediStatus:'Error',needResend:'Need Resend',mawbNo:'180-87654321',carrier:'OZ',flightName:'OZ201',pol:'ICN',pod:'NRT',etd:'2026-05-31',pkgQty:5,grossWt:80.5,chgWt:95.0,rateClass:'N',chargeRate:3.2,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},{id:3,checked:false,status:'New',ediStatus:'N/A',needResend:'Normal',mawbNo:'180-11223344',carrier:'LH',flightName:'LH712',pol:'ICN',pod:'FRA',etd:'2026-06-01',pkgQty:20,grossWt:500.0,chgWt:520.0,rateClass:'M',chargeRate:4.8,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},{id:4,checked:false,status:'EPNINF Sent',ediStatus:'Processing',needResend:'Normal',mawbNo:'180-55667788',carrier:'CX',flightName:'CX418',pol:'ICN',pod:'HKG',etd:'2026-06-02',pkgQty:8,grossWt:120.0,chgWt:135.0,rateClass:'Q',chargeRate:6.0,ocCode1:'CC',ocAmt1:50.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},{id:5,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Need Resend',mawbNo:'180-99887766',carrier:'JL',flightName:'JL092',pol:'ICN',pod:'NRT',etd:'2026-06-03',pkgQty:3,grossWt:40.0,chgWt:45.0,rateClass:'C',chargeRate:7.2,ocCode1:'CA',ocAmt1:30.0,ocCode2:'PX',ocAmt2:10.0,ocCode3:'',ocAmt3:''},{id:6,checked:false,status:'New',ediStatus:'N/A',needResend:'Normal',mawbNo:'180-22334455',carrier:'AA',flightName:'AA280',pol:'ICN',pod:'JFK',etd:'2026-06-04',pkgQty:15,grossWt:340.0,chgWt:360.0,rateClass:'Q',chargeRate:5.9,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},{id:7,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',mawbNo:'180-33445566',carrier:'EK',flightName:'EK322',pol:'ICN',pod:'DXB',etd:'2026-06-05',pkgQty:12,grossWt:280.0,chgWt:295.0,rateClass:'N',chargeRate:4.2,ocCode1:'CC',ocAmt1:80.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},{id:8,checked:false,status:'EPNINF Sent',ediStatus:'Error',needResend:'Need Resend',mawbNo:'180-44556677',carrier:'KE',flightName:'KE017',pol:'ICN',pod:'CDG',etd:'2026-06-06',pkgQty:7,grossWt:155.0,chgWt:168.0,rateClass:'M',chargeRate:5.1,ocCode1:'PP',ocAmt1:60.0,ocCode2:'CA',ocAmt2:20.0,ocCode3:'',ocAmt3:''},{id:9,checked:false,status:'New',ediStatus:'N/A',needResend:'Normal',mawbNo:'180-55778899',carrier:'OZ',flightName:'OZ541',pol:'ICN',pod:'SYD',etd:'2026-06-07',pkgQty:25,grossWt:620.0,chgWt:650.0,rateClass:'Q',chargeRate:6.5,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},{id:10,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',mawbNo:'180-66889900',carrier:'LH',flightName:'LH714',pol:'ICN',pod:'MUC',etd:'2026-06-08',pkgQty:18,grossWt:410.0,chgWt:430.0,rateClass:'C',chargeRate:4.5,ocCode1:'CX',ocAmt1:35.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''}];
+    const hawbData={1:[{id:1,checked:false,bizType:'E',hawbNo:'SELA001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Sent',pkgQty:3,pkgUnit:'PCS',grossWt:75.0,gwUnit:'KG',cargoDesc:'ELECTRONIC',sendDate:'2026-05-30 09:12',sendPerson:'user01',shipper:'Samsung Co.',consignee:'ABC Corp.',notify:'-'},{id:2,checked:false,bizType:'E',hawbNo:'SELA002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:5,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',cargoDesc:'MACHINERY',sendDate:'2026-05-30 09:15',sendPerson:'user01',shipper:'LG Electronics',consignee:'XYZ Ltd.',notify:'XYZ Ltd.'},{id:3,checked:false,bizType:'R',hawbNo:'SELA003',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:2,pkgUnit:'PCS',grossWt:55.0,gwUnit:'KG',cargoDesc:'',sendDate:'-',sendPerson:'-',shipper:'Hanon Corp.',consignee:'DEF Inc.',notify:'-'}],2:[{id:4,checked:false,bizType:'E',hawbNo:'SELB001',status:'EPNINF Sent',ediStatus:'Error',needResend:'Resend',pkgQty:5,pkgUnit:'PCS',grossWt:80.5,gwUnit:'KG',cargoDesc:'AUTO PARTS',sendDate:'2026-05-31 10:00',sendPerson:'user02',shipper:'Hyundai Motor',consignee:'TYO Motors',notify:'-'}],3:[{id:5,checked:false,bizType:'E',hawbNo:'SELC001',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:10,pkgUnit:'PCS',grossWt:200.0,gwUnit:'KG',cargoDesc:'SEMICONDUCTOR',sendDate:'-',sendPerson:'-',shipper:'SK Hynix',consignee:'Intel Corp.',notify:'-'},{id:6,checked:false,bizType:'E',hawbNo:'SELC002',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:10,pkgUnit:'PCS',grossWt:300.0,gwUnit:'KG',cargoDesc:'DISPLAY',sendDate:'-',sendPerson:'-',shipper:'LG Display',consignee:'Apple Inc.',notify:'-'}],4:[{id:7,checked:false,bizType:'E',hawbNo:'SELD001',status:'EPNINF Sent',ediStatus:'Processing',needResend:'Normal',pkgQty:8,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',cargoDesc:'COSMETICS',sendDate:'2026-06-02 08:30',sendPerson:'user03',shipper:'AmorePacific',consignee:'Sephora HK',notify:'-'}],5:[{id:8,checked:false,bizType:'E',hawbNo:'SELE001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Resend',pkgQty:2,pkgUnit:'PCS',grossWt:25.0,gwUnit:'KG',cargoDesc:'MEDICAL DEVICE',sendDate:'2026-06-03 07:15',sendPerson:'user01',shipper:'Medtronic KR',consignee:'Medtronic JP',notify:'-'},{id:9,checked:false,bizType:'R',hawbNo:'SELE002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:1,pkgUnit:'PCS',grossWt:15.0,gwUnit:'KG',cargoDesc:'BATTERY',sendDate:'2026-06-03 07:18',sendPerson:'user01',shipper:'Samsung SDI',consignee:'CATL Japan',notify:'CATL Japan'}],6:[{id:10,checked:false,bizType:'E',hawbNo:'SELF001',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:8,pkgUnit:'PCS',grossWt:180.0,gwUnit:'KG',cargoDesc:'AIRCRAFT PARTS',sendDate:'-',sendPerson:'-',shipper:'Korean Air MRO',consignee:'AA Maintenance',notify:'-'},{id:11,checked:false,bizType:'E',hawbNo:'SELF002',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:7,pkgUnit:'PCS',grossWt:160.0,gwUnit:'KG',cargoDesc:'AVIONICS',sendDate:'-',sendPerson:'-',shipper:'LIG Nex1',consignee:'AA Tech Inc.',notify:'AA Tech Inc.'}],7:[{id:12,checked:false,bizType:'E',hawbNo:'SELG001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:6,pkgUnit:'PCS',grossWt:140.0,gwUnit:'KG',cargoDesc:'PERFUME',sendDate:'2026-06-05 11:20',sendPerson:'user02',shipper:'Lotte Duty Free',consignee:'Dubai Mall LLC',notify:'-'},{id:13,checked:false,bizType:'R',hawbNo:'SELG002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:6,pkgUnit:'PCS',grossWt:140.0,gwUnit:'KG',cargoDesc:'LUXURY GOODS',sendDate:'2026-06-05 11:25',sendPerson:'user02',shipper:'Shinsegae Int.',consignee:'Emirates Retail',notify:'Emirates Retail'}],8:[{id:14,checked:false,bizType:'E',hawbNo:'SELH001',status:'EPNINF Sent',ediStatus:'Error',needResend:'Resend',pkgQty:4,pkgUnit:'PCS',grossWt:90.0,gwUnit:'KG',cargoDesc:'WINE',sendDate:'2026-06-06 09:00',sendPerson:'user03',shipper:'Hyundai Corp.',consignee:'Paris Cellar',notify:'-'},{id:15,checked:false,bizType:'E',hawbNo:'SELH002',status:'EPNINF Sent',ediStatus:'Error',needResend:'Need Resend',pkgQty:3,pkgUnit:'PCS',grossWt:65.0,gwUnit:'KG',cargoDesc:'GOURMET FOOD',sendDate:'2026-06-06 09:10',sendPerson:'user03',shipper:'CJ Foods',consignee:'Galeries Lafayette',notify:'-'}],9:[{id:16,checked:false,bizType:'E',hawbNo:'SELI001',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:12,pkgUnit:'PCS',grossWt:310.0,gwUnit:'KG',cargoDesc:'STEEL PARTS',sendDate:'-',sendPerson:'-',shipper:'POSCO',consignee:'BlueScope Steel',notify:'-'},{id:17,checked:false,bizType:'E',hawbNo:'SELI002',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:13,pkgUnit:'PCS',grossWt:310.0,gwUnit:'KG',cargoDesc:'METAL SHEET',sendDate:'-',sendPerson:'-',shipper:'Hyundai Steel',consignee:'OneSteel Ltd.',notify:'OneSteel Ltd.'}],10:[{id:18,checked:false,bizType:'E',hawbNo:'SELJ001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:9,pkgUnit:'PCS',grossWt:205.0,gwUnit:'KG',cargoDesc:'AUTOMOTIVE',sendDate:'2026-06-08 08:45',sendPerson:'user01',shipper:'Kia Motors',consignee:'BMW Munich',notify:'-'},{id:19,checked:false,bizType:'R',hawbNo:'SELJ002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:9,pkgUnit:'PCS',grossWt:205.0,gwUnit:'KG',cargoDesc:'CAR COMPONENTS',sendDate:'2026-06-08 08:50',sendPerson:'user01',shipper:'Hyundai Mobis',consignee:'Volkswagen AG',notify:'Volkswagen AG'}]};
+    const ediData={1:{expDeclNo:'12345-26-1234567X',pkgQty:3,pkgUnit:'PCS',grossWt:75.0,gwUnit:'KG',samePkgCode:'A',samePkgQty:3,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1},2:{expDeclNo:'12346-26-2345678Y',pkgQty:5,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},3:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},4:{expDeclNo:'12347-26-3456789Z',pkgQty:5,pkgUnit:'PCS',grossWt:80.5,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},5:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},6:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},7:{expDeclNo:'12348-26-4567890A',pkgQty:8,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},8:{expDeclNo:'12349-26-5678901B',pkgQty:2,pkgUnit:'PCS',grossWt:25.0,gwUnit:'KG',samePkgCode:'B',samePkgQty:2,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:2},9:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},10:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},11:{expDeclNo:'12350-26-6789012C',pkgQty:7,pkgUnit:'PCS',grossWt:160.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},12:{expDeclNo:'12351-26-7890123D',pkgQty:6,pkgUnit:'PCS',grossWt:140.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},13:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},14:{expDeclNo:'12352-26-8901234E',pkgQty:4,pkgUnit:'PCS',grossWt:90.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},15:{expDeclNo:'12353-26-9012345F',pkgQty:3,pkgUnit:'PCS',grossWt:65.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},16:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},17:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},18:{expDeclNo:'12354-26-0123456G',pkgQty:9,pkgUnit:'PCS',grossWt:205.0,gwUnit:'KG',samePkgCode:'A',samePkgQty:9,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1},19:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}};
+    const carrierMaster=[{id:1,checked:false,typeCode:'AIR',carrier:'KE',carrierName:'Korean Air',carrierId:'KE-AIR-001',scac:'KEAL'},{id:2,checked:false,typeCode:'AIR',carrier:'OZ',carrierName:'Asiana Airlines',carrierId:'OZ-AIR-001',scac:'AAAR'},{id:3,checked:false,typeCode:'AIR',carrier:'LH',carrierName:'Lufthansa Cargo',carrierId:'LH-AIR-001',scac:'LUFT'},{id:4,checked:false,typeCode:'AIR',carrier:'CX',carrierName:'Cathay Pacific Cargo',carrierId:'CX-AIR-001',scac:'CPAC'},{id:5,checked:false,typeCode:'AIR',carrier:'JL',carrierName:'Japan Airlines Cargo',carrierId:'JL-AIR-001',scac:'JALC'},{id:6,checked:false,typeCode:'AIR',carrier:'AA',carrierName:'American Airlines Cargo',carrierId:'AA-AIR-001',scac:'AACG'},{id:7,checked:false,typeCode:'AIR',carrier:'EK',carrierName:'Emirates SkyCargo',carrierId:'EK-AIR-001',scac:'EMSK'},{id:8,checked:false,typeCode:'SHIP',carrier:'HMM',carrierName:'Hyundai Merchant Marine',carrierId:'HMM-SHP-001',scac:'HDMU'},{id:9,checked:false,typeCode:'SHIP',carrier:'MSC',carrierName:'Mediterranean Shipping',carrierId:'MSC-SHP-001',scac:'MSCU'},{id:10,checked:false,typeCode:'FWDR',carrier:'DHL',carrierName:'DHL Global Forwarding',carrierId:'DHL-FWD-001',scac:'DHLG'},{id:11,checked:false,typeCode:'FWDR',carrier:'FDX',carrierName:'FedEx Express',carrierId:'FDX-FWD-001',scac:'FDXE'},{id:12,checked:false,typeCode:'ROAD',carrier:'KFS',carrierName:'Korea Fast Ship',carrierId:'KFS-RD-001',scac:'KFSR'}];
+    let filteredMawb=[],selectedMawbId=null,selectedHawbId=null;
+    let mawbSort={col:'etd',dir:'asc'},hawbSort={col:'hawbNo',dir:'asc'};
+    let filteredCarrier=[],carrierSort={col:'carrier',dir:'asc'};
+    const chips={carrier:[],cid:[],scac:[]};
+    let pmGrid=null,pmTmp=[],dragIdx=null;
+    var mawbColsDefault=[{key:'status',label:'Status'},{key:'ediStatus',label:'EDI Send Status'},{key:'needResend',label:'Need Resend'},{key:'mawbNo',label:'MAWB No.'},{key:'carrier',label:'Carrier'},{key:'flightName',label:'Flight Name'},{key:'pol',label:'POL'},{key:'pod',label:'POD'},{key:'etd',label:'ETD'},{key:'pkgQty',label:'Pkg Qty.'},{key:'grossWt',label:'Gross Wt'},{key:'chgWt',label:'Chg Wt'},{key:'rateClass',label:'Rate Class'},{key:'chargeRate',label:'Charge Rate'},{key:'ocCode1',label:'OC Code1'},{key:'ocAmt1',label:'OC Amt1'},{key:'ocCode2',label:'OC Code2'},{key:'ocAmt2',label:'OC Amt2'},{key:'ocCode3',label:'OC Code3'},{key:'ocAmt3',label:'OC Amt3'}];
+    var hawbColsDefault=[{key:'bizType',label:'Business Type'},{key:'hawbNo',label:'HAWB No.'},{key:'status',label:'Status'},{key:'ediStatus',label:'EDI Send Status'},{key:'needResend',label:'Need Resend'},{key:'pkgQty',label:'Pkg Qty.'},{key:'pkgUnit',label:'Pkg Unit'},{key:'grossWt',label:'Gross Wt'},{key:'gwUnit',label:'GW Unit'},{key:'cargoDesc',label:'Cargo Description'},{key:'sendDate',label:'Send Date'},{key:'sendPerson',label:'Send Person'},{key:'shipper',label:'Shipper'},{key:'consignee',label:'Consignee'},{key:'notify',label:'Notify'}];
+    var carrierColsDefault=[{key:'typeCode',label:'Carrier Type Code'},{key:'carrier',label:'Carrier'},{key:'carrierName',label:'Carrier Name'},{key:'carrierId',label:'Carrier ID'},{key:'scac',label:'SCAC'}];
+    function toast(msg,type){var wrap=document.getElementById('toast-wrap');var el=document.createElement('div');el.className='toast'+(type?' '+type:'');el.textContent=msg;wrap.appendChild(el);requestAnimationFrame(function(){el.classList.add('show');});setTimeout(function(){el.classList.remove('show');setTimeout(function(){el.remove();},300);},2500);}
+    function switchTab(t){['manifest','carrier'].forEach(function(name){document.getElementById('tab-'+name).classList.toggle('active',name===t);document.getElementById('page-'+name).classList.toggle('active',name===t);});document.getElementById('bc-manifest').style.display=t==='manifest'?'':'none';document.getElementById('bc-carrier').style.display=t==='carrier'?'':'none';if(t==='carrier')doCarrierSearch();}
+    function toggleCollapse(swId,cbId){var sw=document.getElementById(swId),cb=document.getElementById(cbId);var c=sw.classList.toggle('collapsed');cb.classList.toggle('collapsed',c);}
+    function sortArr(arr,col,dir){return arr.slice().sort(function(a,b){var va=a[col]!=null?a[col]:'',vb=b[col]!=null?b[col]:'';if(typeof va==='number')return dir==='asc'?va-vb:vb-va;return dir==='asc'?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));});}
+    function setSortIcon(prefix,col,dir){document.querySelectorAll('[id^="sort-'+prefix+'"]').forEach(function(el){el.textContent='\u2195';el.className='sort';});var el=document.getElementById('sort-'+prefix+col);if(el){el.textContent=dir==='asc'?'\u2191':'\u2193';el.className='sort '+(dir==='asc'?'asc':'desc');}}
+    function badge(v){var m={'New':'b-new','EPNINF Sent':'b-epninf','FWB/FHL Sent':'b-fwbfhl','N/A':'b-na','Processing':'b-proc','Complete':'b-complete','Error':'b-error','Need Resend':'b-resend','Normal':'b-normal','Resend':'b-resend','Sent':'b-sent','AIR':'b-epninf','SHIP':'b-fwbfhl','FWDR':'b-proc','ROAD':'b-normal'};return '<span class="badge '+(m[v]||'b-na')+'">'+v+'</span>';}
+    var mawbColMeta={status:{align:'',sort:true},ediStatus:{align:'',sort:true},needResend:{align:'',sort:true},mawbNo:{align:'',sort:true},carrier:{align:'',sort:true},flightName:{align:'',sort:true},pol:{align:'',sort:true},pod:{align:'',sort:true},etd:{align:'',sort:true},pkgQty:{align:'right',sort:true},grossWt:{align:'right',sort:true},chgWt:{align:'right',sort:true},rateClass:{align:'',sort:false},chargeRate:{align:'right',sort:false},ocCode1:{align:'',sort:false},ocAmt1:{align:'right',sort:false},ocCode2:{align:'',sort:false},ocAmt2:{align:'right',sort:false},ocCode3:{align:'',sort:false},ocAmt3:{align:'right',sort:false}};
+    var hawbColMeta={bizType:{align:'',sort:true,ec:true},hawbNo:{align:'',sort:true},status:{align:'',sort:true},ediStatus:{align:'',sort:true},needResend:{align:'',sort:true},pkgQty:{align:'right',sort:true},pkgUnit:{align:'',sort:false},grossWt:{align:'right',sort:true},gwUnit:{align:'',sort:false},cargoDesc:{align:'',sort:false,ec:true},sendDate:{align:'',sort:true},sendPerson:{align:'',sort:false},shipper:{align:'',sort:false},consignee:{align:'',sort:false},notify:{align:'',sort:false}};
+    var carrierColMeta={typeCode:{align:'',sort:true},carrier:{align:'',sort:true},carrierName:{align:'',sort:true},carrierId:{align:'',sort:true},scac:{align:'',sort:true}};
+    function buildThead(tableId,cols,meta,grid,sortSt){var table=document.getElementById(tableId);if(!table)return;var thead=table.tHead||table.querySelector('thead');if(!thead)return;if(!thead.rows.length){var newTr=document.createElement('tr');thead.appendChild(newTr);}var chkHtml='<th class="center" style="width:30px"><input type="checkbox" class="chk" onchange="toggleAll(\''+grid+'\',this.checked)"></th>';var thHtml=cols.filter(function(c){return c.visible!==false;}).map(function(c){var m=meta[c.key]||{align:'',sort:false};var cls=m.align?' class="'+m.align+'"':'';if(m.sort){var sortCls='',sortChar='\u2195';if(sortSt&&sortSt.col===c.key){sortCls=sortSt.dir==='asc'?' asc':' desc';sortChar=sortSt.dir==='asc'?'\u2191':'\u2193';}return'<th'+cls+' onclick="sortTable(\''+grid+'\',\''+c.key+'\')" >'+c.label+' <span class="sort'+sortCls+'" id="sort-'+grid+'-'+c.key+'">'+sortChar+'</span></th>';}return'<th'+cls+'>'+c.label+'</th>';}).join('');thead.rows[0].innerHTML=chkHtml+thHtml;}
+    function buildCarrierThead(tableId,cols,sortSt,sortFn){var table=document.getElementById(tableId);if(!table)return;var thead=table.tHead||table.querySelector('thead');if(!thead)return;if(!thead.rows.length){var newTr=document.createElement('tr');thead.appendChild(newTr);}var fn=sortFn||'sortCarrier';var chkHtml;if(tableId==='carrier-table'){chkHtml='<th class="center" style="width:30px"><input type="checkbox" class="chk" onchange="toggleCarrierAll(this.checked)"></th>';}else{chkHtml='<th class="center" style="width:30px"><input type="checkbox" class="chk" id="cpop-chk-all" onchange="cpopToggleAll(this.checked)"></th>';}var thHtml=cols.filter(function(c){return c.visible!==false;}).map(function(c){var m=carrierColMeta[c.key]||{align:'',sort:false};var cls=m.align?' class="'+m.align+'"':'';if(m.sort){var sortCls='',sortChar='\u2195';if(sortSt&&sortSt.col===c.key){sortCls=sortSt.dir==='asc'?' asc':' desc';sortChar=sortSt.dir==='asc'?'\u2191':'\u2193';}var idPfx=(tableId==='cpop-table')?'sort-cpop-':'sort-c-';return'<th'+cls+' onclick="'+fn+'(\''+c.key+'\')" >'+c.label+' <span class="sort'+sortCls+'" id="'+idPfx+c.key+'">'+sortChar+'</span></th>';}return'<th'+cls+'>'+c.label+'</th>';}).join('');thead.rows[0].innerHTML=chkHtml+thHtml;}
+    function rebuildMawbThead(){buildThead('mawb-table',mawbCols,mawbColMeta,'mawb',mawbSort);}
+    function rebuildHawbThead(){buildThead('hawb-table',hawbCols,hawbColMeta,'hawb',hawbSort);}
+    function rebuildCarrierThead(){buildCarrierThead('carrier-table',carrierCols,carrierSort);}
+    function rebuildCpopThead(){buildCarrierThead('cpop-table',carrierCols,cpopSort,'sortCpop');}
+    function visibleTds(cols,tdMap){return cols.filter(function(c){return c.visible;}).map(function(c){return tdMap[c.key]||'<td></td>';}).join('');}
+    function doSearch(){var ms=document.getElementById('s-mawb-status').value;var mn=document.getElementById('s-mawb-no').value.trim().toUpperCase();var hn=document.getElementById('s-hawb-no').value.trim().toUpperCase();var ca=document.getElementById('s-carrier').value.trim().toUpperCase();var ef=document.getElementById('s-etd-from').value;var et=document.getElementById('s-etd-to').value;var es=document.getElementById('s-edi-status').value;var nr=document.getElementById('s-need-resend').value;var r=mawbData.map(function(d){return Object.assign({},d);});if(mn){r=r.filter(function(d){return d.mawbNo.replace('-','').indexOf(mn.replace('-',''))>=0;});}else if(hn){var ids=new Set();Object.entries(hawbData).forEach(function(kv){kv[1].forEach(function(h){if(h.hawbNo.toUpperCase().indexOf(hn)>=0)ids.add(Number(kv[0]));});});r=r.filter(function(d){return ids.has(d.id);});}else{if(ef)r=r.filter(function(d){return d.etd>=ef;});if(et)r=r.filter(function(d){return d.etd<=et;});}if(ms)r=r.filter(function(d){return d.status===ms;});if(ca)r=r.filter(function(d){var master=carrierMaster.find(function(m){return m.carrier===d.carrier;});var name=master?master.carrierName.toUpperCase():'';return d.carrier.toUpperCase().indexOf(ca)>=0||name.indexOf(ca)>=0;});if(es)r=r.filter(function(d){return d.ediStatus===es;});if(nr)r=r.filter(function(d){return d.needResend===nr;});filteredMawb=r;selectedMawbId=null;selectedHawbId=null;renderMawb();renderHawb(null);renderEdi(null);}
+    function resetSearch(){['s-mawb-status','s-mawb-no','s-hawb-no','s-carrier','s-edi-status','s-need-resend'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('s-etd-from').value='2026-05-29';document.getElementById('s-etd-to').value='2026-06-12';['sf-hawb','sf-etd'].forEach(function(id){document.getElementById(id).classList.remove('disabled');});document.getElementById('mawb-input-wrap').closest('.sf').classList.remove('disabled');doSearch();}
+    function onMawbInput(){var v=document.getElementById('s-mawb-no').value.trim();document.getElementById('sf-hawb').classList.toggle('disabled',!!v);document.getElementById('sf-etd').classList.toggle('disabled',!!v);}
+    function onHawbInput(){var v=document.getElementById('s-hawb-no').value.trim();document.getElementById('mawb-input-wrap').closest('.sf').classList.toggle('disabled',!!v);document.getElementById('sf-etd').classList.toggle('disabled',!!v);}
+    function rcOpts(sel){return RC.map(function(o){return'<option'+(sel===o?' selected':'')+'>'+o+'</option>';}).join('');}
+    function ocOpts(sel){return OC.map(function(o){return'<option'+(sel===o?' selected':'')+'>'+o+'</option>';}).join('');}
+    function renderMawb(){var tb=document.getElementById('mawb-tbody');document.getElementById('mawb-count').textContent='\uCD1D '+filteredMawb.length+'\uAC74';var visCols=mawbCols.filter(function(c){return c.visible;});var colspan=visCols.length+1;if(!filteredMawb.length){tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\uC870\uD68C\uB41C \uD56D\uBAA9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';return;}var sorted=sortArr(filteredMawb,mawbSort.col,mawbSort.dir);tb.innerHTML=sorted.map(function(d){var sel=selectedMawbId===d.id;var tdMap={status:'<td>'+badge(d.status)+'</td>',ediStatus:'<td>'+badge(d.ediStatus)+'</td>',needResend:'<td>'+badge(d.needResend)+'</td>',mawbNo:'<td><span class="lnk">'+d.mawbNo+'</span></td>',carrier:'<td>'+d.carrier+'</td>',flightName:'<td>'+d.flightName+'</td>',pol:'<td>'+d.pol+'</td>',pod:'<td>'+d.pod+'</td>',etd:'<td>'+d.etd+'</td>',pkgQty:'<td class="right">'+d.pkgQty+'</td>',grossWt:'<td class="right">'+d.grossWt.toFixed(1)+'</td>',chgWt:'<td class="right">'+d.chgWt.toFixed(1)+'</td>',rateClass:'<td class="ec"><select data-field="rateClass">'+rcOpts(d.rateClass)+'</select></td>',chargeRate:'<td class="right ec"><input type="text" data-field="chargeRate" value="'+d.chargeRate+'" style="width:55px;text-align:right"></td>',ocCode1:'<td class="ec"><select data-field="ocCode1">'+ocOpts(d.ocCode1)+'</select></td>',ocAmt1:'<td class="right ec"><input type="text" data-field="ocAmt1" value="'+d.ocAmt1+'" style="width:55px;text-align:right"></td>',ocCode2:'<td class="ec"><select data-field="ocCode2">'+ocOpts(d.ocCode2)+'</select></td>',ocAmt2:'<td class="right ec"><input type="text" data-field="ocAmt2" value="'+d.ocAmt2+'" style="width:55px;text-align:right"></td>',ocCode3:'<td class="ec"><select data-field="ocCode3">'+ocOpts(d.ocCode3)+'</select></td>',ocAmt3:'<td class="right ec"><input type="text" data-field="ocAmt3" value="'+d.ocAmt3+'" style="width:55px;text-align:right"></td>'};return'<tr data-id="'+d.id+'"'+(sel?' class="selected"':'')+'>'+
+    '<td class="center"><input type="checkbox" class="chk"'+(d.checked?' checked':'')+'></td>'+visibleTds(mawbCols,tdMap)+'</tr>';}).join('');}
+    function selectMawb(id){selectedMawbId=id;selectedHawbId=null;renderMawb();renderHawb(id);renderEdi(null);}
+    function updMawb(id,f,v){var item=mawbData.find(function(d){return d.id===id;});if(!item)return;if(f==='ocCode1'||f==='ocCode2'||f==='ocCode3'){var others=['ocCode1','ocCode2','ocCode3'].filter(function(k){return k!==f;}).map(function(k){return item[k];});if(v&&others.indexOf(v)>=0){toast('\uB3D9\uC77C\uD55C OC Code\uAC00 \uC774\uBBF8 \uC120\uD0DD\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.','error');renderMawb();return;}}item[f]=v;}
+    function renderHawb(mid){var tb=document.getElementById('hawb-tbody');var ctx=document.getElementById('hawb-ctx');var cnt=document.getElementById('hawb-count');var visCols=hawbCols.filter(function(c){return c.visible;});var colspan=visCols.length+1;if(!mid){cnt.textContent='\uCD1D 0\uAC74';ctx.textContent='';tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\u2190 MAWB\uB97C \uC120\uD0DD\uD558\uBA74 HAWB \uBAA9\uB85D\uC774 \uD45C\uC2DC\uB429\uB2C8\uB2E4.</td></tr>';return;}var mawb=filteredMawb.find(function(d){return d.id===mid;});ctx.textContent=mawb?'(MAWB: '+mawb.mawbNo+')':'';var rows=hawbData[mid]||[];cnt.textContent='\uCD1D '+rows.length+'\uAC74';if(!rows.length){tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\uC870\uD68C\uB41C HAWB\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';return;}var sorted=sortArr(rows,hawbSort.col,hawbSort.dir);tb.innerHTML=sorted.map(function(d){var sel=selectedHawbId===d.id;var tdMap={bizType:'<td class="ec"><select data-field="bizType"><option'+(d.bizType==='E'?' selected':'')+' value="E">E(Export)</option><option'+(d.bizType==='R'?' selected':'')+' value="R">R(Transshipment)</option></select></td>',hawbNo:'<td><span class="lnk">'+d.hawbNo+'</span></td>',status:'<td>'+badge(d.status)+'</td>',ediStatus:'<td>'+badge(d.ediStatus)+'</td>',needResend:'<td>'+badge(d.needResend)+'</td>',pkgQty:'<td class="right">'+d.pkgQty+'</td>',pkgUnit:'<td>'+d.pkgUnit+'</td>',grossWt:'<td class="right">'+d.grossWt.toFixed(1)+'</td>',gwUnit:'<td>'+d.gwUnit+'</td>',cargoDesc:'<td class="ec"><input type="text" data-field="cargoDesc" value="'+d.cargoDesc+'" maxlength="20" style="width:120px" placeholder="\uCD5C\uB300 20\uC790"></td>',sendDate:'<td>'+d.sendDate+'</td>',sendPerson:'<td>'+d.sendPerson+'</td>',shipper:'<td>'+d.shipper+'</td>',consignee:'<td>'+d.consignee+'</td>',notify:'<td>'+d.notify+'</td>'};return'<tr data-id="'+d.id+'"'+(sel?' class="selected"':'')+'>'+
+    '<td class="center"><input type="checkbox" class="chk"'+(d.checked?' checked':'')+'></td>'+visibleTds(hawbCols,tdMap)+'</tr>';}).join('');}
+    function selectHawb(id){selectedHawbId=id;renderHawb(selectedMawbId);renderEdi(id);}
+    function updHawb(id,f,v){for(var key in hawbData){var item=hawbData[key].find(function(d){return d.id===id;});if(item){item[f]=v;return;}}}
+    function renderEdi(hid){var tb=document.getElementById('edi-tbody'),ctx=document.getElementById('edi-ctx');if(!hid){ctx.textContent='';tb.innerHTML='<tr class="empty"><td colspan="10">\u2190 HAWB\uB97C \uC120\uD0DD\uD558\uBA74 \uC218\uCD9C\uC2E0\uACE0 \uC815\uBCF4\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4.</td></tr>';return;}var hawb=null;for(var key in hawbData){hawb=hawbData[key].find(function(d){return d.id===hid;});if(hawb)break;}ctx.textContent=hawb?'(HAWB: '+hawb.hawbNo+')':'';var d=ediData[hid];if(!d){tb.innerHTML='<tr class="empty"><td colspan="10">\uC218\uCD9C\uC2E0\uACE0 \uC815\uBCF4\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';return;}tb.innerHTML='<tr><td>'+d.expDeclNo+'</td><td class="right">'+d.pkgQty+'</td><td>'+d.pkgUnit+'</td><td class="right">'+(typeof d.grossWt==='number'?d.grossWt.toFixed(1):d.grossWt)+'</td><td>'+d.gwUnit+'</td><td class="center">'+d.samePkgCode+'</td><td class="right">'+d.samePkgQty+'</td><td>'+d.samePkgUnit+'</td><td class="center">'+d.splitShipment+'</td><td class="right">'+d.splitOrderBy+'</td></tr>';}
+    function sortTable(grid,col){var st=grid==='mawb'?mawbSort:hawbSort;var dir=st.col===col&&st.dir==='asc'?'desc':'asc';st.col=col;st.dir=dir;setSortIcon((grid==='mawb'?'mawb-':'hawb-'),col,dir);if(grid==='mawb')renderMawb();else renderHawb(selectedMawbId);}
+    function toggleAll(grid,checked){if(grid==='mawb'){filteredMawb.forEach(function(d){d.checked=checked;});renderMawb();}else{(hawbData[selectedMawbId]||[]).forEach(function(d){d.checked=checked;});renderHawb(selectedMawbId);}}
+    function getCheckedMawb(){return filteredMawb.filter(function(d){return d.checked;});}
+    function getCheckedHawb(){return(hawbData[selectedMawbId]||[]).filter(function(d){return d.checked;});}
+    function fwbFhlSend(){var sel=getCheckedMawb();if(!sel.length){toast('\uC804\uC1A1\uD560 \uD56D\uBAA9\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}if(sel.some(function(d){return d.ediStatus==='Processing';})){toast('\uC774\uBBF8 \uC804\uC1A1 \uC911\uC778 \uAC74\uC774 \uC788\uC2B5\uB2C8\uB2E4.','error');return;}sel.forEach(function(d){d.ediStatus='Processing';d.status='FWB/FHL Sent';});renderMawb();setTimeout(function(){sel.forEach(function(d){d.ediStatus='Complete';});renderMawb();toast('Manifest has been sent.','success');},1800);toast('\uC804\uC1A1 \uC911...','');}
+    function epninfSend(){var sel=getCheckedMawb();if(!sel.length){toast('\uC804\uC1A1\uD560 \uD56D\uBAA9\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}sel.forEach(function(d){d.ediStatus='Processing';d.status='EPNINF Sent';});renderMawb();setTimeout(function(){sel.forEach(function(d){d.ediStatus='Complete';});renderMawb();toast('EPNINF has been sent.','success');},1800);}
+    function amendManifest(){var s=getCheckedHawb();if(!s.length){toast('HAWB\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}if(s.length>1){toast('\uB2E8\uAC74\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}toast('\uC815\uC815\uD654\uBA74: '+s[0].hawbNo,'');}
+    function addressAmend(){var s=getCheckedHawb();if(!s.length){toast('HAWB\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}if(s.length>1){toast('\uB2E8\uAC74\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}toast('Address Amend: '+s[0].hawbNo,'');}
+    function csvDown(hdr,rows,fn){var bom='\uFEFF';var csv=bom+[hdr.join(',')].concat(rows.map(function(r){return r.map(function(v){return'"'+String(v!=null?v:'').replace(/"/g,'""')+'"';}).join(',');})).join('\r\n');var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download=fn+'_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);toast(fn+' \uB2E4\uC6B4\uB85C\uB4DC \uC644\uB8CC','success');}
+    function downloadExcel(grid){if(grid==='mawb'){csvDown(['Status','EDI Send Status','Need Resend','MAWB No.','Carrier','Flight Name','POL','POD','ETD','Pkg Qty.','Gross Wt','Chg Wt','Rate Class','Charge Rate','OC Code1','OC Amt1','OC Code2','OC Amt2','OC Code3','OC Amt3'],filteredMawb.map(function(d){return[d.status,d.ediStatus,d.needResend,d.mawbNo,d.carrier,d.flightName,d.pol,d.pod,d.etd,d.pkgQty,d.grossWt,d.chgWt,d.rateClass,d.chargeRate,d.ocCode1,d.ocAmt1,d.ocCode2,d.ocAmt2,d.ocCode3,d.ocAmt3];}),'MAWB_Info');}else{if(!selectedMawbId){toast('MAWB\uB97C \uBA3C\uC800 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}csvDown(['Business Type','HAWB No.','Status','EDI Send Status','Need Resend','Pkg Qty.','Pkg Unit','Gross Wt','GW Unit','Cargo Description','Send Date','Send Person','Shipper','Consignee','Notify'],(hawbData[selectedMawbId]||[]).map(function(d){return[d.bizType,d.hawbNo,d.status,d.ediStatus,d.needResend,d.pkgQty,d.pkgUnit,d.grossWt,d.gwUnit,d.cargoDesc,d.sendDate,d.sendPerson,d.shipper,d.consignee,d.notify];}),'HAWB_Info');}}
+    function toggleType(btn){btn.classList.toggle('sel');}
+    function getSelTypes(){return Array.from(document.querySelectorAll('#ctype-group .type-btn.sel')).map(function(b){return b.dataset.val;});}
+    function addChip(e,key){if(e.key!=='Enter')return;e.preventDefault();var val=e.target.value.trim().toUpperCase();if(!val||chips[key].indexOf(val)>=0){e.target.value='';return;}chips[key].push(val);renderChips(key);e.target.value='';}
+    function removeChip(key,val){chips[key]=chips[key].filter(function(v){return v!==val;});renderChips(key);}
+    function renderChips(key){var wrapId={carrier:'tw-carrier',cid:'tw-cid',scac:'tw-scac'}[key];var wrap=document.getElementById(wrapId);Array.from(wrap.querySelectorAll('.chip')).forEach(function(el){el.remove();});var input=wrap.querySelector('input');chips[key].forEach(function(v){var chip=document.createElement('span');chip.className='chip';var txt=document.createTextNode(v);var x=document.createElement('span');x.className='chip-x';x.textContent='\u2715';x.setAttribute('onclick','removeChip("'+key+'","'+v+'")');chip.appendChild(txt);chip.appendChild(x);wrap.insertBefore(chip,input);});}
+    function doCarrierSearch(){var types=getSelTypes();var r=carrierMaster.map(function(d){return Object.assign({},d);});if(types.length)r=r.filter(function(d){return types.indexOf(d.typeCode)>=0;});if(chips.carrier.length)r=r.filter(function(d){return chips.carrier.some(function(t){return d.carrier.toUpperCase().indexOf(t)>=0;});});if(chips.cid.length)r=r.filter(function(d){return chips.cid.some(function(t){return d.carrierId.toUpperCase().indexOf(t)>=0;});});if(chips.scac.length)r=r.filter(function(d){return chips.scac.some(function(t){return d.scac.toUpperCase().indexOf(t)>=0;});});filteredCarrier=r;renderCarrier();}
+    function resetCarrierSearch(){Array.from(document.querySelectorAll('#ctype-group .type-btn')).forEach(function(b){b.classList.remove('sel');});document.querySelector('#ctype-group .type-btn[data-val="AIR"]').classList.add('sel');['carrier','cid','scac'].forEach(function(k){chips[k]=[];renderChips(k);});doCarrierSearch();}
+    function renderCarrier(){var tb=document.getElementById('carrier-tbody');document.getElementById('carrier-count').textContent='\uCD1D '+filteredCarrier.length+'\uAC74';var visCols=carrierCols.filter(function(c){return c.visible;});var colspan=visCols.length+1;if(!filteredCarrier.length){tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\uC870\uD68C\uB41C Carrier\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';return;}var sorted=sortArr(filteredCarrier,carrierSort.col,carrierSort.dir);tb.innerHTML=sorted.map(function(d){var tdMap={typeCode:'<td>'+badge(d.typeCode)+'</td>',carrier:'<td>'+d.carrier+'</td>',carrierName:'<td>'+d.carrierName+'</td>',carrierId:'<td>'+d.carrierId+'</td>',scac:'<td>'+d.scac+'</td>'};return'<tr data-id="'+d.id+'"><td class="center"><input type="checkbox" class="chk"'+(d.checked?' checked':'')+'></td>'+visibleTds(carrierCols,tdMap)+'</tr>';}).join('');}
+    function sortCarrier(col){var dir=carrierSort.col===col&&carrierSort.dir==='asc'?'desc':'asc';carrierSort={col:col,dir:dir};setSortIcon('c-',col,dir);renderCarrier();}
+    function toggleCarrierAll(checked){filteredCarrier.forEach(function(d){d.checked=checked;});renderCarrier();}
+    function downloadCarrierExcel(){csvDown(['Carrier Type Code','Carrier','Carrier Name','Carrier ID','SCAC'],filteredCarrier.map(function(d){return[d.typeCode,d.carrier,d.carrierName,d.carrierId,d.scac];}),'Carrier');}
+    var mawbCols=[{key:'status',label:'Status',visible:true},{key:'ediStatus',label:'EDI Send Status',visible:true},{key:'needResend',label:'Need Resend',visible:true},{key:'mawbNo',label:'MAWB No.',visible:true},{key:'carrier',label:'Carrier',visible:true},{key:'flightName',label:'Flight Name',visible:true},{key:'pol',label:'POL',visible:true},{key:'pod',label:'POD',visible:true},{key:'etd',label:'ETD',visible:true},{key:'pkgQty',label:'Pkg Qty.',visible:true},{key:'grossWt',label:'Gross Wt',visible:true},{key:'chgWt',label:'Chg Wt',visible:true},{key:'rateClass',label:'Rate Class',visible:true},{key:'chargeRate',label:'Charge Rate',visible:true},{key:'ocCode1',label:'OC Code1',visible:true},{key:'ocAmt1',label:'OC Amt1',visible:true},{key:'ocCode2',label:'OC Code2',visible:true},{key:'ocAmt2',label:'OC Amt2',visible:true},{key:'ocCode3',label:'OC Code3',visible:true},{key:'ocAmt3',label:'OC Amt3',visible:true}];
+    var hawbCols=[{key:'bizType',label:'Business Type',visible:true},{key:'hawbNo',label:'HAWB No.',visible:true},{key:'status',label:'Status',visible:true},{key:'ediStatus',label:'EDI Send Status',visible:true},{key:'needResend',label:'Need Resend',visible:true},{key:'pkgQty',label:'Pkg Qty.',visible:true},{key:'pkgUnit',label:'Pkg Unit',visible:true},{key:'grossWt',label:'Gross Wt',visible:true},{key:'gwUnit',label:'GW Unit',visible:true},{key:'cargoDesc',label:'Cargo Description',visible:true},{key:'sendDate',label:'Send Date',visible:true},{key:'sendPerson',label:'Send Person',visible:true},{key:'shipper',label:'Shipper',visible:true},{key:'consignee',label:'Consignee',visible:true},{key:'notify',label:'Notify',visible:true}];
+    var carrierCols=[{key:'typeCode',label:'Carrier Type Code',visible:true},{key:'carrier',label:'Carrier',visible:true},{key:'carrierName',label:'Carrier Name',visible:true},{key:'carrierId',label:'Carrier ID',visible:true},{key:'scac',label:'SCAC',visible:true}];
+    function openPersonalize(grid){pmGrid=grid;var src=grid==='mawb'?mawbCols:grid==='hawb'?hawbCols:carrierCols;pmTmp=src.map(function(c){return Object.assign({},c);});var titleMap={mawb:'MAWB',hawb:'HAWB',carrier:'Carrier',cpop:'Carrier (팝업)'};document.getElementById('modal-title').textContent=(titleMap[grid]||grid)+' 컬럼 설정';renderModalCols();document.getElementById('modal-overlay').classList.add('open');}
+    function closePersonalize(){if(pmGrid&&pmTmp.length){var tgt=pmGrid==='mawb'?mawbCols:pmGrid==='hawb'?hawbCols:carrierCols;tgt.length=0;pmTmp.forEach(function(pc){tgt.push({key:pc.key,label:pc.label,visible:pc.visible});});if(pmGrid==='mawb'){rebuildMawbThead();renderMawb();}else if(pmGrid==='hawb'){rebuildHawbThead();renderHawb(selectedMawbId);}else if(pmGrid==='carrier'){rebuildCarrierThead();renderCarrier();}else if(pmGrid==='cpop'){rebuildCpopThead();renderCpopTable();}}document.getElementById('modal-overlay').classList.remove('open');pmGrid=null;pmTmp=[];}
+    function resetPersonalize(){var defaults=pmGrid==='mawb'?mawbColsDefault:pmGrid==='hawb'?hawbColsDefault:carrierColsDefault;pmTmp=defaults.map(function(c){return Object.assign({},c,{visible:true});});renderModalCols();}
+    function applyPersonalize(){var tgt=pmGrid==='mawb'?mawbCols:pmGrid==='hawb'?hawbCols:carrierCols;tgt.length=0;pmTmp.forEach(function(pc){tgt.push({key:pc.key,label:pc.label,visible:pc.visible});});if(pmGrid==='mawb'){rebuildMawbThead();renderMawb();}else if(pmGrid==='hawb'){rebuildHawbThead();renderHawb(selectedMawbId);}else if(pmGrid==='carrier'){rebuildCarrierThead();renderCarrier();}else if(pmGrid==='cpop'){rebuildCpopThead();renderCpopTable();}document.getElementById('modal-overlay').classList.remove('open');pmGrid=null;pmTmp=[];toast('컬럼 설정이 적용되었습니다.','success');}
+    function renderModalCols(){document.getElementById('modal-col-list').innerHTML=pmTmp.map(function(c,i){return'<div class="col-item" draggable="true" ondragstart="dragStart(event,'+i+')" ondragover="event.preventDefault()" ondrop="dragDrop(event,'+i+')" ondragend="dragEnd(event)"><span class="drag-handle">&#x283F;</span><input type="checkbox" id="pck'+i+'"'+(c.visible?' checked':'')+' onchange="pmTmp['+i+'].visible=this.checked"><label for="pck'+i+'">'+c.label+'</label></div>';}).join('');}
+    function dragStart(e,i){dragIdx=i;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+    function dragDrop(e,i){e.preventDefault();if(dragIdx===null||dragIdx===i)return;var m=pmTmp.splice(dragIdx,1)[0];pmTmp.splice(i,0,m);dragIdx=null;renderModalCols();}
+    function dragEnd(e){e.currentTarget.classList.remove('dragging');dragIdx=null;}
+    var cpopChips={carrier:[],cid:[]};var cpopFiltered=[];var cpopSort={col:'carrier',dir:'asc'};
+    function openCarrierPopup(){resetCpopSearch();document.getElementById('cpop-overlay').classList.add('open');document.addEventListener('keydown',cpopEscHandler);}
+    function closeCarrierPopup(){document.getElementById('cpop-overlay').classList.remove('open');document.removeEventListener('keydown',cpopEscHandler);}
+    function cpopEscHandler(e){if(e.key==='Escape')closeCarrierPopup();}
+    function addCpopChip(e,key){if(e.key!=='Enter')return;e.preventDefault();var val=e.target.value.trim().toUpperCase();if(!val||cpopChips[key].indexOf(val)>=0){e.target.value='';return;}cpopChips[key].push(val);renderCpopChips(key);e.target.value='';}
+    function removeCpopChip(key,val){cpopChips[key]=cpopChips[key].filter(function(v){return v!==val;});renderCpopChips(key);}
+    function renderCpopChips(key){var wrapId={carrier:'cpop-tw-carrier',cid:'cpop-tw-cid'}[key];var wrap=document.getElementById(wrapId);Array.from(wrap.querySelectorAll('.chip')).forEach(function(el){el.remove();});var input=wrap.querySelector('input');cpopChips[key].forEach(function(v){var chip=document.createElement('span');chip.className='chip';var txt=document.createTextNode(v);var x=document.createElement('span');x.className='chip-x';x.textContent='✕';x.setAttribute('onclick','removeCpopChip("'+key+'","'+v+'")');chip.appendChild(txt);chip.appendChild(x);wrap.insertBefore(chip,input);});}
+    function doCpopSearch(){var types=Array.from(document.querySelectorAll('#cpop-type-group .type-btn.sel')).map(function(b){return b.dataset.val;});var r=carrierMaster.map(function(d){return Object.assign({},d,{cpopChecked:false});});if(types.length)r=r.filter(function(d){return types.indexOf(d.typeCode)>=0;});if(cpopChips.carrier.length)r=r.filter(function(d){return cpopChips.carrier.some(function(t){return d.carrier.toUpperCase().indexOf(t)>=0;});});if(cpopChips.cid.length)r=r.filter(function(d){return cpopChips.cid.some(function(t){return d.carrierId.toUpperCase().indexOf(t)>=0;});});cpopFiltered=r;renderCpopTable();}
+    function resetCpopSearch(){Array.from(document.querySelectorAll('#cpop-type-group .type-btn')).forEach(function(b){b.classList.remove('sel');});document.querySelector('#cpop-type-group .type-btn[data-val="AIR"]').classList.add('sel');cpopChips.carrier=[];cpopChips.cid=[];renderCpopChips('carrier');renderCpopChips('cid');var allChk=document.getElementById('cpop-chk-all');if(allChk)allChk.checked=false;doCpopSearch();}
+    function renderCpopTable(){var tb=document.getElementById('cpop-tbody');document.getElementById('cpop-count').textContent='총 '+cpopFiltered.length+'건';if(!cpopFiltered.length){tb.innerHTML='<tr class="empty"><td colspan="6">조회된 Carrier가 없습니다.</td></tr>';return;}var sorted=sortArr(cpopFiltered,cpopSort.col,cpopSort.dir);tb.innerHTML=sorted.map(function(d){return'<tr data-id="'+d.id+'"><td class="center"><input type="checkbox" class="chk cpop-row-chk"'+(d.cpopChecked?' checked':'')+'></td><td>'+badge(d.typeCode)+'</td><td>'+d.carrier+'</td><td>'+d.carrierName+'</td><td>'+d.carrierId+'</td><td>'+d.scac+'</td></tr>';}).join('');}
+    function cpopToggleAll(checked){cpopFiltered.forEach(function(d){d.cpopChecked=checked;});renderCpopTable();var allChk=document.getElementById('cpop-chk-all');if(allChk)allChk.checked=checked;}
+    function sortCpop(col){var dir=cpopSort.col===col&&cpopSort.dir==='asc'?'desc':'asc';cpopSort={col:col,dir:dir};setSortIcon('cpop-',col,dir);renderCpopTable();}
+    function confirmCarrierPopup(){var selected=cpopFiltered.filter(function(d){return d.cpopChecked;});if(!selected.length){toast('Carrier를 선택해 주세요.','error');return;}var codes=selected.map(function(d){return d.carrier;});var manifestInput=document.getElementById('s-carrier');if(manifestInput)manifestInput.value=codes.join(', ');chips.carrier=codes.slice();renderChips('carrier');closeCarrierPopup();toast(codes.length+'개 Carrier 선택 반영 완료','success');}
+
+    var hawbHistoryData={1:[{sendDt:'2026-05-30 09:12',mawbNo:'180-12345678',carrier:'KE',bizType:'E',hawbNo:'SELA001',pkgQty:3,pkgUnit:'PCS',grossWt:75.0,volume:0.42,cargoDesc:'ELECTRONIC',loadingPlace:'INCHEON',shipper:'Samsung Co., Ltd.\n12, Seocho-daero 74-gil\nSeocho-gu, Seoul 06620\nKOREA\nTEL: +82-2-2255-0114',consignee:'ABC Corporation\n1234 Commerce Street\nLos Angeles, CA 90001\nUSA\nTEL: +1-213-555-0100',notify:'SAME AS CONSIGNEE',edi:{expDeclNo:'12345-26-1234567X',pkgQty:3,pkgUnit:'PCS',grossWt:75.0,gwUnit:'KG',samePkgCode:'A',samePkgQty:3,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1}},{sendDt:'2026-05-29 17:44',mawbNo:'180-12345678',carrier:'KE',bizType:'E',hawbNo:'SELA001',pkgQty:3,pkgUnit:'PCS',grossWt:74.5,volume:0.40,cargoDesc:'ELECTRONIC PARTS',loadingPlace:'INCHEON',shipper:'Samsung Co., Ltd.\n12, Seocho-daero 74-gil\nSeocho-gu, Seoul 06620\nKOREA',consignee:'ABC Corporation\n1234 Commerce Street\nLos Angeles, CA 90001\nUSA',notify:'ABC Corporation\n1234 Commerce Street\nLos Angeles, CA 90001\nUSA',edi:{expDeclNo:'12345-26-1234567X',pkgQty:3,pkgUnit:'PCS',grossWt:74.5,gwUnit:'KG',samePkgCode:'A',samePkgQty:3,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1}}],4:[{sendDt:'2026-05-31 10:00',mawbNo:'180-87654321',carrier:'OZ',bizType:'E',hawbNo:'SELB001',pkgQty:5,pkgUnit:'PCS',grossWt:80.5,volume:0.95,cargoDesc:'AUTO PARTS',loadingPlace:'INCHEON',shipper:'Hyundai Motor Company\n12, Heolleung-ro\nSeocho-gu, Seoul 06797\nKOREA',consignee:'TYO Motors Co. Ltd.\n1-1 Nihonbashi Muromachi\nChuo-ku, Tokyo 103-0022\nJAPAN',notify:'SAME AS CONSIGNEE',edi:{expDeclNo:'12347-26-3456789Z',pkgQty:5,pkgUnit:'PCS',grossWt:80.5,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'}}],8:[{sendDt:'2026-06-03 07:15',mawbNo:'180-99887766',carrier:'JL',bizType:'E',hawbNo:'SELE001',pkgQty:2,pkgUnit:'PCS',grossWt:25.0,volume:0.18,cargoDesc:'MEDICAL DEVICE',loadingPlace:'INCHEON',shipper:'Medtronic Korea Ltd.\n14F, 131 Teheran-ro\nGangnam-gu, Seoul 06212\nKOREA',consignee:'Medtronic Japan Co., Ltd.\n4-1-6 Takanawa\nMinato-ku, Tokyo 108-0074\nJAPAN',notify:'SAME AS CONSIGNEE',edi:{expDeclNo:'12349-26-5678901B',pkgQty:2,pkgUnit:'PCS',grossWt:25.0,gwUnit:'KG',samePkgCode:'B',samePkgQty:2,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:2}}]};
+
+    function hawbHistory(){var sel=getCheckedHawb();if(!sel.length){toast('HAWB를 선택해 주세요.','error');return;}if(sel.length>1){toast('단건을 선택해 주세요.','error');return;}var hawb=sel[0];var histList=hawbHistoryData[hawb.id];if(!histList||!histList.length){toast('History 데이터가 없습니다.','error');return;}var sel2=document.getElementById('hpop-date-sel');sel2.innerHTML='';histList.forEach(function(h,i){var opt=document.createElement('option');opt.value=String(i);opt.textContent=h.sendDt+(i===0?'  (최신)':'');sel2.appendChild(opt);});document.getElementById('hpop-overlay').classList.add('open');document.addEventListener('keydown',hpopEscHandler);loadHawbHistory('0');document.getElementById('hpop-overlay').onclick=function(e){if(e.target===this)closeHawbHistory();};}
+    function closeHawbHistory(){document.getElementById('hpop-overlay').classList.remove('open');document.removeEventListener('keydown',hpopEscHandler);}
+    function hpopEscHandler(e){if(e.key==='Escape')closeHawbHistory();}
+    function loadHawbHistory(idx){var selEl=document.getElementById('hpop-date-sel');var i=(idx!==undefined&&idx!==null)?Number(idx):Number(selEl.value);var sel=getCheckedHawb();if(!sel.length)return;var histList=hawbHistoryData[sel[0].id];if(!histList||!histList[i])return;var h=histList[i];document.getElementById('hpop-mawb-tbody').innerHTML='<tr><td>'+h.mawbNo+'</td><td>'+h.carrier+'</td></tr>';document.getElementById('hpop-hawb-tbody').innerHTML='<tr><td>'+h.bizType+'</td><td>'+h.hawbNo+'</td><td class="right">'+h.pkgQty+'</td><td>'+h.pkgUnit+'</td><td class="right">'+(typeof h.grossWt==='number'?h.grossWt.toFixed(1):h.grossWt)+'</td><td class="right">'+(typeof h.volume==='number'?h.volume.toFixed(2):h.volume)+'</td><td>'+h.cargoDesc+'</td><td>'+h.loadingPlace+'</td></tr>';document.getElementById('hpop-shipper').textContent=h.shipper;document.getElementById('hpop-consignee').textContent=h.consignee;document.getElementById('hpop-notify').textContent=h.notify;var e2=h.edi;document.getElementById('hpop-edi-tbody').innerHTML='<tr><td>'+e2.expDeclNo+'</td><td class="right">'+e2.pkgQty+'</td><td>'+e2.pkgUnit+'</td><td class="right">'+(typeof e2.grossWt==='number'?e2.grossWt.toFixed(1):e2.grossWt)+'</td><td>'+e2.gwUnit+'</td><td class="center">'+e2.samePkgCode+'</td><td class="right">'+e2.samePkgQty+'</td><td>'+e2.samePkgUnit+'</td><td class="center">'+e2.splitShipment+'</td><td class="right">'+e2.splitOrderBy+'</td></tr>';}
+
+    var mawbHistoryData={1:[{sendDt:'2026-05-30 09:12',mawbNo:'180-12345678',carrier:'KE',flightName:'KE123',pol:'ICN',pod:'LAX',pkgQty:10,grossWt:250.0,chgWt:300.0,rateClass:'Q',chargeRate:5.5,ocCode1:'PP',ocAmt1:100.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Korean Air Cargo\n260, Haneul-gil\nGangseo-gu, Seoul 07505\nKOREA',consignee:'LAX Logistics Inc.\n5900 Century Blvd\nLos Angeles, CA 90045\nUSA',notify:'SAME AS CONSIGNEE'},{sendDt:'2026-05-29 18:00',mawbNo:'180-12345678',carrier:'KE',flightName:'KE123',pol:'ICN',pod:'LAX',pkgQty:10,grossWt:248.5,chgWt:298.0,rateClass:'Q',chargeRate:5.3,ocCode1:'PP',ocAmt1:95.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Korean Air Cargo\n260, Haneul-gil\nGangseo-gu, Seoul 07505\nKOREA',consignee:'LAX Logistics Inc.\n5900 Century Blvd\nLos Angeles, CA 90045\nUSA',notify:'LAX Logistics Inc.'}],2:[{sendDt:'2026-05-31 10:00',mawbNo:'180-87654321',carrier:'OZ',flightName:'OZ201',pol:'ICN',pod:'NRT',pkgQty:5,grossWt:80.5,chgWt:95.0,rateClass:'N',chargeRate:3.2,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Asiana Cargo Center\n496, Gonghang-daero\nGangseo-gu, Seoul\nKOREA',consignee:'NRT Express Co.\n1-1 Furugome\nNarita-shi, Chiba\nJAPAN',notify:'SAME AS CONSIGNEE'}]};
+    function mawbHistory(){var sel=getCheckedMawb();if(!sel.length){toast('MAWB를 선택해 주세요.','error');return;}if(sel.length>1){toast('단건을 선택해 주세요.','error');return;}var mawb=sel[0];var histList=mawbHistoryData[mawb.id];if(!histList||!histList.length){toast('History 데이터가 없습니다.','error');return;}var selEl=document.getElementById('mpop-date-sel');selEl.innerHTML='';histList.forEach(function(h,i){var opt=document.createElement('option');opt.value=String(i);opt.textContent=h.sendDt+(i===0?'  (최신)':'');selEl.appendChild(opt);});document.getElementById('mpop-overlay').classList.add('open');document.addEventListener('keydown',mpopEscHandler);document.getElementById('mpop-overlay').onclick=function(e){if(e.target===this)closeMawbHistory();};loadMawbHistory('0');}
+    function closeMawbHistory(){document.getElementById('mpop-overlay').classList.remove('open');document.removeEventListener('keydown',mpopEscHandler);}
+    function mpopEscHandler(e){if(e.key==='Escape')closeMawbHistory();}
+    function loadMawbHistory(idx){var sel=getCheckedMawb();if(!sel.length)return;var histList=mawbHistoryData[sel[0].id];if(!histList)return;var h=histList[Number(idx)];if(!h)return;document.getElementById('mpop-mawb-tbody').innerHTML='<tr><td>'+h.mawbNo+'</td><td>'+h.carrier+'</td><td>'+h.flightName+'</td><td>'+h.pol+'</td><td>'+h.pod+'</td><td class="right">'+h.pkgQty+'</td><td class="right">'+(typeof h.grossWt==='number'?h.grossWt.toFixed(1):h.grossWt)+'</td><td class="right">'+(typeof h.chgWt==='number'?h.chgWt.toFixed(1):h.chgWt)+'</td></tr>';document.getElementById('mpop-rate-tbody').innerHTML='<tr><td>'+h.rateClass+'</td><td class="right">'+h.chargeRate+'</td><td>'+h.ocCode1+'</td><td class="right">'+(h.ocAmt1!==''?h.ocAmt1:'-')+'</td><td>'+h.ocCode2+'</td><td class="right">'+(h.ocAmt2!==''?h.ocAmt2:'-')+'</td><td>'+h.ocCode3+'</td><td class="right">'+(h.ocAmt3!==''?h.ocAmt3:'-')+'</td></tr>';document.getElementById('mpop-shipper').textContent=h.shipper;document.getElementById('mpop-consignee').textContent=h.consignee;document.getElementById('mpop-notify').textContent=h.notify;}
+
+    document.addEventListener('DOMContentLoaded',function(){
+      document.getElementById('mawb-tbody').addEventListener('click',function(e){var tr=e.target.closest('tr[data-id]');if(!tr)return;var id=Number(tr.dataset.id);if(e.target.classList.contains('chk')){e.stopPropagation();var item=filteredMawb.find(function(d){return d.id===id;});if(item)item.checked=e.target.checked;return;}if(e.target.closest('.ec'))return;selectMawb(id);});
+      document.getElementById('hawb-tbody').addEventListener('click',function(e){var tr=e.target.closest('tr[data-id]');if(!tr)return;var id=Number(tr.dataset.id);if(e.target.classList.contains('chk')){e.stopPropagation();for(var rows of Object.values(hawbData)){var item=rows.find(function(d){return d.id===id;});if(item){item.checked=e.target.checked;break;}}return;}if(e.target.closest('.ec'))return;selectHawb(id);});
+      document.getElementById('mawb-tbody').addEventListener('change',function(e){var tr=e.target.closest('tr[data-id]');if(!tr)return;var id=Number(tr.dataset.id);var field=e.target.dataset.field;if(field)updMawb(id,field,e.target.value);});
+      document.getElementById('hawb-tbody').addEventListener('change',function(e){var tr=e.target.closest('tr[data-id]');if(!tr)return;var id=Number(tr.dataset.id);var field=e.target.dataset.field;if(field)updHawb(id,field,e.target.value);});
+      document.getElementById('carrier-tbody').addEventListener('click',function(e){if(e.target.classList.contains('chk')){var tr=e.target.closest('tr[data-id]');if(!tr)return;var id=Number(tr.dataset.id);var item=filteredCarrier.find(function(d){return d.id===id;});if(item)item.checked=e.target.checked;}});
+      document.getElementById('cpop-tbody').addEventListener('change',function(e){if(!e.target.classList.contains('cpop-row-chk'))return;var tr=e.target.closest('tr[data-id]');if(!tr)return;var id=Number(tr.dataset.id);var item=cpopFiltered.find(function(d){return d.id===id;});if(item)item.cpopChecked=e.target.checked;});
+      document.getElementById('cpop-overlay').addEventListener('click',function(e){if(e.target===this)closeCarrierPopup();});
+      rebuildMawbThead();rebuildHawbThead();rebuildCarrierThead();rebuildCpopThead();
+      doSearch();doCarrierSearch();
+    });
+    </script>
+    <!-- ↑↑↑ 원본 HTML 끝 -->
+
+  </div><!-- /ds-screen -->
+
+  <!-- ══════════════════════════════════
+       개발정의서 패널
+  ══════════════════════════════════ -->
+  <div id="ds-panel">
+    <div class="ds-panel-hd">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h2>Air Manifest Send (KR) 개발정의서</h2>
+          <p>화면ID: AIR-MANIFEST-SEND-KR &nbsp;|&nbsp; 기준: 프로토타입 v1.0</p>
+        </div>
+        <button id="ds-json-toggle" onclick="dsToggleJson()" style="background:#1a3a6e;border:1px solid #2d5498;color:#8eaee8;font-size:10px;font-weight:700;padding:5px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif;letter-spacing:0.3px;">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor"><rect x="1" y="1" width="4" height="4" rx="1"/><rect x="9" y="1" width="4" height="4" rx="1"/><rect x="1" y="9" width="4" height="4" rx="1"/><rect x="9" y="9" width="4" height="4" rx="1"/></svg>
+          JSON 뷰
+        </button>
+      </div>
+    </div>
+
+    <div class="ds-tabs" id="ds-tabs">
+      <div class="ds-tab active" onclick="dsTab(this,'overview')">개요</div>
+      <div class="ds-tab" onclick="dsTab(this,'search')">조회조건</div>
+      <div class="ds-tab" onclick="dsTab(this,'fields')">필드정의</div>
+      <div class="ds-tab" onclick="dsTab(this,'buttons')">버튼</div>
+      <div class="ds-tab" onclick="dsTab(this,'actions')">기능/버튼</div>
+      <div class="ds-tab" onclick="dsTab(this,'api')">API</div>
+      <div class="ds-tab" onclick="dsTab(this,'popup')">팝업</div>
+      <div class="ds-tab" onclick="dsTab(this,'rules')">규칙/제약</div>
+    </div>
+
+    <div class="ds-body">
+
+      <!-- ══ TAB: 조회조건 ══ -->
+      <div class="ds-tc" id="ds-tc-search">
+
+        <!-- JSON VIEW -->
+        <div class="ds-json-view" id="ds-json-search" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-search-content"></pre>
+        </div>
+
+        <!-- PROSE VIEW -->
+        <div class="ds-prose-view" id="ds-prose-search">
+        <div class="ds-sec">
+          <div class="ds-sec-title">MAWB Status</div>
+          <div class="ds-card">
+            <div class="ds-card-title">타입 <span class="ds-badge ds-b-gray">Select</span></div>
+            <p>MAWB의 EDI 전송 단계를 필터링합니다. 기본값은 <code>All</code>이며 선택 가능한 값은 <code>All</code> / <code>New</code> / <code>EPNINF Sent</code> / <code>FWB/FHL Sent</code>입니다.</p>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">MAWB No.</div>
+          <div class="ds-card">
+            <div class="ds-card-title">타입 <span class="ds-badge ds-b-gray">Multi-input</span> <span class="ds-badge ds-b-amber">상호배타</span></div>
+            <p>MAWB 번호를 직접 입력하여 검색합니다. <code>+</code> 버튼으로 복수 입력이 가능합니다.</p>
+            <p style="margin-top:5px">이 필드에 값이 있으면 <strong>HAWB No.</strong>와 <strong>ETD</strong> 필드가 자동 비활성화됩니다.</p>
+          </div>
+          <table class="ds-tbl" style="margin-top:6px">
+            <thead><tr><th>속성</th><th>값</th></tr></thead>
+            <tbody>
+              <tr><td>필드 ID</td><td><code>s-mawb-no</code></td></tr>
+              <tr><td>이벤트</td><td><code>oninput → onMawbInput()</code></td></tr>
+              <tr><td>배타 처리</td><td>HAWB No(<code>sf-hawb</code>), ETD(<code>sf-etd</code>) disabled 토글</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">HAWB No.</div>
+          <div class="ds-card">
+            <div class="ds-card-title">타입 <span class="ds-badge ds-b-gray">Multi-input</span> <span class="ds-badge ds-b-amber">상호배타</span></div>
+            <p>HAWB 번호로 검색합니다. 입력 시 연관된 MAWB를 역방향 조회합니다.</p>
+            <p style="margin-top:5px">이 필드에 값이 있으면 <strong>MAWB No.</strong>와 <strong>ETD</strong> 필드가 자동 비활성화됩니다.</p>
+          </div>
+          <table class="ds-tbl" style="margin-top:6px">
+            <thead><tr><th>속성</th><th>값</th></tr></thead>
+            <tbody>
+              <tr><td>필드 ID</td><td><code>s-hawb-no</code></td></tr>
+              <tr><td>이벤트</td><td><code>oninput → onHawbInput()</code></td></tr>
+              <tr><td>배타 처리</td><td>MAWB No(<code>mawb-input-wrap</code> 부모 .sf), ETD(<code>sf-etd</code>) disabled 토글</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">Carrier</div>
+          <div class="ds-card">
+            <div class="ds-card-title">타입 <span class="ds-badge ds-b-gray">Lookup Input</span></div>
+            <p>Carrier 코드 또는 명칭을 직접 입력하거나, <code>🔍</code> 아이콘 클릭 시 Carrier 검색 팝업(<code>cpop-overlay</code>)이 열립니다. 팝업에서 선택 시 이 필드에 값이 자동 반영됩니다.</p>
+          </div>
+          <table class="ds-tbl" style="margin-top:6px">
+            <thead><tr><th>속성</th><th>값</th></tr></thead>
+            <tbody>
+              <tr><td>필드 ID</td><td><code>s-carrier</code></td></tr>
+              <tr><td>팝업 함수</td><td><code>openCarrierPopup()</code></td></tr>
+              <tr><td>검색 로직</td><td>carrier 코드 LIKE + carrierName LIKE (대소문자 무시)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">ETD (출발 예정일)</div>
+          <div class="ds-card">
+            <div class="ds-card-title">타입 <span class="ds-badge ds-b-gray">DateRange</span> <span class="ds-badge ds-b-amber">상호배타</span></div>
+            <p>항공편 출발 예정일 범위로 필터링합니다. 기본값은 조회 기준일 기준 ±2주. MAWB No. 또는 HAWB No. 입력 시 비활성화됩니다.</p>
+          </div>
+          <table class="ds-tbl" style="margin-top:6px">
+            <thead><tr><th>속성</th><th>값</th></tr></thead>
+            <tbody>
+              <tr><td>From 필드 ID</td><td><code>s-etd-from</code></td></tr>
+              <tr><td>To 필드 ID</td><td><code>s-etd-to</code></td></tr>
+              <tr><td>기본값</td><td>from: 오늘 -14일, to: 오늘 +14일</td></tr>
+              <tr><td>포맷</td><td>YYYY-MM-DD (input[type=date])</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">EDI Send Status</div>
+          <div class="ds-card">
+            <div class="ds-card-title">타입 <span class="ds-badge ds-b-gray">Select</span></div>
+            <p>EDI 전문 전송 처리 상태로 필터링합니다. 옵션: <code>All</code> / <code>N/A</code> / <code>Processing</code> / <code>Complete</code> / <code>Error</code></p>
+          </div>
+          <table class="ds-tbl" style="margin-top:6px">
+            <thead><tr><th>값</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr><td><code>N/A</code></td><td>전송 이력 없음 (초기 상태)</td></tr>
+              <tr><td><code>Processing</code></td><td>KTNET 전송 요청 후 응답 대기 중</td></tr>
+              <tr><td><code>Complete</code></td><td>전송 성공 확인</td></tr>
+              <tr><td><code>Error</code></td><td>전송 실패 — Need Resend 자동 Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">Need Resend</div>
+          <div class="ds-card">
+            <div class="ds-card-title">타입 <span class="ds-badge ds-b-gray">Select</span></div>
+            <p>재전송 필요 여부로 필터링합니다. EDI Send Status가 <code>Error</code>일 때 자동으로 <code>Yes</code>가 설정됩니다. DB 저장값은 <code>Need Resend</code> / <code>Normal</code>이며 화면에는 <code>Yes</code> / <code>No</code>로 표시됩니다.</p>
+          </div>
+          <table class="ds-tbl" style="margin-top:6px">
+            <thead><tr><th>화면값</th><th>DB값</th></tr></thead>
+            <tbody>
+              <tr><td>Yes</td><td><code>Need Resend</code></td></tr>
+              <tr><td>No</td><td><code>Normal</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">초기화 / 재조회 버튼</div>
+          <div class="ds-card">
+            <div class="ds-card-title">↺ 초기화</div>
+            <p>모든 검색 조건을 기본값으로 리셋하고 즉시 재조회합니다. MAWB/HAWB No. 입력으로 비활성화된 필드도 함께 복원됩니다.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">∧ 접기/펼치기</div>
+            <p>검색 필터 영역을 접거나 펼칩니다. 접힌 상태에서도 현재 조건은 유지되며 Search 버튼 조회는 정상 동작합니다.</p>
+          </div>
+        </div>
+        </div><!-- /ds-prose-view -->
+      </div>
+
+      <!-- ══ TAB: 버튼 ══ -->
+      <div class="ds-tc" id="ds-tc-buttons">
+
+        <!-- JSON VIEW -->
+        <div class="ds-json-view" id="ds-json-buttons" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-buttons-content"></pre>
+        </div>
+
+        <!-- PROSE VIEW -->
+        <div class="ds-prose-view" id="ds-prose-buttons">
+        <div class="ds-sec">
+          <div class="ds-sec-title">MAWB 그리드 버튼 규칙</div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">EPNINF Send <span class="ds-badge ds-b-blue">EDI</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">활성 조건</td><td>체크된 MAWB 1건 이상 &amp; Status = <code>New</code> OR <code>Need Resend = Yes</code></td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">비활성 조건</td><td>선택 없음 / 이미 <code>Processing</code> 상태 포함</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">클릭 동작</td><td>선택 건 <code>ediStatus → Processing</code>, <code>status → EPNINF Sent</code> 즉시 변경</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">비동기 결과</td><td>KTNET 응답 후 <code>Complete</code> 또는 <code>Error</code>로 업데이트</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">다건 처리</td><td>체크된 모든 건 일괄 전송 지원</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>epninfSend()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">FWB/FHL Send <span class="ds-badge ds-b-blue">EDI</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">활성 조건</td><td>체크된 MAWB 1건 이상 &amp; <code>EPNINF Sent</code> 상태 이상</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">비활성 조건</td><td>EPNINF 미전송 건 포함 / <code>Processing</code> 상태 건 포함</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">클릭 동작</td><td>FWB(Master) + FHL(House) 전문 동시 전송. <code>status → FWB/FHL Sent</code></td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">선택 제한</td><td>다건 일괄 처리 가능</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>fwbFhlSend()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">MAWB History <span class="ds-badge ds-b-gray">팝업</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">활성 조건</td><td>MAWB 1건만 체크 선택</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">비활성 조건</td><td>선택 없음 / 2건 이상 선택 → 오류 토스트</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">클릭 동작</td><td><code>mpop-overlay</code> 팝업 오픈, 전송 이력 드롭다운 구성</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>mawbHistory()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">⬇ 엑셀 다운로드 <span class="ds-badge ds-b-gray">CSV</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">동작</td><td>현재 조회된 전체 MAWB 데이터를 CSV로 내보내기 (선택과 무관)</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">파일명</td><td><code>MAWB_Info_YYYY-MM-DD.csv</code></td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>downloadExcel('mawb')</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">⚙ 컬럼 설정 <span class="ds-badge ds-b-gray">모달</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">동작</td><td><code>modal-overlay</code> 오픈. pmGrid = <code>'mawb'</code> 세팅</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">기능</td><td>체크박스 표시/숨김 + 드래그로 순서 변경 + 초기화</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>openPersonalize('mawb')</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">HAWB 그리드 버튼 규칙</div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">HAWB History <span class="ds-badge ds-b-gray">팝업</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">활성 조건</td><td>HAWB 1건만 체크 선택</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">비활성 조건</td><td>선택 없음 / 2건 이상 → 오류 토스트</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">클릭 동작</td><td><code>hpop-overlay</code> 오픈. 이력 드롭다운 구성, 최신 이력 자동 표시</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>hawbHistory()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">Amend Manifest <span class="ds-badge ds-b-amber">수정전송</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">활성 조건</td><td>HAWB 1건 체크 &amp; <code>status = FWB/FHL Sent</code></td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">비활성 조건</td><td>미선택 / 2건 이상 / FWB/FHL 미전송 상태</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">클릭 동작</td><td>Amend 화면으로 이동 또는 수정 팝업 오픈 (상세 UX 협의 필요)</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>amendManifest()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">Address Amend <span class="ds-badge ds-b-amber">수정전송</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">활성 조건</td><td>HAWB 1건 체크</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">비활성 조건</td><td>미선택 / 2건 이상</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">수정 범위</td><td>Shipper / Consignee / Notify 주소 필드만 수정 전송. 화물 정보 변경 불가</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>addressAmend()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-card-title">⬇ 엑셀 다운로드 <span class="ds-badge ds-b-gray">CSV</span></div>
+            <table class="ds-tbl">
+              <tbody>
+                <tr><td style="width:80px;color:#7888a8;font-size:10px">선행 조건</td><td>MAWB 선택 필수. 미선택 시 오류 토스트</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">동작</td><td>선택된 MAWB에 속한 HAWB 전체 CSV 내보내기</td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">파일명</td><td><code>HAWB_Info_YYYY-MM-DD.csv</code></td></tr>
+                <tr><td style="color:#7888a8;font-size:10px">함수</td><td><code>downloadExcel('hawb')</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">공통 버튼 상태 규칙</div>
+          <ul class="ds-rules">
+            <li>체크박스 미선택 상태에서 전송/이력 버튼 클릭 시 → <strong>오류 토스트</strong> 표시 후 동작 중단</li>
+            <li>2건 이상 선택 시 단건 전용 버튼(History, Amend, Address Amend) → <strong>오류 토스트</strong> 표시</li>
+            <li><code>Processing</code> 상태 건 포함 일괄 전송 → 오류 토스트, 전송 중단</li>
+            <li>전송 버튼 클릭 후 응답 대기 중 중복 클릭 방지 로직 필요 (UI 비활성화 권장)</li>
+            <li>그리드 헤더 전체 선택 체크박스: 현재 페이지 표시 데이터 전체 선택/해제</li>
+          </ul>
+        </div>
+        </div><!-- /ds-prose-view -->
+      </div>
+
+      <!-- ══ TAB: 개요 ══ -->
+      <div class="ds-tc active" id="ds-tc-overview">
+        <div class="ds-json-view" id="ds-json-overview" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-overview-content"></pre>
+        </div>
+        <div class="ds-prose-view" id="ds-prose-overview">
+        <div class="ds-sec">
+          <div class="ds-sec-title">화면 목적</div>
+          <div class="ds-card">
+            <p>한국 세관 항공 화물 EDI 전문(EPNINF / FWB / FHL)을 전송하는 화면. MAWB · HAWB 단위로 전송 상태를 관리하며 KTNET / uLogisHub 게이트웨이를 통해 실전문을 발송합니다.</p>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">화면 구성 (4-Layer)</div>
+          <div class="ds-step">
+            <div class="ds-step-num">1</div>
+            <div class="ds-step-body"><strong>검색 필터 영역</strong><p>MAWB No, HAWB No, Carrier, ETD 범위, EDI Send Status, Need Resend 조건으로 조회. ∧ 버튼으로 접기/펼치기.</p></div>
+          </div>
+          <div class="ds-step">
+            <div class="ds-step-num">2</div>
+            <div class="ds-step-body"><strong>MAWB Info. 그리드</strong><p>조회된 MAWB 목록. 행 선택 → HAWB 그리드 자동 연계 조회.</p></div>
+          </div>
+          <div class="ds-step">
+            <div class="ds-step-num">3</div>
+            <div class="ds-step-body"><strong>HAWB Info. 그리드</strong><p>선택된 MAWB에 속한 HAWB 목록. 행 선택 → 수출신고 정보 연계.</p></div>
+          </div>
+          <div class="ds-step">
+            <div class="ds-step-num">4</div>
+            <div class="ds-step-body"><strong>Export Declaration Info. (Read Only)</strong><p>HBL Detail &gt; Others 탭 연동. 선택 HAWB의 수출신고 정보 조회 전용.</p></div>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">MAWB Status 상태 흐름</div>
+          <div class="ds-card">
+            <div class="ds-flow">
+              <span class="ds-badge ds-b-gray">New</span>
+              <span class="ds-flow-arrow">→</span>
+              <span class="ds-badge ds-b-blue">EPNINF Sent</span>
+              <span class="ds-flow-arrow">→</span>
+              <span class="ds-badge ds-b-blue" style="background:#c5dff8;color:#083b80">FWB/FHL Sent</span>
+            </div>
+            <p style="margin-top:6px;font-size:11px;color:#3a4e70">EPNINF 전송 후에만 FWB/FHL 전송 가능. 역순 불가.</p>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">EDI Send Status 상태 흐름</div>
+          <div class="ds-card">
+            <div class="ds-flow">
+              <span class="ds-badge ds-b-gray">N/A</span>
+              <span class="ds-flow-arrow">→</span>
+              <span class="ds-badge ds-b-amber">Processing</span>
+              <span class="ds-flow-arrow">→</span>
+              <span class="ds-badge ds-b-green">Complete</span>
+            </div>
+            <div class="ds-flow" style="margin-top:4px">
+              <span class="ds-badge ds-b-amber">Processing</span>
+              <span class="ds-flow-arrow">→</span>
+              <span class="ds-badge ds-b-red">Error</span>
+              <span style="font-size:10px;color:#666;margin-left:4px">→ Need Resend = Yes 자동 설정</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">외부 시스템 연계</div>
+          <div class="ds-card">
+            <div class="ds-card-title">KTNET / uLogisHub <span class="ds-badge ds-b-blue">필수</span></div>
+            <p>EDI 전문 실제 발송 게이트웨이. 전송 버튼 클릭 시 백엔드에서 연계 처리. 화면 링크: <code>https://www.ulogishub.com/</code></p>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">탭 구조</div>
+          <div class="ds-card">
+            <div class="ds-card-title">Air Manifest Send (KR) 탭</div>
+            <p>메인 업무 화면. MAWB/HAWB/EDI 3-Layer 그리드.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">Carrier 탭</div>
+            <p>항공사 마스터 조회 화면. Carrier Type(AIR/SHIP/FWDR/ROAD) 토글 필터 + 태그 입력 방식 검색.</p>
+          </div>
+        </div>
+        </div><!-- /ds-prose-overview -->
+      </div>
+
+      <!-- ══ TAB: 필드정의 ══ -->
+      <div class="ds-tc" id="ds-tc-fields">
+        <div class="ds-json-view" id="ds-json-fields" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-fields-content"></pre>
+        </div>
+        <div class="ds-prose-view" id="ds-prose-fields">
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">검색 필터 필드</div>
+          <table class="ds-tbl">
+            <thead><tr><th>필드명</th><th>타입</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>MAWB Status</td><td>Select</td><td>All / New / EPNINF Sent / FWB/FHL Sent</td></tr>
+              <tr><td>MAWB No.</td><td>Multi-input</td><td>+ 버튼으로 복수 입력. 입력 시 HAWB No·ETD 비활성</td></tr>
+              <tr><td>HAWB No.</td><td>Multi-input</td><td>입력 시 MAWB No·ETD 비활성 (상호 배타)</td></tr>
+              <tr><td>Carrier</td><td>Lookup</td><td>🔍 버튼 → Carrier 검색 팝업 호출</td></tr>
+              <tr><td>ETD</td><td>DateRange</td><td>시작일 ~ 종료일</td></tr>
+              <tr><td>EDI Send Status</td><td>Select</td><td>All / N/A / Processing / Complete / Error</td></tr>
+              <tr><td>Need Resend</td><td>Select</td><td>All / Yes(Need Resend) / No(Normal)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">MAWB Info. 그리드 컬럼</div>
+          <table class="ds-tbl">
+            <thead><tr><th>컬럼명</th><th>기본정렬</th><th>편집</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>Status</td><td>—</td><td>—</td><td>배지 표시</td></tr>
+              <tr><td>EDI Send Status</td><td>—</td><td>—</td><td>배지 표시</td></tr>
+              <tr><td>Need Resend</td><td>—</td><td>—</td><td>배지 표시</td></tr>
+              <tr><td>MAWB No.</td><td>—</td><td>—</td><td>링크 클릭 → HAWB 연계</td></tr>
+              <tr><td>Carrier</td><td>—</td><td>—</td><td></td></tr>
+              <tr><td>Flight Name</td><td>—</td><td>—</td><td></td></tr>
+              <tr><td>POL / POD</td><td>—</td><td>—</td><td>공항 코드</td></tr>
+              <tr><td>ETD</td><td>↑ 오름차순</td><td>—</td><td>기본 정렬 컬럼</td></tr>
+              <tr><td>Pkg Qty.</td><td>—</td><td>—</td><td>우측정렬</td></tr>
+              <tr><td>Gross Wt / Chg Wt</td><td>—</td><td>—</td><td>KG, 소수점 1자리</td></tr>
+              <tr><td>Rate Class</td><td>—</td><td>Select</td><td>Q/N/M/C/R/U/B/X</td></tr>
+              <tr><td>Charge Rate</td><td>—</td><td>Text</td><td>우측정렬</td></tr>
+              <tr><td>OC Code1~3</td><td>—</td><td>Select</td><td>PP/CC/CA/CX/PX. 동일코드 중복 불가</td></tr>
+              <tr><td>OC Amt1~3</td><td>—</td><td>Text</td><td>우측정렬</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">HAWB Info. 그리드 컬럼</div>
+          <table class="ds-tbl">
+            <thead><tr><th>컬럼명</th><th>기본정렬</th><th>편집</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>Business Type</td><td>—</td><td>Select</td><td>E(Export) / R(Transshipment)</td></tr>
+              <tr><td>HAWB No.</td><td>↑ 오름차순</td><td>—</td><td>기본 정렬 컬럼</td></tr>
+              <tr><td>Status</td><td>—</td><td>—</td><td>배지</td></tr>
+              <tr><td>EDI Send Status</td><td>—</td><td>—</td><td>배지</td></tr>
+              <tr><td>Need Resend</td><td>—</td><td>—</td><td>배지</td></tr>
+              <tr><td>Pkg Qty. / Unit</td><td>—</td><td>—</td><td></td></tr>
+              <tr><td>Gross Wt / GW Unit</td><td>—</td><td>—</td><td></td></tr>
+              <tr><td>Cargo Description</td><td>—</td><td>Text</td><td>최대 20자</td></tr>
+              <tr><td>Send Date</td><td>—</td><td>—</td><td>최종 EDI 전송 일시</td></tr>
+              <tr><td>Send Person</td><td>—</td><td>—</td><td>전송 담당자</td></tr>
+              <tr><td>Shipper / Consignee / Notify</td><td>—</td><td>—</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">Export Declaration Info. 필드 (Read Only)</div>
+          <div class="ds-note"><p>HBL Detail &gt; Others 탭 입력 데이터를 Read Only로 표시. 이 화면에서 직접 편집 불가.</p></div>
+          <table class="ds-tbl">
+            <thead><tr><th>필드명</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>Export Declaration No.</td><td class="ds-ro">수출신고번호</td></tr>
+              <tr><td>Pkg Qty. / Pkg Unit</td><td class="ds-ro"></td></tr>
+              <tr><td>Gross Weight / GW Unit</td><td class="ds-ro"></td></tr>
+              <tr><td>Same Pkg Code / Qty / Unit</td><td class="ds-ro">동일포장 정보</td></tr>
+              <tr><td>Split Shipment</td><td class="ds-ro">분할선적 여부 (Y/N)</td></tr>
+              <tr><td>Split Order By</td><td class="ds-ro">분할 순번</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">Carrier 탭 검색 필드</div>
+          <table class="ds-tbl">
+            <thead><tr><th>필드명</th><th>타입</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>Carrier Type</td><td>Toggle (다중)</td><td>AIR / SHIP / FWDR / ROAD. 복수 선택 가능</td></tr>
+              <tr><td>Carrier</td><td>Tag Input</td><td>Enter로 칩 추가. OR 조건 검색</td></tr>
+              <tr><td>Carrier ID</td><td>Tag Input</td><td>Enter로 칩 추가</td></tr>
+              <tr><td>SCAC</td><td>Tag Input</td><td>Enter로 칩 추가</td></tr>
+            </tbody>
+          </table>
+        </div>
+        </div><!-- /ds-prose-fields -->
+      </div>
+
+      <!-- ══ TAB: 기능/버튼 ══ -->
+      <div class="ds-tc" id="ds-tc-actions">
+        <div class="ds-json-view" id="ds-json-actions" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-actions-content"></pre>
+        </div>
+        <div class="ds-prose-view" id="ds-prose-actions">
+          <div class="ds-sec-title">MAWB 그리드 버튼</div>
+          <div class="ds-card">
+            <div class="ds-card-title">MAWB History <span class="ds-badge ds-b-gray">팝업</span></div>
+            <p>선택 MAWB(단건)의 과거 EDI 전송 이력 조회. 전송 시점별 스냅샷을 Read Only로 확인.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">EPNINF Send <span class="ds-badge ds-b-blue">EDI 전송</span></div>
+            <p>선택 MAWB에 EPNINF 전문 전송. <br>조건: Status = <code>New</code> 또는 <code>Need Resend = Yes</code><br>결과: Status → <code>EPNINF Sent</code>, EDI Send Status → <code>Processing</code> → <code>Complete/Error</code></p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">FWB/FHL Send <span class="ds-badge ds-b-blue">EDI 전송</span></div>
+            <p>FWB(Master AWB) + FHL(House AWB) 동시 전송.<br>조건: Status = <code>EPNINF Sent</code> 이상 (미전송 시 비활성)<br>다건 선택 일괄 전송 지원.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">⬇ 엑셀 다운로드 <span class="ds-badge ds-b-gray">CSV</span></div>
+            <p>현재 그리드 조회 데이터를 CSV 파일로 내보내기.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">⚙ 컬럼 설정 <span class="ds-badge ds-b-gray">다이얼로그</span></div>
+            <p>표시 컬럼 체크박스 선택 + 드래그로 순서 변경. 초기화 버튼으로 기본값 복원.</p>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">HAWB 그리드 버튼</div>
+          <div class="ds-card">
+            <div class="ds-card-title">HAWB History <span class="ds-badge ds-b-gray">팝업</span></div>
+            <p>선택 HAWB(단건)의 과거 전송 이력. MAWB + HAWB + 수출신고 정보 포함.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">Amend Manifest <span class="ds-badge ds-b-amber">수정 전송</span></div>
+            <p>기 전송된 Manifest 수정 후 재전송. FWB/FHL 전송 완료 이후에만 활성화. 단건 선택.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">Address Amend <span class="ds-badge ds-b-amber">수정 전송</span></div>
+            <p>Shipper/Consignee/Notify 주소 정보만 수정 전송하는 경량 수정 기능. 단건 선택.</p>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">검색 영역 공통 버튼</div>
+          <div class="ds-card">
+            <div class="ds-card-title">∧ (접기/펼치기)</div>
+            <p>검색 필터 영역 토글. 접힌 상태에서도 조회 기능 유지.</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">↺ (초기화)</div>
+            <p>검색 조건 전체 초기화 후 기본 조건으로 재조회.</p>
+          </div>
+        </div>
+        </div><!-- /ds-prose-actions -->
+      </div>
+
+      <!-- ══ TAB: API ══ -->
+      <div class="ds-tc" id="ds-tc-api">
+        <div class="ds-json-view" id="ds-json-api" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-api-content"></pre>
+        </div>
+        <div class="ds-prose-view" id="ds-prose-api">
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">조회 API</div>
+
+          <div class="ds-api">
+            <span class="ds-method get">GET</span><span class="ds-api-url">/api/air-manifest/mawb/list</span>
+            <div class="ds-api-desc">MAWB 목록 조회. 검색 필터 파라미터 전달.</div>
+          </div>
+          <table class="ds-tbl" style="margin-bottom:10px">
+            <thead><tr><th>파라미터</th><th>타입</th><th>필수</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>mawbStatus</td><td>String</td><td>—</td><td></td></tr>
+              <tr><td>mawbNo</td><td>String[]</td><td>—</td><td></td></tr>
+              <tr><td>hawbNo</td><td>String[]</td><td>—</td><td></td></tr>
+              <tr><td>carrier</td><td>String</td><td>—</td><td></td></tr>
+              <tr><td>etdFrom / etdTo</td><td>Date</td><td>—</td><td>YYYY-MM-DD</td></tr>
+              <tr><td>ediSendStatus</td><td>String</td><td>—</td><td></td></tr>
+              <tr><td>needResend</td><td>Boolean</td><td>—</td><td></td></tr>
+            </tbody>
+          </table>
+
+          <div class="ds-api">
+            <span class="ds-method get">GET</span><span class="ds-api-url">/api/air-manifest/hawb/list</span>
+            <div class="ds-api-desc">MAWB 선택 시 연계 HAWB 목록 조회.</div>
+          </div>
+          <table class="ds-tbl" style="margin-bottom:10px">
+            <thead><tr><th>파라미터</th><th>타입</th><th>필수</th></tr></thead>
+            <tbody><tr><td>mawbId</td><td>String</td><td><span class="ds-req">✓</span></td></tr></tbody>
+          </table>
+
+          <div class="ds-api">
+            <span class="ds-method get">GET</span><span class="ds-api-url">/api/air-manifest/export-declaration</span>
+            <div class="ds-api-desc">HAWB 선택 시 수출신고 정보 조회 (HBL Others 연동).</div>
+          </div>
+          <table class="ds-tbl" style="margin-bottom:10px">
+            <thead><tr><th>파라미터</th><th>타입</th><th>필수</th></tr></thead>
+            <tbody><tr><td>hawbId</td><td>String</td><td><span class="ds-req">✓</span></td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">EDI 전송 API</div>
+
+          <div class="ds-api">
+            <span class="ds-method post">POST</span><span class="ds-api-url">/api/air-manifest/epninf/send</span>
+            <div class="ds-api-desc">EPNINF 전문 전송. mawbIds 배열 전달.</div>
+          </div>
+          <table class="ds-tbl" style="margin-bottom:10px">
+            <thead><tr><th>Body</th><th>타입</th><th>필수</th></tr></thead>
+            <tbody><tr><td>mawbIds</td><td>String[]</td><td><span class="ds-req">✓</span></td></tr></tbody>
+          </table>
+
+          <div class="ds-api">
+            <span class="ds-method post">POST</span><span class="ds-api-url">/api/air-manifest/fwb-fhl/send</span>
+            <div class="ds-api-desc">FWB + FHL 전문 동시 전송. hawbIds 배열 전달.</div>
+          </div>
+          <table class="ds-tbl" style="margin-bottom:10px">
+            <thead><tr><th>Body</th><th>타입</th><th>필수</th></tr></thead>
+            <tbody><tr><td>hawbIds</td><td>String[]</td><td><span class="ds-req">✓</span></td></tr></tbody>
+          </table>
+
+          <div class="ds-api">
+            <span class="ds-method post">POST</span><span class="ds-api-url">/api/air-manifest/amend/send</span>
+            <div class="ds-api-desc">Amend Manifest 수정 전문 전송.</div>
+          </div>
+          <div class="ds-api">
+            <span class="ds-method post">POST</span><span class="ds-api-url">/api/air-manifest/address-amend/send</span>
+            <div class="ds-api-desc">Address Amend 주소 수정 전문 전송.</div>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">이력 조회 API</div>
+          <div class="ds-api">
+            <span class="ds-method get">GET</span><span class="ds-api-url">/api/air-manifest/mawb/history/{mawbId}</span>
+            <div class="ds-api-desc">MAWB 전송 이력 목록. 시점별 스냅샷 포함.</div>
+          </div>
+          <div class="ds-api">
+            <span class="ds-method get">GET</span><span class="ds-api-url">/api/air-manifest/hawb/history/{hawbId}</span>
+            <div class="ds-api-desc">HAWB 전송 이력 목록. 시점별 스냅샷 포함.</div>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">마스터 데이터 API</div>
+          <div class="ds-api">
+            <span class="ds-method get">GET</span><span class="ds-api-url">/api/master/carrier/search</span>
+            <div class="ds-api-desc">Carrier 검색 팝업용. Type/명/ID 조건 검색.</div>
+          </div>
+        </div>
+        </div><!-- /ds-prose-api -->
+      </div>
+
+      <!-- ══ TAB: 팝업 ══ -->
+      <div class="ds-tc" id="ds-tc-popup">
+        <div class="ds-json-view" id="ds-json-popup" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-popup-content"></pre>
+        </div>
+        <div class="ds-prose-view" id="ds-prose-popup">
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">MAWB Manifest History</div>
+          <div class="ds-card">
+            <div class="ds-card-title">호출 조건</div>
+            <p>MAWB 그리드에서 단건 선택 후 <strong>MAWB History</strong> 버튼 클릭</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">표시 데이터</div>
+            <ul class="ds-rules">
+              <li>상단: 전송 시점(Manifest Send Date) 드롭다운 — 시점 선택 시 해당 데이터 표시</li>
+              <li>MAWB Info. (MAWB No., Carrier, Flight Name, POL, POD, Pkg Qty., GW, CW) Read Only</li>
+              <li>Rate Class / Charge Rate / OC Code·Amt (1~3)</li>
+              <li>Shipper / Consignee / Notify 주소 텍스트 박스</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">HAWB Manifest History</div>
+          <div class="ds-card">
+            <div class="ds-card-title">호출 조건</div>
+            <p>HAWB 그리드에서 단건 선택 후 <strong>HAWB History</strong> 버튼 클릭</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">표시 데이터</div>
+            <ul class="ds-rules">
+              <li>전송 시점 드롭다운</li>
+              <li>MAWB Info. Read Only (MAWB No., Carrier)</li>
+              <li>HAWB Info. Read Only (Business Type, HAWB No., Pkg Qty., Unit, GW, Volume, Cargo Desc., Loading Place)</li>
+              <li>Shipper / Consignee / Notify</li>
+              <li>Export Declaration Info. Read Only (수출신고 전체 필드)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">Carrier 검색 팝업</div>
+          <div class="ds-card">
+            <div class="ds-card-title">호출 조건</div>
+            <p>검색 필터 Carrier 필드의 🔍 버튼 클릭</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">기능</div>
+            <ul class="ds-rules">
+              <li>Carrier Type 토글 필터 (AIR 기본 선택)</li>
+              <li>Carrier명 / Carrier ID 태그 입력 검색</li>
+              <li>결과: Carrier Type Code, Carrier, Carrier Name, Carrier ID, SCAC</li>
+              <li>Confirm → 검색 필터 Carrier 필드에 값 반환</li>
+              <li>Cancel / ESC / 배경 클릭 → 값 반환 없이 닫힘</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">컬럼 설정 다이얼로그</div>
+          <div class="ds-card">
+            <div class="ds-card-title">호출 조건</div>
+            <p>MAWB / HAWB / Carrier 그리드 우측 ⚙ 버튼 클릭</p>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-title">기능</div>
+            <ul class="ds-rules">
+              <li>체크박스로 표시 컬럼 선택/해제</li>
+              <li>드래그 앤 드롭으로 컬럼 순서 변경</li>
+              <li>초기화: 기본 컬럼 순서로 리셋</li>
+              <li>적용: 변경사항 즉시 그리드에 반영</li>
+              <li>닫기 / X / 배경 클릭: 변경사항 적용 후 닫힘</li>
+            </ul>
+          </div>
+        </div>
+        </div><!-- /ds-prose-popup -->
+      </div>
+
+      <!-- ══ TAB: 규칙/제약 ══ -->
+      <div class="ds-tc" id="ds-tc-rules">
+        <div class="ds-json-view" id="ds-json-rules" style="display:none">
+          <pre class="ds-json-pre" id="ds-json-rules-content"></pre>
+        </div>
+        <div class="ds-prose-view" id="ds-prose-rules">
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">EDI 전송 규칙</div>
+          <ul class="ds-rules">
+            <li>EPNINF 전송: <code>Status = New</code> 또는 <code>Need Resend = Yes</code>인 경우에만 활성화</li>
+            <li>FWB/FHL 전송: <code>EPNINF Sent</code> 이후에만 가능. 미전송 시 버튼 비활성</li>
+            <li>전송은 다건 선택 일괄 처리 지원</li>
+            <li>전송 후 즉시 <code>Processing</code> → KTNET 응답에 따라 <code>Complete</code> 또는 <code>Error</code> 비동기 업데이트</li>
+            <li>Error 발생 시 <code>Need Resend = Yes</code> 자동 설정</li>
+            <li><code>Processing</code> 상태 건 포함 일괄 전송 시 오류 메시지 표시</li>
+          </ul>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">화면 연동 규칙</div>
+          <ul class="ds-rules">
+            <li>MAWB 행 선택 → HAWB 그리드 자동 연계 조회 (미선택 시 빈 상태)</li>
+            <li>HAWB 행 선택 → Export Declaration Info. 자동 연계 표시</li>
+            <li>Export Declaration 영역은 Read Only — 수정은 HBL Detail &gt; Others 탭에서만 가능</li>
+            <li>MAWB No. / HAWB No. 검색 필터는 상호 배타 (하나 입력 시 다른 필드 비활성)</li>
+            <li>MAWB No. / HAWB No. 입력 시 ETD 필터도 비활성</li>
+          </ul>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">Amend 규칙</div>
+          <ul class="ds-rules">
+            <li>Amend Manifest: FWB/FHL 전송 완료 후에만 활성화, 단건만 처리</li>
+            <li>Address Amend: Shipper/Consignee/Notify 주소 필드만 수정 전송. 화물 정보 변경 불가. 단건</li>
+            <li>Amend 전송도 EDI Send Status 흐름 동일 적용</li>
+          </ul>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">그리드 동작 규칙</div>
+          <ul class="ds-rules">
+            <li>MAWB 기본 정렬: ETD 오름차순 / HAWB 기본 정렬: HAWB No. 오름차순</li>
+            <li>OC Code1~3: 동일 코드 중복 입력 불가 (UI 단 Validation)</li>
+            <li>Cargo Description: 최대 20자 입력 제한</li>
+            <li>컬럼 설정은 사용자별 저장 (서버 또는 LocalStorage — 구현 방식 협의 필요)</li>
+          </ul>
+        </div>
+
+        <div class="ds-sec">
+          <div class="ds-sec-title">개발 협의 필요 사항</div>
+          <div class="ds-note">
+            <p>
+              ① 컬럼 설정 저장 방식: 서버 DB 저장 vs. LocalStorage<br>
+              ② EDI 비동기 응답: 폴링 주기 vs. WebSocket<br>
+              ③ 전송 오류 알림 방식: 토스트 vs. 팝업<br>
+              ④ 다건 전송 부분 성공 처리 방식 정의<br>
+              ⑤ Amend/Address Amend 화면 UX 상세 설계 필요
+            </p>
+          </div>
+        </div>
+        </div><!-- /ds-prose-rules -->
+      </div>
+
+    </div><!-- /ds-body -->
+  </div><!-- /ds-panel -->
+
+</div><!-- /ds-layout -->
+
+<style>
+/* JSON 뷰 스타일 */
+.ds-json-pre {
+  background: #0a1020;
+  color: #e2e8f8;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  padding: 14px 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 0;
+  border: 1px solid #1e3050;
+}
+.ds-json-pre .jk { color: #90bcf8; }
+.ds-json-pre .js { color: #a8e8a8; }
+.ds-json-pre .jn { color: #f8c870; }
+.ds-json-pre .jb { color: #f08070; }
+.ds-json-pre .jc { color: #6878a0; font-style: italic; }
+#ds-json-toggle.active {
+  background: #3b6de8;
+  border-color: #5585f0;
+  color: #fff;
+}
+</style>
+
+<script>
+var dsJsonMode = false;
+var dsCurrentTab = 'overview';
+
+var DS_JSON_DATA = {
+  overview: {
+    screenId: "AIR-MANIFEST-SEND-KR",
+    title: "Air Manifest Send (KR)",
+    description: "한국 세관 항공 화물 EDI 전문(EPNINF/FWB/FHL) 전송 화면. MAWB·HAWB 단위 전송 상태 관리.",
+    layout: [
+      { layer: 1, name: "검색 필터", description: "7개 조건 필드" },
+      { layer: 2, name: "MAWB Info. 그리드", description: "MAWB 목록. 행 선택 → HAWB 연계" },
+      { layer: 3, name: "HAWB Info. 그리드", description: "HAWB 목록. 행 선택 → 수출신고 연계" },
+      { layer: 4, name: "Export Declaration Info.", description: "Read Only. HBL Others 탭 연동" }
+    ],
+    mawbStatusFlow: ["New", "EPNINF Sent", "FWB/FHL Sent"],
+    ediStatusFlow: ["N/A", "Processing", "Complete"],
+    ediStatusError: { from: "Processing", to: "Error", sideEffect: "needResend = true" },
+    externalSystem: { name: "KTNET/uLogisHub", url: "https://www.ulogishub.com/", required: true }
+  },
+  search: {
+    screenId: "AIR-MANIFEST-SEND-KR",
+    section: "searchFilter",
+    fields: [
+      {
+        id: "s-mawb-status", label: "MAWB Status", type: "select",
+        options: ["", "New", "EPNINF Sent", "FWB/FHL Sent"],
+        defaultValue: "", required: false
+      },
+      {
+        id: "s-mawb-no", label: "MAWB No.", type: "multi-input",
+        placeholder: "MAWB No.", required: false,
+        mutualExclusive: ["s-hawb-no", "s-etd-from", "s-etd-to"],
+        onInput: "onMawbInput()",
+        disables: ["sf-hawb", "sf-etd"]
+      },
+      {
+        id: "s-hawb-no", label: "HAWB No.", type: "multi-input",
+        placeholder: "HAWB No.", required: false,
+        mutualExclusive: ["s-mawb-no", "s-etd-from", "s-etd-to"],
+        onInput: "onHawbInput()",
+        disables: ["mawb-input-wrap(parent .sf)", "sf-etd"]
+      },
+      {
+        id: "s-carrier", label: "Carrier", type: "lookup-input",
+        placeholder: "ID/Name", required: false,
+        popup: "cpop-overlay",
+        popupTrigger: "openCarrierPopup()",
+        searchLogic: "carrier LIKE OR carrierName LIKE (case-insensitive)"
+      },
+      {
+        id: "s-etd-from", label: "ETD From", type: "date",
+        format: "YYYY-MM-DD", defaultValue: "today-14days",
+        mutualExclusiveWith: ["s-mawb-no", "s-hawb-no"]
+      },
+      {
+        id: "s-etd-to", label: "ETD To", type: "date",
+        format: "YYYY-MM-DD", defaultValue: "today+14days",
+        mutualExclusiveWith: ["s-mawb-no", "s-hawb-no"]
+      },
+      {
+        id: "s-edi-status", label: "EDI Send Status", type: "select",
+        options: ["", "N/A", "Processing", "Complete", "Error"],
+        defaultValue: "", required: false
+      },
+      {
+        id: "s-need-resend", label: "Need Resend", type: "select",
+        options: [
+          { label: "All", value: "" },
+          { label: "Yes", value: "Need Resend" },
+          { label: "No", value: "Normal" }
+        ],
+        defaultValue: "", required: false
+      }
+    ],
+    actions: [
+      { id: "btn-search", label: "Search", function: "doSearch()" },
+      { id: "cb-manifest", label: "접기/펼치기", function: "toggleCollapse('sw-manifest','cb-manifest')" },
+      { id: "btn-reset", label: "초기화", function: "resetSearch()", effect: "모든 조건 기본값 복원 후 즉시 재조회" }
+    ]
+  },
+  fields: {
+    screenId: "AIR-MANIFEST-SEND-KR",
+    grids: {
+      mawb: {
+        tableId: "mawb-table", tbodyId: "mawb-tbody",
+        defaultSort: { col: "etd", dir: "asc" },
+        columns: [
+          { key: "status",     label: "Status",          type: "badge",   sortable: true,  editable: false },
+          { key: "ediStatus",  label: "EDI Send Status", type: "badge",   sortable: true,  editable: false },
+          { key: "needResend", label: "Need Resend",     type: "badge",   sortable: true,  editable: false },
+          { key: "mawbNo",     label: "MAWB No.",        type: "link",    sortable: true,  editable: false, onClick: "selectMawb(id)" },
+          { key: "carrier",    label: "Carrier",         type: "text",    sortable: true,  editable: false },
+          { key: "flightName", label: "Flight Name",     type: "text",    sortable: true,  editable: false },
+          { key: "pol",        label: "POL",             type: "text",    sortable: true,  editable: false },
+          { key: "pod",        label: "POD",             type: "text",    sortable: true,  editable: false },
+          { key: "etd",        label: "ETD",             type: "date",    sortable: true,  editable: false },
+          { key: "pkgQty",     label: "Pkg Qty.",        type: "number",  sortable: true,  editable: false, align: "right" },
+          { key: "grossWt",    label: "Gross Wt",        type: "decimal", sortable: true,  editable: false, align: "right", decimals: 1 },
+          { key: "chgWt",      label: "Chg Wt",          type: "decimal", sortable: true,  editable: false, align: "right", decimals: 1 },
+          { key: "rateClass",  label: "Rate Class",      type: "select",  sortable: false, editable: true,  options: ["Q","N","M","C","R","U","B","X"] },
+          { key: "chargeRate", label: "Charge Rate",     type: "input",   sortable: false, editable: true,  align: "right" },
+          { key: "ocCode1",    label: "OC Code1",        type: "select",  sortable: false, editable: true,  options: ["","PP","CC","CA","CX","PX"], validation: "no-duplicate-among-ocCode1~3" },
+          { key: "ocAmt1",     label: "OC Amt1",         type: "input",   sortable: false, editable: true,  align: "right" },
+          { key: "ocCode2",    label: "OC Code2",        type: "select",  sortable: false, editable: true,  options: ["","PP","CC","CA","CX","PX"], validation: "no-duplicate-among-ocCode1~3" },
+          { key: "ocAmt2",     label: "OC Amt2",         type: "input",   sortable: false, editable: true,  align: "right" },
+          { key: "ocCode3",    label: "OC Code3",        type: "select",  sortable: false, editable: true,  options: ["","PP","CC","CA","CX","PX"], validation: "no-duplicate-among-ocCode1~3" },
+          { key: "ocAmt3",     label: "OC Amt3",         type: "input",   sortable: false, editable: true,  align: "right" }
+        ]
+      },
+      hawb: {
+        tableId: "hawb-table", tbodyId: "hawb-tbody",
+        defaultSort: { col: "hawbNo", dir: "asc" },
+        triggerOn: "mawbRow.click → selectedMawbId",
+        columns: [
+          { key: "bizType",    label: "Business Type",   type: "select",  sortable: true,  editable: true,  options: [{ value: "E", label: "E(Export)" }, { value: "R", label: "R(Transshipment)" }] },
+          { key: "hawbNo",     label: "HAWB No.",        type: "link",    sortable: true,  editable: false },
+          { key: "status",     label: "Status",          type: "badge",   sortable: true,  editable: false },
+          { key: "ediStatus",  label: "EDI Send Status", type: "badge",   sortable: true,  editable: false },
+          { key: "needResend", label: "Need Resend",     type: "badge",   sortable: true,  editable: false },
+          { key: "pkgQty",     label: "Pkg Qty.",        type: "number",  sortable: true,  editable: false, align: "right" },
+          { key: "pkgUnit",    label: "Pkg Unit",        type: "text",    sortable: false, editable: false },
+          { key: "grossWt",    label: "Gross Wt",        type: "decimal", sortable: true,  editable: false, align: "right", decimals: 1 },
+          { key: "gwUnit",     label: "GW Unit",         type: "text",    sortable: false, editable: false },
+          { key: "cargoDesc",  label: "Cargo Description", type: "input", sortable: false, editable: true,  maxLength: 20 },
+          { key: "sendDate",   label: "Send Date",       type: "datetime", sortable: true, editable: false },
+          { key: "sendPerson", label: "Send Person",     type: "text",    sortable: false, editable: false },
+          { key: "shipper",    label: "Shipper",         type: "text",    sortable: false, editable: false },
+          { key: "consignee",  label: "Consignee",       type: "text",    sortable: false, editable: false },
+          { key: "notify",     label: "Notify",          type: "text",    sortable: false, editable: false }
+        ]
+      },
+      exportDeclaration: {
+        tableId: "edi-tbody",
+        readOnly: true,
+        dataSource: "HBL Detail > Others 탭 연동",
+        triggerOn: "hawbRow.click → selectedHawbId",
+        columns: [
+          { key: "expDeclNo",     label: "Export Declaration No." },
+          { key: "pkgQty",        label: "Pkg Qty.",        align: "right" },
+          { key: "pkgUnit",       label: "Pkg Unit" },
+          { key: "grossWt",       label: "Gross Weight",    align: "right" },
+          { key: "gwUnit",        label: "GW Unit" },
+          { key: "samePkgCode",   label: "Same Pkg Code",   align: "center" },
+          { key: "samePkgQty",    label: "Same Pkg Qty.",   align: "right" },
+          { key: "samePkgUnit",   label: "Same Pkg Unit" },
+          { key: "splitShipment", label: "Split Shipment",  align: "center" },
+          { key: "splitOrderBy",  label: "Split Order By",  align: "right" }
+        ]
+      }
+    }
+  },
+  buttons: {
+    screenId: "AIR-MANIFEST-SEND-KR",
+    mawbGrid: [
+      {
+        id: "btn-epninf-send", label: "EPNINF Send", type: "edi",
+        function: "epninfSend()",
+        enableCondition: "checkedMawb.length > 0 AND NOT any(ediStatus === 'Processing')",
+        disableCondition: "checkedMawb.length === 0 OR any(ediStatus === 'Processing')",
+        multiSelect: true,
+        onSuccess: { ediStatus: "Processing → Complete", mawbStatus: "EPNINF Sent" },
+        onError:   { ediStatus: "Error", needResend: true },
+        errorToast: ["전송할 항목을 선택해 주세요.", "이미 전송 중인 건이 있습니다."]
+      },
+      {
+        id: "btn-fwbfhl-send", label: "FWB/FHL Send", type: "edi",
+        function: "fwbFhlSend()",
+        enableCondition: "checkedMawb.length > 0 AND all(status >= 'EPNINF Sent') AND NOT any(ediStatus === 'Processing')",
+        multiSelect: true,
+        onSuccess: { ediStatus: "Processing → Complete", mawbStatus: "FWB/FHL Sent" },
+        onError:   { ediStatus: "Error", needResend: true },
+        errorToast: ["전송할 항목을 선택해 주세요.", "이미 전송 중인 건이 있습니다."]
+      },
+      {
+        id: "btn-mawb-history", label: "MAWB History", type: "popup",
+        function: "mawbHistory()",
+        enableCondition: "checkedMawb.length === 1",
+        disableCondition: "checkedMawb.length !== 1",
+        popup: "mpop-overlay",
+        errorToast: ["MAWB를 선택해 주세요.", "단건을 선택해 주세요."]
+      },
+      {
+        id: "btn-mawb-excel", label: "엑셀 다운로드", type: "download",
+        function: "downloadExcel('mawb')",
+        fileName: "MAWB_Info_YYYY-MM-DD.csv",
+        scope: "전체 조회 결과 (체크 무관)"
+      },
+      {
+        id: "btn-mawb-cols", label: "컬럼 설정", type: "modal",
+        function: "openPersonalize('mawb')",
+        modal: "modal-overlay", pmGrid: "mawb"
+      }
+    ],
+    hawbGrid: [
+      {
+        id: "btn-hawb-history", label: "HAWB History", type: "popup",
+        function: "hawbHistory()",
+        enableCondition: "checkedHawb.length === 1",
+        popup: "hpop-overlay",
+        errorToast: ["HAWB를 선택해 주세요.", "단건을 선택해 주세요."]
+      },
+      {
+        id: "btn-amend", label: "Amend Manifest", type: "amend",
+        function: "amendManifest()",
+        enableCondition: "checkedHawb.length === 1 AND hawb.status === 'FWB/FHL Sent'",
+        note: "상세 UX 협의 필요",
+        errorToast: ["HAWB를 선택해 주세요.", "단건을 선택해 주세요."]
+      },
+      {
+        id: "btn-address-amend", label: "Address Amend", type: "amend",
+        function: "addressAmend()",
+        enableCondition: "checkedHawb.length === 1",
+        editableFields: ["shipper", "consignee", "notify"],
+        nonEditableFields: "화물 정보 전체",
+        errorToast: ["HAWB를 선택해 주세요.", "단건을 선택해 주세요."]
+      },
+      {
+        id: "btn-hawb-excel", label: "엑셀 다운로드", type: "download",
+        function: "downloadExcel('hawb')",
+        preCondition: "selectedMawbId !== null",
+        fileName: "HAWB_Info_YYYY-MM-DD.csv",
+        errorToast: ["MAWB를 먼저 선택해 주세요."]
+      }
+    ],
+    commonRules: [
+      "미선택 전송 클릭 → 오류 토스트, 동작 중단",
+      "2건 이상 선택 + 단건 전용 버튼 클릭 → 오류 토스트",
+      "Processing 포함 일괄 전송 → 오류 토스트, 전송 중단",
+      "전송 중 중복 클릭 방지 (버튼 비활성화 권장)",
+      "헤더 전체선택: 현재 표시 데이터 전체 선택/해제"
+    ]
+  },
+  api: {
+    screenId: "AIR-MANIFEST-SEND-KR",
+    baseUrl: "/api/air-manifest",
+    endpoints: [
+      {
+        method: "GET", path: "/mawb/list",
+        description: "MAWB 목록 조회",
+        params: [
+          { name: "mawbStatus",    type: "String",   required: false },
+          { name: "mawbNo",        type: "String[]", required: false },
+          { name: "hawbNo",        type: "String[]", required: false },
+          { name: "carrier",       type: "String",   required: false },
+          { name: "etdFrom",       type: "Date",     required: false, format: "YYYY-MM-DD" },
+          { name: "etdTo",         type: "Date",     required: false, format: "YYYY-MM-DD" },
+          { name: "ediSendStatus", type: "String",   required: false },
+          { name: "needResend",    type: "Boolean",  required: false }
+        ]
+      },
+      { method: "GET",  path: "/hawb/list",           description: "MAWB 선택 시 HAWB 목록 조회",          params: [{ name: "mawbId", type: "String", required: true }] },
+      { method: "GET",  path: "/export-declaration",  description: "HAWB 선택 시 수출신고 정보 조회",       params: [{ name: "hawbId", type: "String", required: true }] },
+      { method: "POST", path: "/epninf/send",         description: "EPNINF 전문 전송",                      body: [{ name: "mawbIds", type: "String[]", required: true }] },
+      { method: "POST", path: "/fwb-fhl/send",        description: "FWB + FHL 전문 동시 전송",              body: [{ name: "hawbIds", type: "String[]", required: true }] },
+      { method: "POST", path: "/amend/send",          description: "Amend Manifest 수정 전문 전송",         body: [] },
+      { method: "POST", path: "/address-amend/send",  description: "Address Amend 주소 수정 전문 전송",     body: [] },
+      { method: "GET",  path: "/mawb/history/{mawbId}", description: "MAWB 전송 이력 (시점별 스냅샷)",    params: [] },
+      { method: "GET",  path: "/hawb/history/{hawbId}", description: "HAWB 전송 이력 (시점별 스냅샷)",    params: [] }
+    ],
+    masterDataApi: { method: "GET", path: "/api/master/carrier/search", description: "Carrier 검색 팝업용" }
+  },
+  popup: {
+    screenId: "AIR-MANIFEST-SEND-KR",
+    popups: [
+      {
+        id: "mpop-overlay", title: "MAWB Manifest History",
+        trigger: "mawbHistory() — MAWB 단건 체크 선택 후 클릭",
+        closeTriggers: ["Close 버튼", "ESC 키", "배경 클릭"],
+        content: ["전송 시점 드롭다운 (최신순)", "MAWB Info. Read Only", "Rate/OC Info. Read Only", "Shipper/Consignee/Notify"]
+      },
+      {
+        id: "hpop-overlay", title: "HAWB Manifest History",
+        trigger: "hawbHistory() — HAWB 단건 체크 선택 후 클릭",
+        closeTriggers: ["Close 버튼", "ESC 키", "배경 클릭"],
+        content: ["전송 시점 드롭다운 (최신순)", "MAWB Info. Read Only", "HAWB Info. Read Only", "Shipper/Consignee/Notify", "Export Declaration Info. Read Only"]
+      },
+      {
+        id: "cpop-overlay", title: "Search Carrier",
+        trigger: "openCarrierPopup() — Carrier 필드 🔍 클릭",
+        closeTriggers: ["Cancel 버튼", "ESC 키", "배경 클릭"],
+        confirm: "confirmCarrierPopup() → s-carrier 필드에 선택값 반환",
+        searchFields: ["Carrier Type (Toggle: AIR/SHIP/FWDR/ROAD)", "Carrier (Tag Input)", "Carrier ID (Tag Input)"],
+        resultColumns: ["Carrier Type Code", "Carrier", "Carrier Name", "Carrier ID", "SCAC"]
+      },
+      {
+        id: "modal-overlay", title: "컬럼 설정",
+        trigger: "openPersonalize(grid) — ⚙ 버튼 클릭",
+        closeTriggers: ["적용 버튼", "닫기 버튼", "X 버튼", "배경 클릭 (변경사항 자동 적용)"],
+        features: ["체크박스 컬럼 표시/숨김", "드래그앤드롭 순서 변경", "초기화 (기본값 복원)"]
+      }
+    ]
+  },
+  rules: {
+    screenId: "AIR-MANIFEST-SEND-KR",
+    edi: [
+      { rule: "EPNINF 전송 가능 조건", detail: "status = 'New' OR needResend = true" },
+      { rule: "FWB/FHL 전송 가능 조건", detail: "status >= 'EPNINF Sent' (역순 불가)" },
+      { rule: "비동기 처리", detail: "전송 후 즉시 Processing → KTNET 응답에 따라 Complete/Error" },
+      { rule: "Error 시 자동처리", detail: "needResend = true 자동 설정" },
+      { rule: "다건 전송", detail: "일괄 처리 지원. Processing 포함 시 전체 차단" }
+    ],
+    ui: [
+      { rule: "MAWB 행 선택", detail: "→ HAWB 그리드 자동 연계 조회 (미선택 시 빈 상태)" },
+      { rule: "HAWB 행 선택", detail: "→ Export Declaration Info. 자동 연계" },
+      { rule: "Export Declaration", detail: "Read Only. 수정은 HBL Detail > Others 탭에서만" },
+      { rule: "MAWB No. / HAWB No.", detail: "상호 배타 입력. 하나 입력 시 다른 필드 + ETD 비활성" }
+    ],
+    grid: [
+      { rule: "MAWB 기본 정렬", detail: "ETD 오름차순" },
+      { rule: "HAWB 기본 정렬", detail: "HAWB No. 오름차순" },
+      { rule: "OC Code 중복", detail: "OC Code1~3 동일 코드 불가 (UI Validation)" },
+      { rule: "Cargo Description", detail: "최대 20자 제한" }
+    ],
+    openIssues: [
+      "컬럼 설정 저장 방식: 서버 DB vs. LocalStorage",
+      "EDI 비동기 응답: 폴링 주기 vs. WebSocket",
+      "전송 오류 알림 방식: 토스트 vs. 팝업",
+      "다건 전송 부분 성공 처리 방식",
+      "Amend/Address Amend 화면 UX 상세 설계"
+    ]
+  }
+};
+
+function dsJsonHL(obj) {
+  var s = JSON.stringify(obj, null, 2);
+  s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(m) {
+    if (/^"/.test(m)) {
+      if (/:$/.test(m)) return '<span class="jk">' + m + '</span>';
+      return '<span class="js">' + m + '</span>';
+    }
+    if (/true|false/.test(m)) return '<span class="jb">' + m + '</span>';
+    if (/null/.test(m)) return '<span class="jb">' + m + '</span>';
+    return '<span class="jn">' + m + '</span>';
+  });
+  return s;
+}
+
+function dsToggleJson() {
+  dsJsonMode = !dsJsonMode;
+  var btn = document.getElementById('ds-json-toggle');
+  btn.classList.toggle('active', dsJsonMode);
+  btn.querySelector('svg').style.opacity = dsJsonMode ? '1' : '0.7';
+  if (dsJsonMode) {
+    btn.childNodes[btn.childNodes.length-1].textContent = ' 자연어 뷰';
+  } else {
+    btn.childNodes[btn.childNodes.length-1].textContent = ' JSON 뷰';
+  }
+  dsApplyJsonMode(dsCurrentTab);
+}
+
+function dsApplyJsonMode(tabId) {
+  var tabs = ['overview','search','fields','buttons','actions','api','popup','rules'];
+  tabs.forEach(function(t) {
+    var jsonDiv = document.getElementById('ds-json-' + t);
+    var proseDiv = document.getElementById('ds-prose-' + t);
+    if (!jsonDiv || !proseDiv) return;
+    if (dsJsonMode) {
+      var dataKey = t === 'actions' ? 'buttons' : t;
+      var content = document.getElementById('ds-json-' + t + '-content');
+      if (content && DS_JSON_DATA[dataKey]) {
+        content.innerHTML = dsJsonHL(DS_JSON_DATA[dataKey]);
+      } else if (content) {
+        content.innerHTML = '<span class="jc">// 이 탭은 JSON 정의가 별도 탭(버튼)에 포함됩니다.</span>';
+      }
+      jsonDiv.style.display = 'block';
+      proseDiv.style.display = 'none';
+    } else {
+      jsonDiv.style.display = 'none';
+      proseDiv.style.display = 'block';
+    }
+  });
+}
+
+function dsTogglePanel() {
+  var panel = document.getElementById('ds-panel');
+  var screen = document.getElementById('ds-screen');
+  var btn = document.getElementById('ds-btn-toggle');
+  var isOpen = panel.classList.toggle('open');
+  screen.classList.toggle('panel-open', isOpen);
+  btn.classList.toggle('open', isOpen);
+  btn.innerHTML = isOpen
+    ? '<svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor"><rect x="9" y="2" width="4" height="10" rx="1"/><rect x="1" y="2" width="6" height="1.5" rx="0.75"/><rect x="1" y="6.25" width="6" height="1.5" rx="0.75"/><rect x="1" y="10.5" width="6" height="1.5" rx="0.75"/></svg> 패널 닫기'
+    : '<svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor"><rect x="1" y="2" width="12" height="1.5" rx="0.75"/><rect x="1" y="6" width="8" height="1.5" rx="0.75"/><rect x="1" y="10" width="10" height="1.5" rx="0.75"/></svg> 개발정의서 열기';
+}
+
+function dsTab(el, id) {
+  document.querySelectorAll('.ds-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.ds-tc').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('ds-tc-' + id).classList.add('active');
+  dsCurrentTab = id;
+  if (dsJsonMode) dsApplyJsonMode(id);
+}
+</script>
+</body>
+</html>
