@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Air Manifest Send (KR)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR','Malgun Gothic',Arial,sans-serif;font-size:12px;background:#EEF1F4;color:#2c3e50;min-height:100vh}
+.top-bar{background:#1a2233;display:flex;align-items:center;padding:0 8px;height:32px;gap:0}
+.tab-item{display:flex;align-items:center;gap:6px;padding:0 14px;height:32px;font-size:11px;color:#aab;cursor:pointer;border-right:1px solid #2a3450;white-space:nowrap}
+.tab-item.active{background:#fff;color:#1a2233;font-weight:600}
+.tab-item .tab-x{color:#888;font-size:10px;margin-left:2px}
+.tab-item.active .tab-x{color:#555}
+.breadcrumb{font-size:11px;color:#666;padding:5px 12px;background:#fff;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:4px}
+.breadcrumb .sep{color:#bbb}
+.breadcrumb .cur{color:#1a2233;font-weight:500}
+.page{display:none}
+.page.active{display:block}
+.search-wrap{background:#fff;border:1px solid #d8dce3;margin:8px;border-radius:3px;padding:8px 12px 10px;transition:padding .2s}
+.search-wrap.collapsed .search-grid{display:none}
+.search-wrap.collapsed{padding-bottom:8px}
+.search-actions{display:flex;justify-content:flex-end;align-items:center;gap:5px;margin-bottom:7px}
+.search-wrap.collapsed .search-actions{margin-bottom:0}
+.search-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px 10px}
+.sf{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sf label{font-size:10px;color:#555;font-weight:500;white-space:nowrap}
+.sf input,.sf select{height:24px;border:1px solid #c8cdd6;border-radius:2px;font-size:11px;padding:0 6px;color:#2c3e50;background:#fff;outline:none;font-family:'Noto Sans KR',sans-serif;min-width:0;width:100%}
+.sf input:focus,.sf select:focus{border-color:#4a90d9}
+.sf .multi-input{height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;align-items:center;padding:0 4px;gap:3px;background:#fff;min-width:0}
+.sf .multi-input input{border:none;height:20px;flex:1;font-size:11px;padding:0 2px;outline:none;min-width:0;font-family:'Noto Sans KR',sans-serif}
+.sf .multi-input .add-btn{background:#e8edf4;border:1px solid #c8cdd6;border-radius:2px;font-size:10px;padding:1px 5px;cursor:pointer;color:#555;white-space:nowrap;flex-shrink:0}
+.sf .date-range{height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;align-items:center;padding:0 3px;gap:1px;font-size:10px;color:#2c3e50;background:#fff;min-width:0;overflow:hidden}
+.sf .date-range input[type=date]{border:none;font-size:10px;width:86px;min-width:60px;flex:1;outline:none;color:#2c3e50;font-family:'Noto Sans KR',sans-serif;padding:0 1px}
+.sf .date-range .sep{color:#999;flex-shrink:0;font-size:10px;padding:0 1px}
+.sf .search-pop{height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;align-items:center;padding:0 4px;gap:3px;background:#fff;min-width:0}
+.sf .search-pop input{border:none;flex:1;font-size:11px;outline:none;min-width:0;font-family:'Noto Sans KR',sans-serif}
+.sf .search-pop .ico{color:#888;font-size:13px;cursor:pointer;flex-shrink:0}
+.disabled .sf input,.disabled .sf select,.disabled .sf .multi-input,.disabled .sf .date-range{opacity:0.38;pointer-events:none;background:#f5f5f5}
+.disabled label{color:#aaa}
+.btn{height:24px;padding:0 10px;border-radius:2px;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid #c8cdd6;background:#fff;color:#333;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.btn:hover{background:#EEF1F4}
+.btn.primary{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.btn.primary:hover{background:#1557b0}
+.btn.reset{color:#666;font-size:14px;padding:0 8px}
+.btn.search-btn{background:#181F29;border:1px solid #2C323B;color:#18A6C6;font-weight:600;box-shadow:0 1px 3px rgba(44,50,59,.5);padding:0 16px;outline:2px solid #BABCBF;outline-offset:-2px}
+.btn.search-btn:hover{background:#1e2736;color:#1dbfdb}
+.btn.collapse-btn{width:24px;height:24px;padding:0;justify-content:center;border:1px solid #c8cdd6;background:#fff;color:#555;border-radius:2px;font-size:13px;line-height:1;transition:transform .25s ease}
+.btn.collapse-btn.collapsed{transform:rotate(180deg)}
+.btn.collapse-btn:hover{background:#EEF1F4}
+.btn.link-btn{color:#3FA2E4;border-color:#9ec5f5;font-size:10px}
+.btn.link-btn:hover{background:#e8f0fe}
+.btn.blue-btn{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.btn.blue-btn:hover{background:#1557b0}
+.btn.icon-btn{width:26px;height:22px;padding:0;justify-content:center;color:#444;border:1px solid #c8cdd6;background:#fff;border-radius:3px;font-size:13px}
+.btn.icon-btn:hover{background:#EEF1F4;color:#1a2233}
+.btn.sm{height:22px;font-size:10px;padding:0 8px}
+.btn-sep{width:1px;height:14px;background:#ddd;margin:0 2px}
+.grid-area{margin:0 8px 8px;display:flex;flex-direction:column;gap:6px}
+.grid-panel{background:#F8F8F9;border:1px solid #d8dce3;border-radius:3px;overflow:hidden}
+.grid-hd{border-bottom:1px solid #d8dce3}
+.grid-hd-link{display:flex;justify-content:flex-end;padding:3px 8px;background:#f7f8fa;border-bottom:1px solid #e8eaed}
+.grid-hd-main{display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:#D9EBFF}
+.grid-hd-simple{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:#D9EBFF;border-bottom:1px solid #d8dce3}
+.grid-title{font-size:11px;font-weight:600;color:#1a2233;display:flex;align-items:center;gap:6px}
+.grid-title .cnt{font-size:10px;color:#666;font-weight:400}
+.grid-title .ctx{font-size:10px;color:#888;font-weight:400}
+.grid-btns{display:flex;align-items:center;gap:3px}
+.readonly-label{font-size:10px;color:#888;font-style:italic}
+.tbl-wrap{overflow-x:auto;max-height:220px;overflow-y:auto}
+.tbl-wrap.short{max-height:160px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead{position:sticky;top:0;z-index:2}
+thead tr{background:#D9EBFF}
+thead th{padding:4px 7px;text-align:left;font-weight:600;color:#3a4a5c;white-space:nowrap;border-bottom:1px solid #d0d5dd;border-right:1px solid #e0e4ea;font-size:10px;user-select:none;cursor:pointer}
+thead th:last-child{border-right:none}
+thead th.right{text-align:right}
+thead th.center{text-align:center}
+thead th:hover{background:#c6dff7}
+thead th .sort{font-size:9px;color:#aaa;margin-left:2px}
+thead th .sort.asc{color:#3FA2E4}
+thead th .sort.desc{color:#3FA2E4}
+tbody tr{border-bottom:1px solid #eef0f3;cursor:pointer;transition:background .1s;background:#F8F8F9}
+tbody tr:nth-child(even){background:#fff}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#e8f4ff}
+tbody tr.selected{background:#fff!important}
+tbody tr.selected td{color:#1a2233;font-weight:500}
+tbody td{padding:4px 7px;color:#2c3e50;white-space:nowrap;border-right:1px solid #eef0f3;font-size:11px}
+tbody td:last-child{border-right:none}
+tbody td.right{text-align:right}
+tbody td.center{text-align:center}
+tbody td.muted{color:#aaa}
+tbody tr.empty td{text-align:center;color:#999;font-size:11px;padding:20px;cursor:default}
+.chk{width:13px;height:13px;cursor:pointer;vertical-align:middle}
+.lnk{color:#3FA2E4;text-decoration:underline;cursor:pointer}
+.lnk:hover{color:#1a7fc4}
+.ec select,.ec input[type=text]{height:20px;border:1px solid #c8cdd6;border-radius:2px;font-size:10px;padding:0 4px;background:#fff;outline:none;width:100%;font-family:'Noto Sans KR',sans-serif}
+.ec select:focus,.ec input[type=text]:focus{border-color:#4a90d9}
+.ec-num input{width:60px}
+.badge{display:inline-flex;align-items:center;height:17px;padding:0 6px;border-radius:2px;font-size:10px;font-weight:600;white-space:nowrap}
+.b-new{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+.b-epninf{background:#e3f0fc;color:#0d5bab;border:1px solid #aaceed}
+.b-fwbfhl{background:#c5dff8;color:#083b80;border:1px solid #7ab3e8}
+.b-na{background:#f0f0f0;color:#666;border:1px solid #ddd}
+.b-proc{background:#fff4e0;color:#8a5700;border:1px solid #f0c070}
+.b-complete{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+.b-error{background:#fce8e6;color:#b31412;border:1px solid #f0a8a6}
+.b-resend{background:#fce8e6;color:#b31412;border:1px solid #f0a8a6}
+.b-sent{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+.b-normal{background:#f0f0f0;color:#666;border:1px solid #ddd}
+.connector{display:flex;align-items:center;gap:8px;padding:0 12px;color:#aaa;font-size:10px}
+.connector::before,.connector::after{content:'';flex:1;height:1px;background:#dde1ea;border-top:1px dashed #d0d5e0}
+.toast-wrap{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:#323232;color:#fff;font-size:12px;padding:10px 16px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:0;transform:translateY(-8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{background:#1e7e34}
+.toast.error{background:#b31412}
+.readonly-tint tbody td{background:rgba(248,248,249,0.7)}
+.readonly-note{font-size:10px;color:#888;font-style:italic;padding:3px 8px 4px;border-top:1px solid #eef0f3;background:#fafafa}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:8000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,.2);width:340px;max-height:80vh;display:flex;flex-direction:column}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e0e4ea;background:#D9EBFF}
+.modal-hd h3{font-size:12px;font-weight:600;color:#1a2233}
+.modal-close{background:none;border:none;font-size:16px;cursor:pointer;color:#666;line-height:1;padding:2px 4px}
+.modal-close:hover{color:#333}
+.modal-body{padding:12px 14px;overflow-y:auto;flex:1}
+.modal-body p{font-size:10px;color:#888;margin-bottom:8px}
+.col-item{display:flex;align-items:center;gap:8px;padding:5px 6px;border:1px solid #e8eaed;border-radius:3px;margin-bottom:4px;cursor:grab;background:#fff;transition:background .1s}
+.col-item:hover{background:#f5f8ff}
+.col-item.dragging{opacity:.4}
+.col-item .drag-handle{color:#ccc;font-size:14px;flex-shrink:0}
+.col-item label{font-size:11px;color:#2c3e50;cursor:pointer;flex:1}
+.col-item input[type=checkbox]{width:13px;height:13px;flex-shrink:0}
+.modal-ft{padding:8px 14px;border-top:1px solid #e0e4ea;display:flex;justify-content:flex-end;gap:5px}
+/* Carrier 탭 전용 */
+.type-toggle-group{display:flex;gap:3px;flex-wrap:wrap;min-height:24px;align-items:center}
+.type-btn{height:22px;padding:0 10px;border-radius:2px;font-size:10px;cursor:pointer;border:1px solid #c8cdd6;background:#fff;color:#555;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.type-btn:hover{background:#EEF1F4}
+.type-btn.sel{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.tag-wrap{min-height:24px;border:1px solid #c8cdd6;border-radius:2px;display:flex;flex-wrap:wrap;align-items:center;padding:2px 4px;gap:3px;background:#fff;cursor:text;min-width:0}
+.tag-wrap:focus-within{border-color:#4a90d9}
+.tag-wrap input{border:none;outline:none;font-size:11px;min-width:50px;flex:1;height:18px;font-family:'Noto Sans KR',sans-serif;background:transparent}
+.chip{display:inline-flex;align-items:center;gap:3px;background:#e3f0fc;border:1px solid #aaceed;border-radius:2px;padding:0 5px;height:18px;font-size:10px;color:#0d5bab;white-space:nowrap;flex-shrink:0}
+.chip-x{cursor:pointer;font-size:11px;color:#0d5bab;line-height:1;margin-left:2px}
+.chip-x:hover{color:#b31412}
+
+/* ── CARRIER SEARCH POPUP ── */
+.cpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9000;display:none;align-items:center;justify-content:center}
+.cpop-overlay.open{display:flex}
+.cpop-box{background:#fff;border-radius:4px;box-shadow:0 6px 28px rgba(0,0,0,.22);width:720px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+.cpop-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid #d8dce3;background:#D9EBFF;border-radius:4px 4px 0 0;flex-shrink:0}
+.cpop-hd-title{font-size:15px;font-weight:700;color:#1a2233}
+.cpop-hd-close{background:none;border:none;font-size:18px;cursor:pointer;color:#666;line-height:1;padding:2px 5px;border-radius:2px}
+.cpop-hd-close:hover{background:#e0e6f0;color:#333}
+.cpop-search{background:#fff;border-bottom:1px solid #d8dce3;padding:8px 12px 10px;flex-shrink:0}
+.cpop-search-actions{display:flex;justify-content:flex-end;align-items:center;gap:5px;margin-bottom:7px}
+.cpop-search-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px 10px}
+.cpop-body{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0}
+.cpop-tbl-hd{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#D9EBFF;border-bottom:1px solid #d8dce3;flex-shrink:0}
+.cpop-tbl-title{font-size:11px;font-weight:600;color:#1a2233;display:flex;align-items:center;gap:6px}
+.cpop-tbl-title .cnt{font-size:10px;color:#666;font-weight:400}
+.cpop-tbl-wrap{overflow-y:auto;overflow-x:auto;flex:1;min-height:0;max-height:320px}
+.cpop-ft{display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:10px 14px;border-top:1px solid #d8dce3;flex-shrink:0;background:#fafbfc}
+.btn.confirm-btn{background:#1a73e8;border-color:#1a73e8;color:#fff;font-weight:600}
+.btn.confirm-btn:hover{background:#1557b0}
+.btn.cancel-btn{background:#fff;border-color:#c8cdd6;color:#555}
+.btn.cancel-btn:hover{background:#EEF1F4}
+
+/* ── HAWB HISTORY POPUP ── */
+.hpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:9100;display:none;align-items:center;justify-content:center}
+.hpop-overlay.open{display:flex}
+.hpop-box{background:#fff;border-radius:4px;box-shadow:0 6px 32px rgba(0,0,0,.24);width:820px;max-width:97vw;max-height:92vh;display:flex;flex-direction:column;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+/* 팝업 헤더 */
+.hpop-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid #d8dce3;background:#D9EBFF;border-radius:4px 4px 0 0;flex-shrink:0}
+.hpop-hd-title{font-size:14px;font-weight:700;color:#1a2233}
+.hpop-hd-close{background:none;border:none;font-size:18px;cursor:pointer;color:#555;line-height:1;padding:2px 5px;border-radius:2px}
+.hpop-hd-close:hover{background:#c6dff7;color:#1a2233}
+/* 날짜 선택 바 */
+.hpop-date-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #e0e4ea;background:#f7f9fc;flex-shrink:0}
+.hpop-date-bar label{font-size:11px;font-weight:600;color:#3a4a5c;white-space:nowrap}
+.hpop-date-bar select{height:26px;border:1px solid #c8cdd6;border-radius:2px;font-size:11px;padding:0 8px;color:#2c3e50;background:#fff;outline:none;min-width:180px;font-family:'Noto Sans KR',sans-serif;cursor:pointer}
+.hpop-date-bar select:focus{border-color:#4a90d9}
+.hpop-date-bar .hpop-date-hint{font-size:10px;color:#999;font-style:italic}
+/* 스크롤 본문 */
+.hpop-body{flex:1;overflow-y:auto;padding:0 0 4px;min-height:0}
+/* 섹션 공통 */
+.hpop-section{margin:10px 14px 0}
+.hpop-sec-title{font-size:11px;font-weight:700;color:#1a2233;padding:5px 8px;background:#D9EBFF;border:1px solid #d0d5dd;border-bottom:none;border-radius:2px 2px 0 0;display:flex;align-items:center;gap:6px}
+.hpop-sec-title .ro-tag{font-size:9px;font-weight:400;color:#888;font-style:italic;margin-left:4px}
+.hpop-tbl-wrap{border:1px solid #d0d5dd;border-radius:0 0 2px 2px;overflow-x:auto;background:#F8F8F9}
+.hpop-tbl-wrap table{width:100%;border-collapse:collapse;font-size:11px}
+.hpop-tbl-wrap thead tr{background:#D9EBFF}
+.hpop-tbl-wrap thead th{padding:4px 8px;text-align:left;font-weight:600;color:#3a4a5c;white-space:nowrap;border-bottom:1px solid #d0d5dd;border-right:1px solid #e0e4ea;font-size:10px}
+.hpop-tbl-wrap thead th:last-child{border-right:none}
+.hpop-tbl-wrap tbody tr{background:#F8F8F9}
+.hpop-tbl-wrap tbody tr:nth-child(even){background:#fff}
+.hpop-tbl-wrap tbody td{padding:4px 8px;color:#2c3e50;white-space:nowrap;border-right:1px solid #eef0f3;font-size:11px}
+.hpop-tbl-wrap tbody td:last-child{border-right:none}
+/* Party 박스 (Shipper/Consignee/Notify) */
+.hpop-party-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 14px 0}
+.hpop-party-box{display:flex;flex-direction:column;border:1px solid #d0d5dd;border-radius:2px;overflow:hidden}
+.hpop-party-label{font-size:10px;font-weight:700;color:#3a4a5c;padding:4px 8px;background:#D9EBFF;border-bottom:1px solid #d0d5dd;white-space:nowrap}
+.hpop-party-text{background:#F8F8F9;padding:6px 8px;font-size:11px;color:#2c3e50;line-height:1.6;min-height:90px;overflow-y:auto;resize:vertical;white-space:pre-wrap;word-break:break-all;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+/* 하단 버튼 */
+.hpop-ft{display:flex;justify-content:flex-end;padding:9px 14px;border-top:1px solid #d8dce3;flex-shrink:0;background:#fafbfc}
+
+/* ── MAWB HISTORY POPUP ── */
+.mpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:9200;display:none;align-items:center;justify-content:center}
+.mpop-overlay.open{display:flex}
+.mpop-box{background:#fff;border-radius:4px;box-shadow:0 6px 32px rgba(0,0,0,.24);width:860px;max-width:97vw;max-height:92vh;display:flex;flex-direction:column;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="tab-item active" id="tab-manifest" onclick="switchTab('manifest')">Air Manifest Send (KR) <span class="tab-x">&#x2715;</span></div>
+  <div class="tab-item" id="tab-carrier" onclick="switchTab('carrier')">Carrier <span class="tab-x">&#x2715;</span></div>
+</div>
+
+<!-- BREADCRUMBS -->
+<div class="breadcrumb" id="bc-manifest">
+  Global Freight <span class="sep">&#x203A;</span> Air Forwarding <span class="sep">&#x203A;</span> <span class="cur">Air Manifest Send (KR)</span>
+</div>
+<div class="breadcrumb" id="bc-carrier" style="display:none">
+  Global Freight <span class="sep">&#x203A;</span> Master Data <span class="sep">&#x203A;</span> <span class="cur">Carrier</span>
+</div>
+
+<!-- ===================== PAGE: MANIFEST ===================== -->
+<div class="page active" id="page-manifest">
+
+  <div class="search-wrap" id="sw-manifest">
+    <div class="search-actions">
+      <button class="btn collapse-btn" id="cb-manifest" onclick="toggleCollapse('sw-manifest','cb-manifest')">&#x2227;</button>
+      <button class="btn reset" onclick="resetSearch()" title="초기화">&#x21BA;</button>
+      <button class="btn search-btn" onclick="doSearch()">Search</button>
+    </div>
+    <div class="search-grid">
+      <div class="sf">
+        <label>MAWB Status</label>
+        <select id="s-mawb-status">
+          <option value="">All</option>
+          <option value="New">New</option>
+          <option value="EPNINF Sent">EPNINF Sent</option>
+          <option value="FWB/FHL Sent">FWB/FHL Sent</option>
+        </select>
+      </div>
+      <div class="sf">
+        <label>MAWB No.</label>
+        <div class="multi-input" id="mawb-input-wrap">
+          <input type="text" id="s-mawb-no" placeholder="MAWB No." oninput="onMawbInput()">
+          <span class="add-btn">+</span>
+        </div>
+      </div>
+      <div class="sf" id="sf-hawb">
+        <label>HAWB No.</label>
+        <div class="multi-input" id="hawb-input-wrap">
+          <input type="text" id="s-hawb-no" placeholder="HAWB No." oninput="onHawbInput()">
+          <span class="add-btn">+</span>
+        </div>
+      </div>
+      <div class="sf">
+        <label>Carrier</label>
+        <div class="search-pop">
+          <input type="text" id="s-carrier" placeholder="ID/Name">
+          <span class="ico" onclick="openCarrierPopup()" style="cursor:pointer" title="Carrier 검색">&#128269;</span>
+        </div>
+      </div>
+      <div class="sf" id="sf-etd">
+        <label>ETD</label>
+        <div class="date-range">
+          <input type="date" id="s-etd-from" value="2026-05-29">
+          <span class="sep">~</span>
+          <input type="date" id="s-etd-to" value="2026-06-12">
+        </div>
+      </div>
+      <div class="sf">
+        <label>EDI Send Status</label>
+        <select id="s-edi-status">
+          <option value="">All</option>
+          <option value="N/A">N/A</option>
+          <option value="Processing">Processing</option>
+          <option value="Complete">Complete</option>
+          <option value="Error">Error</option>
+        </select>
+      </div>
+      <div class="sf">
+        <label>Need Resend</label>
+        <select id="s-need-resend">
+          <option value="">All</option>
+          <option value="Need Resend">Yes</option>
+          <option value="Normal">No</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-area">
+    <!-- MAWB -->
+    <div class="grid-panel">
+      <div class="grid-hd">
+        <div class="grid-hd-link">
+          <a href="https://www.ulogishub.com/" target="_blank" style="text-decoration:none">
+            <button class="btn link-btn">&#128279; KTNET/uLogisHub</button>
+          </a>
+        </div>
+        <div class="grid-hd-main">
+          <div class="grid-title">MAWB Info. <span class="cnt" id="mawb-count">&#xCD1D; 0&#xAC74;</span></div>
+          <div class="grid-btns">
+            <button class="btn sm" onclick="mawbHistory()">MAWB History</button>
+            <button class="btn sm" onclick="epninfSend()">EPNINF Send</button>
+            <button class="btn sm blue-btn" onclick="fwbFhlSend()">FWB/FHL Send</button>
+            <span class="btn-sep"></span>
+            <button class="btn icon-btn" title="&#xC5D1;&#xC140; &#xB2E4;&#xC6B4;&#xB85C;&#xB4DC;" onclick="downloadExcel('mawb')">&#x2B07;</button>
+            <button class="btn icon-btn" title="&#xAC1C;&#xC778;&#xD654;" onclick="openPersonalize('mawb')">&#9881;</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table id="mawb-table">
+          <thead><tr>
+            <th class="center" style="width:30px"><input type="checkbox" class="chk" onchange="toggleAll('mawb',this.checked)"></th>
+            <th onclick="sortTable('mawb','status')">Status <span class="sort" id="sort-mawb-status">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','ediStatus')">EDI Send Status <span class="sort" id="sort-mawb-ediStatus">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','needResend')">Need Resend <span class="sort" id="sort-mawb-needResend">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','mawbNo')">MAWB No. <span class="sort" id="sort-mawb-mawbNo">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','carrier')">Carrier <span class="sort" id="sort-mawb-carrier">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','flightName')">Flight Name <span class="sort" id="sort-mawb-flightName">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','pol')">POL <span class="sort" id="sort-mawb-pol">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','pod')">POD <span class="sort" id="sort-mawb-pod">&#x2195;</span></th>
+            <th onclick="sortTable('mawb','etd')">ETD <span class="sort asc" id="sort-mawb-etd">&#x2191;</span></th>
+            <th class="right" onclick="sortTable('mawb','pkgQty')">Pkg Qty. <span class="sort" id="sort-mawb-pkgQty">&#x2195;</span></th>
+            <th class="right" onclick="sortTable('mawb','grossWt')">Gross Wt <span class="sort" id="sort-mawb-grossWt">&#x2195;</span></th>
+            <th class="right" onclick="sortTable('mawb','chgWt')">Chg Wt <span class="sort" id="sort-mawb-chgWt">&#x2195;</span></th>
+            <th>Rate Class</th><th class="right">Charge Rate</th>
+            <th>OC Code1</th><th class="right">OC Amt1</th>
+            <th>OC Code2</th><th class="right">OC Amt2</th>
+            <th>OC Code3</th><th class="right">OC Amt3</th>
+          </tr></thead>
+          <tbody id="mawb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="connector">&#x25BC; MAWB 1&#xAC74; &#xC120;&#xD0DD; &#xC2DC; HAWB &#xBAA9;&#xB85D; &#xC5F0;&#xACC4; &#xC870;&#xD68C;</div>
+
+    <!-- HAWB -->
+    <div class="grid-panel">
+      <div class="grid-hd">
+        <div class="grid-hd-simple">
+          <div class="grid-title">HAWB Info. <span class="cnt" id="hawb-count">&#xCD1D; 0&#xAC74;</span> <span class="ctx" id="hawb-ctx"></span></div>
+          <div class="grid-btns">
+            <button class="btn sm" onclick="hawbHistory()">HAWB History</button>
+            <button class="btn sm" onclick="amendManifest()">Amend Manifest</button>
+            <button class="btn sm" onclick="addressAmend()">Address Amend</button>
+            <span class="btn-sep"></span>
+            <button class="btn icon-btn" title="&#xC5D1;&#xC140; &#xB2E4;&#xC6B4;&#xB85C;&#xB4DC;" onclick="downloadExcel('hawb')">&#x2B07;</button>
+            <button class="btn icon-btn" title="&#xAC1C;&#xC778;&#xD654;" onclick="openPersonalize('hawb')">&#9881;</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table id="hawb-table">
+          <thead><tr>
+            <th class="center" style="width:30px"><input type="checkbox" class="chk" onchange="toggleAll('hawb',this.checked)"></th>
+            <th onclick="sortTable('hawb','bizType')">Business Type <span class="sort" id="sort-hawb-bizType">&#x2195;</span></th>
+            <th onclick="sortTable('hawb','hawbNo')">HAWB No. <span class="sort asc" id="sort-hawb-hawbNo">&#x2191;</span></th>
+            <th onclick="sortTable('hawb','status')">Status <span class="sort" id="sort-hawb-status">&#x2195;</span></th>
+            <th onclick="sortTable('hawb','ediStatus')">EDI Send Status <span class="sort" id="sort-hawb-ediStatus">&#x2195;</span></th>
+            <th onclick="sortTable('hawb','needResend')">Need Resend <span class="sort" id="sort-hawb-needResend">&#x2195;</span></th>
+            <th class="right" onclick="sortTable('hawb','pkgQty')">Pkg Qty. <span class="sort" id="sort-hawb-pkgQty">&#x2195;</span></th>
+            <th>Pkg Unit</th>
+            <th class="right" onclick="sortTable('hawb','grossWt')">Gross Wt <span class="sort" id="sort-hawb-grossWt">&#x2195;</span></th>
+            <th>GW Unit</th>
+            <th>Cargo Description</th>
+            <th onclick="sortTable('hawb','sendDate')">Send Date <span class="sort" id="sort-hawb-sendDate">&#x2195;</span></th>
+            <th>Send Person</th><th>Shipper</th><th>Consignee</th><th>Notify</th>
+          </tr></thead>
+          <tbody id="hawb-tbody">
+            <tr class="empty"><td colspan="16">&#x2190; MAWB&#xB97C; &#xC120;&#xD0DD;&#xD558;&#xBA74; HAWB &#xBAA9;&#xB85D;&#xC774; &#xD45C;&#xC2DC;&#xB429;&#xB2C8;&#xB2E4;.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="connector">&#x25BC; HAWB 1&#xAC74; &#xC120;&#xD0DD; &#xC2DC; Export Declaration &#xC815;&#xBCF4; &#xC5F0;&#xACC4; &#xC870;&#xD68C;</div>
+
+    <!-- EDI -->
+    <div class="grid-panel">
+      <div class="grid-hd">
+        <div class="grid-hd-simple">
+          <div class="grid-title">Export Declaration Info. <span class="ctx" id="edi-ctx"></span></div>
+          <div class="grid-btns"><span class="readonly-label">Read Only &#x2014; HBL Detail &gt; Others&#xD0ED; &#xC5F0;&#xB3D9;</span></div>
+        </div>
+      </div>
+      <div class="tbl-wrap short readonly-tint">
+        <table>
+          <thead><tr>
+            <th>Export Declaration No.</th>
+            <th class="right">Pkg Qty.</th><th>Pkg Unit</th>
+            <th class="right">Gross Weight</th><th>GW Unit</th>
+            <th class="center">Same Pkg Code</th>
+            <th class="right">Same Pkg Qty.</th><th>Same Pkg Unit</th>
+            <th class="center">Split Shipment</th>
+            <th class="right">Split Order By</th>
+          </tr></thead>
+          <tbody id="edi-tbody">
+            <tr class="empty"><td colspan="10">&#x2190; HAWB&#xB97C; &#xC120;&#xD0DD;&#xD558;&#xBA74; &#xC218;&#xCD9C;&#xC2E0;&#xACE0; &#xC815;&#xBCF4;&#xAC00; &#xD45C;&#xC2DC;&#xB429;&#xB2C8;&#xB2E4;.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="readonly-note">* HBL Detail &gt; Others &#xD0ED;&#xC5D0;&#xC11C; &#xC785;&#xB825;&#xB41C; &#xC815;&#xBCF4;&#xB97C; Read Only&#xB85C; &#xD45C;&#xC2DC;&#xD569;&#xB2C8;&#xB2E4;.</div>
+    </div>
+  </div>
+</div><!-- /page-manifest -->
+
+<!-- ===================== PAGE: CARRIER ===================== -->
+<div class="page" id="page-carrier">
+
+  <div class="search-wrap" id="sw-carrier">
+    <div class="search-actions">
+      <button class="btn collapse-btn" id="cb-carrier" onclick="toggleCollapse('sw-carrier','cb-carrier')">&#x2227;</button>
+      <button class="btn reset" onclick="resetCarrierSearch()" title="&#xCD08;&#xAE30;&#xD654;">&#x21BA;</button>
+      <button class="btn search-btn" onclick="doCarrierSearch()">Search</button>
+    </div>
+    <div class="search-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="sf">
+        <label>Carrier Type</label>
+        <div class="type-toggle-group" id="ctype-group">
+          <button class="type-btn sel" data-val="AIR" onclick="toggleType(this)">AIR</button>
+          <button class="type-btn" data-val="SHIP" onclick="toggleType(this)">SHIP</button>
+          <button class="type-btn" data-val="FWDR" onclick="toggleType(this)">FWDR</button>
+          <button class="type-btn" data-val="ROAD" onclick="toggleType(this)">ROAD</button>
+        </div>
+      </div>
+      <div class="sf">
+        <label>Carrier</label>
+        <div class="tag-wrap" id="tw-carrier" onclick="this.querySelector('input').focus()">
+          <input type="text" placeholder="&#xC785;&#xB825; &#xD6C4; Enter" onkeydown="addChip(event,'carrier')">
+        </div>
+      </div>
+      <div class="sf">
+        <label>Carrier ID</label>
+        <div class="tag-wrap" id="tw-cid" onclick="this.querySelector('input').focus()">
+          <input type="text" placeholder="&#xC785;&#xB825; &#xD6C4; Enter" onkeydown="addChip(event,'cid')">
+        </div>
+      </div>
+      <div class="sf">
+        <label>SCAC</label>
+        <div class="tag-wrap" id="tw-scac" onclick="this.querySelector('input').focus()">
+          <input type="text" placeholder="&#xC785;&#xB825; &#xD6C4; Enter" onkeydown="addChip(event,'scac')">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-area">
+    <div class="grid-panel">
+      <div class="grid-hd">
+        <div class="grid-hd-simple">
+          <div class="grid-title">Carrier <span class="cnt" id="carrier-count">&#xCD1D; 0&#xAC74;</span></div>
+          <div class="grid-btns">
+            <button class="btn icon-btn" title="&#xC5D1;&#xC140; &#xB2E4;&#xC6B4;&#xB85C;&#xB4DC;" onclick="downloadCarrierExcel()">&#x2B07;</button>
+            <button class="btn icon-btn" title="&#xAC1C;&#xC778;&#xD654;" onclick="openPersonalize('carrier')">&#9881;</button>
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap" style="max-height:400px">
+        <table id="carrier-table">
+          <thead><tr>
+            <th class="center" style="width:30px"><input type="checkbox" class="chk" onchange="toggleCarrierAll(this.checked)"></th>
+            <th onclick="sortCarrier('typeCode')">Carrier Type Code <span class="sort" id="sort-c-typeCode">&#x2195;</span></th>
+            <th onclick="sortCarrier('carrier')">Carrier <span class="sort" id="sort-c-carrier">&#x2195;</span></th>
+            <th onclick="sortCarrier('carrierName')">Carrier Name <span class="sort" id="sort-c-carrierName">&#x2195;</span></th>
+            <th onclick="sortCarrier('carrierId')">Carrier ID <span class="sort" id="sort-c-carrierId">&#x2195;</span></th>
+            <th onclick="sortCarrier('scac')">SCAC <span class="sort" id="sort-c-scac">&#x2195;</span></th>
+          </tr></thead>
+          <tbody id="carrier-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-carrier -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closePersonalize()">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3 id="modal-title">&#xCEEC;&#xB7FC; &#xC124;&#xC815;</h3>
+      <button class="modal-close" onclick="closePersonalize()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <p>&#xD45C;&#xC2DC;&#xD560; &#xCEEC;&#xB7FC;&#xC744; &#xC120;&#xD0DD;&#xD558;&#xACE0; &#xB4DC;&#xB798;&#xADF8;&#xB85C; &#xC21C;&#xC11C;&#xB97C; &#xC870;&#xC815;&#xD558;&#xC138;&#xC694;.</p>
+      <div id="modal-col-list"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn sm" onclick="resetPersonalize()">&#xCD08;&#xAE30;&#xD654;</button>
+      <button class="btn sm blue-btn" onclick="applyPersonalize()">&#xC801;&#xC6A9;</button>
+      <button class="btn sm" onclick="closePersonalize()">&#xB2EB;&#xAE30;</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST (global, outside any page div) -->
+
+
+<!-- ===== MAWB HISTORY POPUP ===== -->
+<div class="mpop-overlay" id="mpop-overlay">
+  <div class="mpop-box">
+
+    <div class="hpop-hd">
+      <span class="hpop-hd-title">MAWB Manifest History</span>
+      <button class="hpop-hd-close" onclick="closeMawbHistory()" title="닫기">&#x2715;</button>
+    </div>
+
+    <div class="hpop-date-bar">
+      <label>Manifest Send Date</label>
+      <select id="mpop-date-sel" onchange="loadMawbHistory(this.value)"></select>
+      <span class="hpop-date-hint">&#x25B6; 전송 시점 선택 시 해당 시점의 데이터가 표시됩니다</span>
+    </div>
+
+    <div class="hpop-body">
+
+      <!-- MAWB Info -->
+      <div class="hpop-section">
+        <div class="hpop-sec-title">MAWB Info. <span class="ro-tag">Read Only</span></div>
+        <div class="hpop-tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>MAWB No.</th><th>Carrier</th><th>Flight Name</th>
+              <th>POL</th><th>POD</th>
+              <th class="right">Package Qty.</th>
+              <th class="right">Gross Weight (KG)</th>
+              <th class="right">Chargeable Weight (KG)</th>
+            </tr></thead>
+            <tbody id="mpop-mawb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Rate / OC (영역명 없음) -->
+      <div class="hpop-section">
+        <div class="hpop-tbl-wrap" style="border-radius:2px">
+          <table>
+            <thead><tr>
+              <th>Rate Class</th>
+              <th class="right">Charge Rate</th>
+              <th>OC Code1</th><th class="right">OC Amt1</th>
+              <th>OC Code2</th><th class="right">OC Amt2</th>
+              <th>OC Code3</th><th class="right">OC Amt3</th>
+            </tr></thead>
+            <tbody id="mpop-rate-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Party -->
+      <div class="hpop-party-row" style="margin-bottom:10px">
+        <div class="hpop-party-box">
+          <div class="hpop-party-label">Shipper</div>
+          <div class="hpop-party-text" id="mpop-shipper"></div>
+        </div>
+        <div class="hpop-party-box">
+          <div class="hpop-party-label">Consignee</div>
+          <div class="hpop-party-text" id="mpop-consignee"></div>
+        </div>
+        <div class="hpop-party-box">
+          <div class="hpop-party-label">Notify</div>
+          <div class="hpop-party-text" id="mpop-notify"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="hpop-ft">
+      <button class="btn cancel-btn" onclick="closeMawbHistory()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== HAWB HISTORY POPUP ===== -->
+<div class="hpop-overlay" id="hpop-overlay">
+  <div class="hpop-box">
+
+    <!-- 헤더 -->
+    <div class="hpop-hd">
+      <span class="hpop-hd-title">HAWB Manifest History</span>
+      <button class="hpop-hd-close" onclick="closeHawbHistory()" title="닫기">&#x2715;</button>
+    </div>
+
+    <!-- 날짜 드롭다운 -->
+    <div class="hpop-date-bar">
+      <label>Manifest Send Date</label>
+      <select id="hpop-date-sel" onchange="loadHawbHistory(this.value)">
+        <!-- JS로 동적 생성 -->
+      </select>
+      <span class="hpop-date-hint">&#x25B6; 전송 시점 선택 시 해당 시점의 데이터가 표시됩니다</span>
+    </div>
+
+    <!-- 본문 -->
+    <div class="hpop-body" id="hpop-body">
+
+      <!-- MAWB Info -->
+      <div class="hpop-section">
+        <div class="hpop-sec-title">MAWB Info. <span class="ro-tag">Read Only</span></div>
+        <div class="hpop-tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>MAWB No.</th>
+              <th>Carrier</th>
+            </tr></thead>
+            <tbody id="hpop-mawb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HAWB Info -->
+      <div class="hpop-section">
+        <div class="hpop-sec-title">HAWB Info. <span class="ro-tag">Read Only</span></div>
+        <div class="hpop-tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Business Type</th>
+              <th>HAWB No.</th>
+              <th class="right">Package Qty.</th>
+              <th>Unit</th>
+              <th class="right">Gross Weight (KG)</th>
+              <th class="right">Volume (CBM)</th>
+              <th>Cargo Description</th>
+              <th>Loading Place</th>
+            </tr></thead>
+            <tbody id="hpop-hawb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Party: Shipper / Consignee / Notify -->
+      <div class="hpop-party-row" id="hpop-party-row">
+        <div class="hpop-party-box">
+          <div class="hpop-party-label">Shipper</div>
+          <div class="hpop-party-text" id="hpop-shipper"></div>
+        </div>
+        <div class="hpop-party-box">
+          <div class="hpop-party-label">Consignee</div>
+          <div class="hpop-party-text" id="hpop-consignee"></div>
+        </div>
+        <div class="hpop-party-box">
+          <div class="hpop-party-label">Notify</div>
+          <div class="hpop-party-text" id="hpop-notify"></div>
+        </div>
+      </div>
+
+      <!-- Export Declaration Info -->
+      <div class="hpop-section" style="margin-bottom:10px">
+        <div class="hpop-sec-title">Export Declaration Info. <span class="ro-tag">Read Only</span></div>
+        <div class="hpop-tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Export Declaration No.</th>
+              <th class="right">Pkg Qty.</th>
+              <th>Pkg Unit</th>
+              <th class="right">Gross Weight</th>
+              <th>GW Unit</th>
+              <th class="center">Same Pkg Code</th>
+              <th class="right">Same Pkg Qty.</th>
+              <th>Same Pkg Unit</th>
+              <th class="center">Split Shipment</th>
+              <th class="right">Split Order By</th>
+            </tr></thead>
+            <tbody id="hpop-edi-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /hpop-body -->
+
+    <!-- 하단 -->
+    <div class="hpop-ft">
+      <button class="btn cancel-btn" onclick="closeHawbHistory()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== CARRIER SEARCH POPUP ===== -->
+<div class="cpop-overlay" id="cpop-overlay">
+  <div class="cpop-box">
+
+    <!-- 헤더 -->
+    <div class="cpop-hd">
+      <span class="cpop-hd-title">Search Carrier</span>
+      <button class="cpop-hd-close" onclick="closeCarrierPopup()" title="닫기">&#x2715;</button>
+    </div>
+
+    <!-- 검색조건 -->
+    <div class="cpop-search">
+      <div class="cpop-search-actions">
+        <button class="btn collapse-btn" id="cpop-cb" onclick="toggleCollapse('cpop-search-body','cpop-cb')">&#x2227;</button>
+        <button class="btn reset" onclick="resetCpopSearch()" title="초기화">&#x21BA;</button>
+        <button class="btn search-btn" onclick="doCpopSearch()">Search</button>
+      </div>
+      <div class="cpop-search-grid" id="cpop-search-body">
+        <!-- Carrier Type: 다건 토글 -->
+        <div class="sf">
+          <label>Carrier Type</label>
+          <div class="type-toggle-group" id="cpop-type-group">
+            <button class="type-btn sel" data-val="AIR" onclick="this.classList.toggle('sel')">AIR</button>
+            <button class="type-btn"     data-val="SHIP" onclick="this.classList.toggle('sel')">SHIP</button>
+            <button class="type-btn"     data-val="FWDR" onclick="this.classList.toggle('sel')">FWDR</button>
+            <button class="type-btn"     data-val="ROAD" onclick="this.classList.toggle('sel')">ROAD</button>
+          </div>
+        </div>
+        <!-- Carrier: 다건 태그 -->
+        <div class="sf">
+          <label>Carrier</label>
+          <div class="tag-wrap" id="cpop-tw-carrier" onclick="this.querySelector('input').focus()">
+            <input type="text" placeholder="입력 후 Enter" onkeydown="addCpopChip(event,'carrier')">
+          </div>
+        </div>
+        <!-- Carrier ID: 다건 태그 -->
+        <div class="sf">
+          <label>Carrier ID</label>
+          <div class="tag-wrap" id="cpop-tw-cid" onclick="this.querySelector('input').focus()">
+            <input type="text" placeholder="입력 후 Enter" onkeydown="addCpopChip(event,'cid')">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 테이블 -->
+    <div class="cpop-body">
+      <div class="cpop-tbl-hd">
+        <div class="cpop-tbl-title">
+          Carrier
+          <span class="cnt" id="cpop-count">총 0건</span>
+        </div>
+        <div class="grid-btns">
+          <button class="btn icon-btn" title="개인화" onclick="openPersonalize('cpop')">&#9881;</button>
+        </div>
+      </div>
+      <div class="cpop-tbl-wrap">
+        <table id="cpop-table">
+          <thead><tr>
+            <th class="center" style="width:30px"><input type="checkbox" class="chk" id="cpop-chk-all" onchange="cpopToggleAll(this.checked)"></th>
+            <th onclick="sortCpop('typeCode')">Carrier Type Code <span class="sort" id="sort-cpop-typeCode">&#x2195;</span></th>
+            <th onclick="sortCpop('carrier')">Carrier <span class="sort" id="sort-cpop-carrier">&#x2195;</span></th>
+            <th onclick="sortCpop('carrierName')">Carrier Name <span class="sort" id="sort-cpop-carrierName">&#x2195;</span></th>
+            <th onclick="sortCpop('carrierId')">Carrier ID <span class="sort" id="sort-cpop-carrierId">&#x2195;</span></th>
+            <th onclick="sortCpop('scac')">SCAC <span class="sort" id="sort-cpop-scac">&#x2195;</span></th>
+          </tr></thead>
+          <tbody id="cpop-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 하단 버튼 -->
+    <div class="cpop-ft">
+      <button class="btn cancel-btn" onclick="closeCarrierPopup()">Cancel</button>
+      <button class="btn confirm-btn" onclick="confirmCarrierPopup()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const RC = ['Q','N','M','C','R','U','B','X'];
+const OC = ['','PP','CC','CA','CX','PX'];
+
+const mawbData = [
+  {id:1,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',
+   mawbNo:'180-12345678',carrier:'KE',flightName:'KE123',pol:'ICN',pod:'LAX',etd:'2026-05-30',
+   pkgQty:10,grossWt:250.0,chgWt:300.0,rateClass:'Q',chargeRate:5.5,ocCode1:'PP',ocAmt1:100.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+  {id:2,checked:false,status:'EPNINF Sent',ediStatus:'Error',needResend:'Need Resend',
+   mawbNo:'180-87654321',carrier:'OZ',flightName:'OZ201',pol:'ICN',pod:'NRT',etd:'2026-05-31',
+   pkgQty:5,grossWt:80.5,chgWt:95.0,rateClass:'N',chargeRate:3.2,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+  {id:3,checked:false,status:'New',ediStatus:'N/A',needResend:'Normal',
+   mawbNo:'180-11223344',carrier:'LH',flightName:'LH712',pol:'ICN',pod:'FRA',etd:'2026-06-01',
+   pkgQty:20,grossWt:500.0,chgWt:520.0,rateClass:'M',chargeRate:4.8,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+  {id:4,checked:false,status:'EPNINF Sent',ediStatus:'Processing',needResend:'Normal',
+   mawbNo:'180-55667788',carrier:'CX',flightName:'CX418',pol:'ICN',pod:'HKG',etd:'2026-06-02',
+   pkgQty:8,grossWt:120.0,chgWt:135.0,rateClass:'Q',chargeRate:6.0,ocCode1:'CC',ocAmt1:50.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+  {id:5,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Need Resend',
+   mawbNo:'180-99887766',carrier:'JL',flightName:'JL092',pol:'ICN',pod:'NRT',etd:'2026-06-03',
+   pkgQty:3,grossWt:40.0,chgWt:45.0,rateClass:'C',chargeRate:7.2,ocCode1:'CA',ocAmt1:30.0,ocCode2:'PX',ocAmt2:10.0,ocCode3:'',ocAmt3:''},
+  {id:6,checked:false,status:'New',ediStatus:'N/A',needResend:'Normal',
+   mawbNo:'180-22334455',carrier:'AA',flightName:'AA280',pol:'ICN',pod:'JFK',etd:'2026-06-04',
+   pkgQty:15,grossWt:340.0,chgWt:360.0,rateClass:'Q',chargeRate:5.9,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+  {id:7,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',
+   mawbNo:'180-33445566',carrier:'EK',flightName:'EK322',pol:'ICN',pod:'DXB',etd:'2026-06-05',
+   pkgQty:12,grossWt:280.0,chgWt:295.0,rateClass:'N',chargeRate:4.2,ocCode1:'CC',ocAmt1:80.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+  {id:8,checked:false,status:'EPNINF Sent',ediStatus:'Error',needResend:'Need Resend',
+   mawbNo:'180-44556677',carrier:'KE',flightName:'KE017',pol:'ICN',pod:'CDG',etd:'2026-06-06',
+   pkgQty:7,grossWt:155.0,chgWt:168.0,rateClass:'M',chargeRate:5.1,ocCode1:'PP',ocAmt1:60.0,ocCode2:'CA',ocAmt2:20.0,ocCode3:'',ocAmt3:''},
+  {id:9,checked:false,status:'New',ediStatus:'N/A',needResend:'Normal',
+   mawbNo:'180-55778899',carrier:'OZ',flightName:'OZ541',pol:'ICN',pod:'SYD',etd:'2026-06-07',
+   pkgQty:25,grossWt:620.0,chgWt:650.0,rateClass:'Q',chargeRate:6.5,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+  {id:10,checked:false,status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',
+   mawbNo:'180-66889900',carrier:'LH',flightName:'LH714',pol:'ICN',pod:'MUC',etd:'2026-06-08',
+   pkgQty:18,grossWt:410.0,chgWt:430.0,rateClass:'C',chargeRate:4.5,ocCode1:'CX',ocAmt1:35.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:''},
+]
+
+const hawbData = {
+  1:[
+    {id:1,checked:false,bizType:'E',hawbNo:'SELA001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Sent',pkgQty:3,pkgUnit:'PCS',grossWt:75.0,gwUnit:'KG',cargoDesc:'ELECTRONIC',sendDate:'2026-05-30 09:12',sendPerson:'user01',shipper:'Samsung Co.',consignee:'ABC Corp.',notify:'-'},
+    {id:2,checked:false,bizType:'E',hawbNo:'SELA002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:5,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',cargoDesc:'MACHINERY',sendDate:'2026-05-30 09:15',sendPerson:'user01',shipper:'LG Electronics',consignee:'XYZ Ltd.',notify:'XYZ Ltd.'},
+    {id:3,checked:false,bizType:'R',hawbNo:'SELA003',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:2,pkgUnit:'PCS',grossWt:55.0,gwUnit:'KG',cargoDesc:'',sendDate:'-',sendPerson:'-',shipper:'Hanon Corp.',consignee:'DEF Inc.',notify:'-'},
+  ],
+  2:[{id:4,checked:false,bizType:'E',hawbNo:'SELB001',status:'EPNINF Sent',ediStatus:'Error',needResend:'Resend',pkgQty:5,pkgUnit:'PCS',grossWt:80.5,gwUnit:'KG',cargoDesc:'AUTO PARTS',sendDate:'2026-05-31 10:00',sendPerson:'user02',shipper:'Hyundai Motor',consignee:'TYO Motors',notify:'-'}],
+  3:[
+    {id:5,checked:false,bizType:'E',hawbNo:'SELC001',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:10,pkgUnit:'PCS',grossWt:200.0,gwUnit:'KG',cargoDesc:'SEMICONDUCTOR',sendDate:'-',sendPerson:'-',shipper:'SK Hynix',consignee:'Intel Corp.',notify:'-'},
+    {id:6,checked:false,bizType:'E',hawbNo:'SELC002',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:10,pkgUnit:'PCS',grossWt:300.0,gwUnit:'KG',cargoDesc:'DISPLAY',sendDate:'-',sendPerson:'-',shipper:'LG Display',consignee:'Apple Inc.',notify:'-'},
+  ],
+  4:[{id:7,checked:false,bizType:'E',hawbNo:'SELD001',status:'EPNINF Sent',ediStatus:'Processing',needResend:'Normal',pkgQty:8,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',cargoDesc:'COSMETICS',sendDate:'2026-06-02 08:30',sendPerson:'user03',shipper:'AmorePacific',consignee:'Sephora HK',notify:'-'}],
+  5:[
+    {id:8,checked:false,bizType:'E',hawbNo:'SELE001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Resend',pkgQty:2,pkgUnit:'PCS',grossWt:25.0,gwUnit:'KG',cargoDesc:'MEDICAL DEVICE',sendDate:'2026-06-03 07:15',sendPerson:'user01',shipper:'Medtronic KR',consignee:'Medtronic JP',notify:'-'},
+    {id:9,checked:false,bizType:'R',hawbNo:'SELE002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:1,pkgUnit:'PCS',grossWt:15.0,gwUnit:'KG',cargoDesc:'BATTERY',sendDate:'2026-06-03 07:18',sendPerson:'user01',shipper:'Samsung SDI',consignee:'CATL Japan',notify:'CATL Japan'},
+  ],
+  6:[
+    {id:10,checked:false,bizType:'E',hawbNo:'SELF001',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:8,pkgUnit:'PCS',grossWt:180.0,gwUnit:'KG',cargoDesc:'AIRCRAFT PARTS',sendDate:'-',sendPerson:'-',shipper:'Korean Air MRO',consignee:'AA Maintenance',notify:'-'},
+    {id:11,checked:false,bizType:'E',hawbNo:'SELF002',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:7,pkgUnit:'PCS',grossWt:160.0,gwUnit:'KG',cargoDesc:'AVIONICS',sendDate:'-',sendPerson:'-',shipper:'LIG Nex1',consignee:'AA Tech Inc.',notify:'AA Tech Inc.'},
+  ],
+  7:[
+    {id:12,checked:false,bizType:'E',hawbNo:'SELG001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:6,pkgUnit:'PCS',grossWt:140.0,gwUnit:'KG',cargoDesc:'PERFUME',sendDate:'2026-06-05 11:20',sendPerson:'user02',shipper:'Lotte Duty Free',consignee:'Dubai Mall LLC',notify:'-'},
+    {id:13,checked:false,bizType:'R',hawbNo:'SELG002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:6,pkgUnit:'PCS',grossWt:140.0,gwUnit:'KG',cargoDesc:'LUXURY GOODS',sendDate:'2026-06-05 11:25',sendPerson:'user02',shipper:'Shinsegae Int.',consignee:'Emirates Retail',notify:'Emirates Retail'},
+  ],
+  8:[
+    {id:14,checked:false,bizType:'E',hawbNo:'SELH001',status:'EPNINF Sent',ediStatus:'Error',needResend:'Resend',pkgQty:4,pkgUnit:'PCS',grossWt:90.0,gwUnit:'KG',cargoDesc:'WINE',sendDate:'2026-06-06 09:00',sendPerson:'user03',shipper:'Hyundai Corp.',consignee:'Paris Cellar',notify:'-'},
+    {id:15,checked:false,bizType:'E',hawbNo:'SELH002',status:'EPNINF Sent',ediStatus:'Error',needResend:'Need Resend',pkgQty:3,pkgUnit:'PCS',grossWt:65.0,gwUnit:'KG',cargoDesc:'GOURMET FOOD',sendDate:'2026-06-06 09:10',sendPerson:'user03',shipper:'CJ Foods',consignee:'Galeries Lafayette',notify:'-'},
+  ],
+  9:[
+    {id:16,checked:false,bizType:'E',hawbNo:'SELI001',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:12,pkgUnit:'PCS',grossWt:310.0,gwUnit:'KG',cargoDesc:'STEEL PARTS',sendDate:'-',sendPerson:'-',shipper:'POSCO',consignee:'BlueScope Steel',notify:'-'},
+    {id:17,checked:false,bizType:'E',hawbNo:'SELI002',status:'New',ediStatus:'N/A',needResend:'Normal',pkgQty:13,pkgUnit:'PCS',grossWt:310.0,gwUnit:'KG',cargoDesc:'METAL SHEET',sendDate:'-',sendPerson:'-',shipper:'Hyundai Steel',consignee:'OneSteel Ltd.',notify:'OneSteel Ltd.'},
+  ],
+  10:[
+    {id:18,checked:false,bizType:'E',hawbNo:'SELJ001',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:9,pkgUnit:'PCS',grossWt:205.0,gwUnit:'KG',cargoDesc:'AUTOMOTIVE',sendDate:'2026-06-08 08:45',sendPerson:'user01',shipper:'Kia Motors',consignee:'BMW Munich',notify:'-'},
+    {id:19,checked:false,bizType:'R',hawbNo:'SELJ002',status:'FWB/FHL Sent',ediStatus:'Complete',needResend:'Normal',pkgQty:9,pkgUnit:'PCS',grossWt:205.0,gwUnit:'KG',cargoDesc:'CAR COMPONENTS',sendDate:'2026-06-08 08:50',sendPerson:'user01',shipper:'Hyundai Mobis',consignee:'Volkswagen AG',notify:'Volkswagen AG'},
+  ],
+}
+
+const ediData = {
+  1:{expDeclNo:'12345-26-1234567X',pkgQty:3,pkgUnit:'PCS',grossWt:75.0,gwUnit:'KG',samePkgCode:'A',samePkgQty:3,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1},
+  2:{expDeclNo:'12346-26-2345678Y',pkgQty:5,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},
+  3:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  4:{expDeclNo:'12347-26-3456789Z',pkgQty:5,pkgUnit:'PCS',grossWt:80.5,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},
+  5:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  6:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  7:{expDeclNo:'12348-26-4567890A',pkgQty:8,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},
+  8:{expDeclNo:'12349-26-5678901B',pkgQty:2,pkgUnit:'PCS',grossWt:25.0,gwUnit:'KG',samePkgCode:'B',samePkgQty:2,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:2},
+  9:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  10:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  11:{expDeclNo:'12350-26-6789012C',pkgQty:7,pkgUnit:'PCS',grossWt:160.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},
+  12:{expDeclNo:'12351-26-7890123D',pkgQty:6,pkgUnit:'PCS',grossWt:140.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},
+  13:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  14:{expDeclNo:'12352-26-8901234E',pkgQty:4,pkgUnit:'PCS',grossWt:90.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},
+  15:{expDeclNo:'12353-26-9012345F',pkgQty:3,pkgUnit:'PCS',grossWt:65.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'},
+  16:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  17:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+  18:{expDeclNo:'12354-26-0123456G',pkgQty:9,pkgUnit:'PCS',grossWt:205.0,gwUnit:'KG',samePkgCode:'A',samePkgQty:9,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1},
+  19:{expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'},
+}
+
+const carrierMaster = [
+  {id:1,checked:false,typeCode:'AIR', carrier:'KE', carrierName:'Korean Air',              carrierId:'KE-AIR-001', scac:'KEAL'},
+  {id:2,checked:false,typeCode:'AIR', carrier:'OZ', carrierName:'Asiana Airlines',         carrierId:'OZ-AIR-001', scac:'AAAR'},
+  {id:3,checked:false,typeCode:'AIR', carrier:'LH', carrierName:'Lufthansa Cargo',         carrierId:'LH-AIR-001', scac:'LUFT'},
+  {id:4,checked:false,typeCode:'AIR', carrier:'CX', carrierName:'Cathay Pacific Cargo',    carrierId:'CX-AIR-001', scac:'CPAC'},
+  {id:5,checked:false,typeCode:'AIR', carrier:'JL', carrierName:'Japan Airlines Cargo',    carrierId:'JL-AIR-001', scac:'JALC'},
+  {id:6,checked:false,typeCode:'AIR', carrier:'AA', carrierName:'American Airlines Cargo', carrierId:'AA-AIR-001', scac:'AACG'},
+  {id:7,checked:false,typeCode:'AIR', carrier:'EK', carrierName:'Emirates SkyCargo',       carrierId:'EK-AIR-001', scac:'EMSK'},
+  {id:8,checked:false,typeCode:'SHIP',carrier:'HMM',carrierName:'Hyundai Merchant Marine', carrierId:'HMM-SHP-001',scac:'HDMU'},
+  {id:9,checked:false,typeCode:'SHIP',carrier:'MSC',carrierName:'Mediterranean Shipping',  carrierId:'MSC-SHP-001',scac:'MSCU'},
+  {id:10,checked:false,typeCode:'FWDR',carrier:'DHL',carrierName:'DHL Global Forwarding',  carrierId:'DHL-FWD-001',scac:'DHLG'},
+  {id:11,checked:false,typeCode:'FWDR',carrier:'FDX',carrierName:'FedEx Express',          carrierId:'FDX-FWD-001',scac:'FDXE'},
+  {id:12,checked:false,typeCode:'ROAD',carrier:'KFS',carrierName:'Korea Fast Ship',        carrierId:'KFS-RD-001', scac:'KFSR'},
+];
+
+/* ── STATE ── */
+let filteredMawb=[], selectedMawbId=null, selectedHawbId=null;
+let mawbSort={col:'etd',dir:'asc'}, hawbSort={col:'hawbNo',dir:'asc'};
+let filteredCarrier=[], carrierSort={col:'carrier',dir:'asc'};
+const chips={carrier:[],cid:[],scac:[]};
+let pmGrid=null, pmTmp=[], dragIdx=null;
+
+
+/* ── COLUMN DEFAULTS (초기화용 원본 사본) ── */
+var mawbColsDefault = [
+  {key:'status',    label:'Status'},          {key:'ediStatus', label:'EDI Send Status'},
+  {key:'needResend',label:'Need Resend'},      {key:'mawbNo',    label:'MAWB No.'},
+  {key:'carrier',   label:'Carrier'},          {key:'flightName',label:'Flight Name'},
+  {key:'pol',       label:'POL'},              {key:'pod',       label:'POD'},
+  {key:'etd',       label:'ETD'},              {key:'pkgQty',    label:'Pkg Qty.'},
+  {key:'grossWt',   label:'Gross Wt'},         {key:'chgWt',     label:'Chg Wt'},
+  {key:'rateClass', label:'Rate Class'},       {key:'chargeRate',label:'Charge Rate'},
+  {key:'ocCode1',   label:'OC Code1'},         {key:'ocAmt1',    label:'OC Amt1'},
+  {key:'ocCode2',   label:'OC Code2'},         {key:'ocAmt2',    label:'OC Amt2'},
+  {key:'ocCode3',   label:'OC Code3'},         {key:'ocAmt3',    label:'OC Amt3'},
+];
+var hawbColsDefault = [
+  {key:'bizType',   label:'Business Type'},    {key:'hawbNo',    label:'HAWB No.'},
+  {key:'status',    label:'Status'},           {key:'ediStatus', label:'EDI Send Status'},
+  {key:'needResend',label:'Need Resend'},      {key:'pkgQty',    label:'Pkg Qty.'},
+  {key:'pkgUnit',   label:'Pkg Unit'},         {key:'grossWt',   label:'Gross Wt'},
+  {key:'gwUnit',    label:'GW Unit'},          {key:'cargoDesc', label:'Cargo Description'},
+  {key:'sendDate',  label:'Send Date'},        {key:'sendPerson',label:'Send Person'},
+  {key:'shipper',   label:'Shipper'},          {key:'consignee', label:'Consignee'},
+  {key:'notify',    label:'Notify'},
+];
+var carrierColsDefault = [
+  {key:'typeCode',   label:'Carrier Type Code'},{key:'carrier',    label:'Carrier'},
+  {key:'carrierName',label:'Carrier Name'},      {key:'carrierId',  label:'Carrier ID'},
+  {key:'scac',       label:'SCAC'},
+];
+
+/* ── TOAST ── */
+function toast(msg,type){
+  const wrap=document.getElementById('toast-wrap');
+  const el=document.createElement('div');
+  el.className='toast'+(type?' '+type:'');
+  el.textContent=msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300);},2500);
+}
+
+/* ── TAB SWITCH ── */
+function switchTab(t){
+  ['manifest','carrier'].forEach(function(name){
+    document.getElementById('tab-'+name).classList.toggle('active',name===t);
+    document.getElementById('page-'+name).classList.toggle('active',name===t);
+  });
+  document.getElementById('bc-manifest').style.display = t==='manifest'?'':'none';
+  document.getElementById('bc-carrier').style.display  = t==='carrier' ?'':'none';
+  if(t==='carrier') doCarrierSearch();
+}
+
+/* ── COLLAPSE ── */
+function toggleCollapse(swId,cbId){
+  var sw=document.getElementById(swId), cb=document.getElementById(cbId);
+  var c=sw.classList.toggle('collapsed');
+  cb.classList.toggle('collapsed',c);
+}
+
+/* ── SORT HELPER ── */
+function sortArr(arr,col,dir){
+  return arr.slice().sort(function(a,b){
+    var va=a[col]!=null?a[col]:'', vb=b[col]!=null?b[col]:'';
+    if(typeof va==='number') return dir==='asc'?va-vb:vb-va;
+    return dir==='asc'?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
+  });
+}
+function setSortIcon(prefix,col,dir){
+  document.querySelectorAll('[id^="sort-'+prefix+'"]').forEach(function(el){el.textContent='\u2195';el.className='sort';});
+  var el=document.getElementById('sort-'+prefix+col);
+  if(el){el.textContent=dir==='asc'?'\u2191':'\u2193';el.className='sort '+(dir==='asc'?'asc':'desc');}
+}
+
+/* ── BADGE ── */
+function badge(v){
+  var m={'New':'b-new','EPNINF Sent':'b-epninf','FWB/FHL Sent':'b-fwbfhl','N/A':'b-na',
+         'Processing':'b-proc','Complete':'b-complete','Error':'b-error',
+         'Need Resend':'b-resend','Normal':'b-normal','Resend':'b-resend','Sent':'b-sent',
+         'AIR':'b-epninf','SHIP':'b-fwbfhl','FWDR':'b-proc','ROAD':'b-normal'};
+  return '<span class="badge '+(m[v]||'b-na')+'">'+v+'</span>';
+}
+
+/* ── EVENT DELEGATION ── */
+document.addEventListener('DOMContentLoaded', function(){
+  // MAWB tbody delegation
+  document.getElementById('mawb-tbody').addEventListener('click', function(e){
+    var tr = e.target.closest('tr[data-id]');
+    if(!tr) return;
+    var id = Number(tr.dataset.id);
+    if(e.target.classList.contains('chk')){
+      e.stopPropagation();
+      var item=filteredMawb.find(function(d){return d.id===id;});
+      if(item) item.checked=e.target.checked;
+      return;
+    }
+    if(e.target.closest('.ec')) return;
+    selectMawb(id);
+  });
+  // HAWB tbody delegation
+  document.getElementById('hawb-tbody').addEventListener('click', function(e){
+    var tr = e.target.closest('tr[data-id]');
+    if(!tr) return;
+    var id = Number(tr.dataset.id);
+    if(e.target.classList.contains('chk')){
+      e.stopPropagation();
+      for(var rows of Object.values(hawbData)){
+        var item=rows.find(function(d){return d.id===id;});
+        if(item){item.checked=e.target.checked;break;}
+      }
+      return;
+    }
+    if(e.target.closest('.ec')) return;
+    selectHawb(id);
+  });
+  // MAWB select/input change delegation
+  document.getElementById('mawb-tbody').addEventListener('change', function(e){
+    var tr = e.target.closest('tr[data-id]');
+    if(!tr) return;
+    var id = Number(tr.dataset.id);
+    var field = e.target.dataset.field;
+    if(field) updMawb(id, field, e.target.value);
+  });
+  // HAWB input change delegation
+  document.getElementById('hawb-tbody').addEventListener('change', function(e){
+    var tr = e.target.closest('tr[data-id]');
+    if(!tr) return;
+    var id = Number(tr.dataset.id);
+    var field = e.target.dataset.field;
+    if(field) updHawb(id, field, e.target.value);
+  });
+  // Carrier tbody delegation
+  document.getElementById('carrier-tbody').addEventListener('click', function(e){
+    if(e.target.classList.contains('chk')){
+      var tr = e.target.closest('tr[data-id]');
+      if(!tr) return;
+      var id = Number(tr.dataset.id);
+      var item=filteredCarrier.find(function(d){return d.id===id;});
+      if(item) item.checked=e.target.checked;
+    }
+  });
+  /* 초기 thead 빌드 (하드코딩 thead → JS 동적 thead로 교체) */
+  rebuildMawbThead();
+  rebuildHawbThead();
+  rebuildCarrierThead();
+  doSearch();
+  doCarrierSearch();
+});
+
+/* ════════════════════════════════
+   MANIFEST SEARCH
+════════════════════════════════ */
+
+/* ════════════════════════════════
+   PERSONALIZATION APPLY HELPERS
+════════════════════════════════ */
+
+/* MAWB 컬럼 메타: right-align, sortKey */
+var mawbColMeta = {
+  status:      {align:'',    sort:true},
+  ediStatus:   {align:'',    sort:true},
+  needResend:  {align:'',    sort:true},
+  mawbNo:      {align:'',    sort:true},
+  carrier:     {align:'',    sort:true},
+  flightName:  {align:'',    sort:true},
+  pol:         {align:'',    sort:true},
+  pod:         {align:'',    sort:true},
+  etd:         {align:'',    sort:true},
+  pkgQty:      {align:'right', sort:true},
+  grossWt:     {align:'right', sort:true},
+  chgWt:       {align:'right', sort:true},
+  rateClass:   {align:'',    sort:false},
+  chargeRate:  {align:'right',sort:false},
+  ocCode1:     {align:'',    sort:false},
+  ocAmt1:      {align:'right',sort:false},
+  ocCode2:     {align:'',    sort:false},
+  ocAmt2:      {align:'right',sort:false},
+  ocCode3:     {align:'',    sort:false},
+  ocAmt3:      {align:'right',sort:false},
+};
+var hawbColMeta = {
+  bizType:    {align:'',    sort:true, ec:true},
+  hawbNo:     {align:'',    sort:true},
+  status:     {align:'',    sort:true},
+  ediStatus:  {align:'',    sort:true},
+  needResend: {align:'',    sort:true},
+  pkgQty:     {align:'right',sort:true},
+  pkgUnit:    {align:'',    sort:false},
+  grossWt:    {align:'right',sort:true},
+  gwUnit:     {align:'',    sort:false},
+  cargoDesc:  {align:'',    sort:false, ec:true},
+  sendDate:   {align:'',    sort:true},
+  sendPerson: {align:'',    sort:false},
+  shipper:    {align:'',    sort:false},
+  consignee:  {align:'',    sort:false},
+  notify:     {align:'',    sort:false},
+};
+var carrierColMeta = {
+  typeCode:    {align:'',   sort:true},
+  carrier:     {align:'',   sort:true},
+  carrierName: {align:'',   sort:true},
+  carrierId:   {align:'',   sort:true},
+  scac:        {align:'',   sort:true},
+};
+
+function buildThead(tableId, cols, meta, grid, sortSt){
+  var table = document.getElementById(tableId);
+  if(!table) return;
+  var thead = table.tHead || table.querySelector('thead');
+  if(!thead) return;
+  /* tr 이 없으면 생성 */
+  if(!thead.rows.length){
+    var newTr = document.createElement('tr');
+    thead.appendChild(newTr);
+  }
+  /* 체크박스 th HTML */
+  var chkHtml = '<th class="center" style="width:30px"><input type="checkbox" class="chk" onchange="toggleAll(\''+grid+'\',this.checked)"></th>';
+  /* visible 컬럼 th HTML */
+  var thHtml = cols.filter(function(c){ return c.visible !== false; }).map(function(c){
+    var m = meta[c.key] || {align:'', sort:false};
+    var cls = m.align ? ' class="'+m.align+'"' : '';
+    if(m.sort){
+      var sortCls = '', sortChar = '\u2195';
+      if(sortSt && sortSt.col === c.key){
+        sortCls = sortSt.dir==='asc' ? ' asc' : ' desc';
+        sortChar = sortSt.dir==='asc' ? '\u2191' : '\u2193';
+      }
+      return '<th'+cls+' onclick="sortTable(\''+grid+'\',\''+c.key+'\')">'
+        + c.label
+        + ' <span class="sort'+sortCls+'" id="sort-'+grid+'-'+c.key+'">'+sortChar+'</span>'
+        + '</th>';
+    }
+    return '<th'+cls+'>'+c.label+'</th>';
+  }).join('');
+  thead.rows[0].innerHTML = chkHtml + thHtml;
+}
+function buildCarrierThead(tableId, cols, sortSt, sortFn){
+  var table = document.getElementById(tableId);
+  if(!table) return;
+  var thead = table.tHead || table.querySelector('thead');
+  if(!thead) return;
+  if(!thead.rows.length){
+    var newTr = document.createElement('tr');
+    thead.appendChild(newTr);
+  }
+  var fn = sortFn || 'sortCarrier';
+  var chkHtml;
+  if(tableId === 'carrier-table'){
+    chkHtml = '<th class="center" style="width:30px"><input type="checkbox" class="chk" onchange="toggleCarrierAll(this.checked)"></th>';
+  } else {
+    chkHtml = '<th class="center" style="width:30px"><input type="checkbox" class="chk" id="cpop-chk-all" onchange="cpopToggleAll(this.checked)"></th>';
+  }
+  var thHtml = cols.filter(function(c){ return c.visible !== false; }).map(function(c){
+    var m = carrierColMeta[c.key] || {align:'', sort:false};
+    var cls = m.align ? ' class="'+m.align+'"' : '';
+    if(m.sort){
+      var sortCls = '', sortChar = '\u2195';
+      if(sortSt && sortSt.col === c.key){
+        sortCls = sortSt.dir==='asc' ? ' asc' : ' desc';
+        sortChar = sortSt.dir==='asc' ? '\u2191' : '\u2193';
+      }
+      var idPfx = (tableId === 'cpop-table') ? 'sort-cpop-' : 'sort-c-';
+      return '<th'+cls+' onclick="'+fn+'(\''+c.key+'\')">'
+        + c.label
+        + ' <span class="sort'+sortCls+'" id="'+idPfx+c.key+'">'+sortChar+'</span>'
+        + '</th>';
+    }
+    return '<th'+cls+'>'+c.label+'</th>';
+  }).join('');
+  thead.rows[0].innerHTML = chkHtml + thHtml;
+}
+function rebuildMawbThead(){
+  buildThead('mawb-table', mawbCols, mawbColMeta, 'mawb', mawbSort);
+}
+function rebuildHawbThead(){
+  buildThead('hawb-table', hawbCols, hawbColMeta, 'hawb', hawbSort);
+}
+function rebuildCarrierThead(){
+  buildCarrierThead('carrier-table', carrierCols, carrierSort);
+}
+function rebuildCpopThead(){
+  buildCarrierThead('cpop-table', carrierCols, cpopSort, 'sortCpop');
+}
+
+/* visible 컬럼 기준 td 배열 생성 헬퍼 */
+function visibleTds(cols, tdMap){
+  return cols.filter(function(c){ return c.visible; }).map(function(c){
+    return tdMap[c.key] || '<td></td>';
+  }).join('');
+}
+
+function doSearch(){
+  var ms=document.getElementById('s-mawb-status').value;
+  var mn=document.getElementById('s-mawb-no').value.trim().toUpperCase();
+  var hn=document.getElementById('s-hawb-no').value.trim().toUpperCase();
+  var ca=document.getElementById('s-carrier').value.trim().toUpperCase();
+  var ef=document.getElementById('s-etd-from').value;
+  var et=document.getElementById('s-etd-to').value;
+  var es=document.getElementById('s-edi-status').value;
+  var nr=document.getElementById('s-need-resend').value;
+  var r=mawbData.map(function(d){return Object.assign({},d);});
+  if(mn){
+    r=r.filter(function(d){return d.mawbNo.replace('-','').indexOf(mn.replace('-',''))>=0;});
+  } else if(hn){
+    var ids=new Set();
+    Object.entries(hawbData).forEach(function(kv){
+      kv[1].forEach(function(h){if(h.hawbNo.toUpperCase().indexOf(hn)>=0)ids.add(Number(kv[0]));});
+    });
+    r=r.filter(function(d){return ids.has(d.id);});
+  } else {
+    if(ef) r=r.filter(function(d){return d.etd>=ef;});
+    if(et) r=r.filter(function(d){return d.etd<=et;});
+  }
+  if(ms) r=r.filter(function(d){return d.status===ms;});
+  if(ca) r=r.filter(function(d){
+    var master=carrierMaster.find(function(m){return m.carrier===d.carrier;});
+    var name=master?master.carrierName.toUpperCase():'';
+    return d.carrier.toUpperCase().indexOf(ca)>=0 || name.indexOf(ca)>=0;
+  });
+  if(es) r=r.filter(function(d){return d.ediStatus===es;});
+  if(nr) r=r.filter(function(d){return d.needResend===nr;});
+  filteredMawb=r; selectedMawbId=null; selectedHawbId=null;
+  renderMawb(); renderHawb(null); renderEdi(null);
+}
+function resetSearch(){
+  ['s-mawb-status','s-mawb-no','s-hawb-no','s-carrier','s-edi-status','s-need-resend'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('s-etd-from').value='2026-05-29';
+  document.getElementById('s-etd-to').value='2026-06-12';
+  ['sf-hawb','sf-etd'].forEach(function(id){document.getElementById(id).classList.remove('disabled');});
+  document.getElementById('mawb-input-wrap').closest('.sf').classList.remove('disabled');
+  doSearch();
+}
+function onMawbInput(){
+  var v=document.getElementById('s-mawb-no').value.trim();
+  document.getElementById('sf-hawb').classList.toggle('disabled',!!v);
+  document.getElementById('sf-etd').classList.toggle('disabled',!!v);
+}
+function onHawbInput(){
+  var v=document.getElementById('s-hawb-no').value.trim();
+  document.getElementById('mawb-input-wrap').closest('.sf').classList.toggle('disabled',!!v);
+  document.getElementById('sf-etd').classList.toggle('disabled',!!v);
+}
+
+/* ── RENDER MAWB ── */
+function rcOpts(sel){return RC.map(function(o){return '<option'+(sel===o?' selected':'')+'>'+o+'</option>';}).join('');}
+function ocOpts(sel){return OC.map(function(o){return '<option'+(sel===o?' selected':'')+'>'+o+'</option>';}).join('');}
+
+function renderMawb(){
+  var tb=document.getElementById('mawb-tbody');
+  document.getElementById('mawb-count').textContent='\uCD1D '+filteredMawb.length+'\uAC74';
+  var visCols = mawbCols.filter(function(c){ return c.visible; });
+  var colspan = visCols.length + 1;
+  if(!filteredMawb.length){
+    tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\uC870\uD68C\uB41C \uC801\uD558\uBAA9\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';
+    return;
+  }
+  var sorted=sortArr(filteredMawb,mawbSort.col,mawbSort.dir);
+  tb.innerHTML=sorted.map(function(d){
+    var sel=selectedMawbId===d.id;
+    var tdMap = {
+      status:     '<td>'+badge(d.status)+'</td>',
+      ediStatus:  '<td>'+badge(d.ediStatus)+'</td>',
+      needResend: '<td>'+badge(d.needResend)+'</td>',
+      mawbNo:     '<td><span class="lnk">'+d.mawbNo+'</span></td>',
+      carrier:    '<td>'+d.carrier+'</td>',
+      flightName: '<td>'+d.flightName+'</td>',
+      pol:        '<td>'+d.pol+'</td>',
+      pod:        '<td>'+d.pod+'</td>',
+      etd:        '<td>'+d.etd+'</td>',
+      pkgQty:     '<td class="right">'+d.pkgQty+'</td>',
+      grossWt:    '<td class="right">'+d.grossWt.toFixed(1)+'</td>',
+      chgWt:      '<td class="right">'+d.chgWt.toFixed(1)+'</td>',
+      rateClass:  '<td class="ec"><select data-field="rateClass">'+rcOpts(d.rateClass)+'</select></td>',
+      chargeRate: '<td class="right ec"><input type="text" data-field="chargeRate" value="'+d.chargeRate+'" style="width:55px;text-align:right"></td>',
+      ocCode1:    '<td class="ec"><select data-field="ocCode1">'+ocOpts(d.ocCode1)+'</select></td>',
+      ocAmt1:     '<td class="right ec"><input type="text" data-field="ocAmt1" value="'+d.ocAmt1+'" style="width:55px;text-align:right"></td>',
+      ocCode2:    '<td class="ec"><select data-field="ocCode2">'+ocOpts(d.ocCode2)+'</select></td>',
+      ocAmt2:     '<td class="right ec"><input type="text" data-field="ocAmt2" value="'+d.ocAmt2+'" style="width:55px;text-align:right"></td>',
+      ocCode3:    '<td class="ec"><select data-field="ocCode3">'+ocOpts(d.ocCode3)+'</select></td>',
+      ocAmt3:     '<td class="right ec"><input type="text" data-field="ocAmt3" value="'+d.ocAmt3+'" style="width:55px;text-align:right"></td>',
+    };
+    return '<tr data-id="'+d.id+'"'+(sel?' class="selected"':'')+'>'+
+      '<td class="center"><input type="checkbox" class="chk"'+(d.checked?' checked':'')+'></td>'+
+      visibleTds(mawbCols, tdMap)+
+      '</tr>';
+  }).join('');
+}
+function selectMawb(id){selectedMawbId=id;selectedHawbId=null;renderMawb();renderHawb(id);renderEdi(null);}
+function updMawb(id,f,v){
+  var item=mawbData.find(function(d){return d.id===id;});
+  if(!item) return;
+  if(f==='ocCode1'||f==='ocCode2'||f==='ocCode3'){
+    var others=['ocCode1','ocCode2','ocCode3'].filter(function(k){return k!==f;}).map(function(k){return item[k];});
+    if(v&&others.indexOf(v)>=0){toast('\uB3D9\uC77C\uD55C OC Code\uAC00 \uC774\uBBF8 \uC120\uD0DD\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.','error');renderMawb();return;}
+  }
+  item[f]=v;
+}
+
+/* ── RENDER HAWB ── */
+function renderHawb(mid){
+  var tb=document.getElementById('hawb-tbody');
+  var ctx=document.getElementById('hawb-ctx');
+  var cnt=document.getElementById('hawb-count');
+  var visCols=hawbCols.filter(function(c){return c.visible;});
+  var colspan=visCols.length+1;
+  if(!mid){
+    cnt.textContent='\uCD1D 0\uAC74'; ctx.textContent='';
+    tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\u2190 MAWB\uB97C \uC120\uD0DD\uD558\uBA74 HAWB \uBAA9\uB85D\uC774 \uD45C\uC2DC\uB429\uB2C8\uB2E4.</td></tr>';
+    return;
+  }
+  var mawb=filteredMawb.find(function(d){return d.id===mid;});
+  ctx.textContent=mawb?'(MAWB: '+mawb.mawbNo+')':'';
+  var rows=hawbData[mid]||[];
+  cnt.textContent='\uCD1D '+rows.length+'\uAC74';
+  if(!rows.length){
+    tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\uC870\uD68C\uB41C HAWB\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';
+    return;
+  }
+  var sorted=sortArr(rows,hawbSort.col,hawbSort.dir);
+  tb.innerHTML=sorted.map(function(d){
+    var sel=selectedHawbId===d.id;
+    var tdMap={
+      bizType:    '<td class="ec"><select data-field="bizType"><option'+(d.bizType==='E'?' selected':'')+' value="E">E(Export)</option><option'+(d.bizType==='R'?' selected':'')+' value="R">R(Transshipment)</option></select></td>',
+      hawbNo:     '<td><span class="lnk">'+d.hawbNo+'</span></td>',
+      status:     '<td>'+badge(d.status)+'</td>',
+      ediStatus:  '<td>'+badge(d.ediStatus)+'</td>',
+      needResend: '<td>'+badge(d.needResend)+'</td>',
+      pkgQty:     '<td class="right">'+d.pkgQty+'</td>',
+      pkgUnit:    '<td>'+d.pkgUnit+'</td>',
+      grossWt:    '<td class="right">'+d.grossWt.toFixed(1)+'</td>',
+      gwUnit:     '<td>'+d.gwUnit+'</td>',
+      cargoDesc:  '<td class="ec"><input type="text" data-field="cargoDesc" value="'+d.cargoDesc+'" maxlength="20" style="width:120px" placeholder="\uCD5C\uB300 20\uC790"></td>',
+      sendDate:   '<td>'+d.sendDate+'</td>',
+      sendPerson: '<td>'+d.sendPerson+'</td>',
+      shipper:    '<td>'+d.shipper+'</td>',
+      consignee:  '<td>'+d.consignee+'</td>',
+      notify:     '<td>'+d.notify+'</td>',
+    };
+    return '<tr data-id="'+d.id+'"'+(sel?' class="selected"':'')+'>'+
+      '<td class="center"><input type="checkbox" class="chk"'+(d.checked?' checked':'')+'></td>'+
+      visibleTds(hawbCols, tdMap)+
+      '</tr>';
+  }).join('');
+}
+function selectHawb(id){selectedHawbId=id;renderHawb(selectedMawbId);renderEdi(id);}
+function updHawb(id,f,v){
+  for(var key in hawbData){
+    var item=hawbData[key].find(function(d){return d.id===id;});
+    if(item){item[f]=v;return;}
+  }
+}
+
+/* ── RENDER EDI ── */
+function renderEdi(hid){
+  var tb=document.getElementById('edi-tbody'),ctx=document.getElementById('edi-ctx');
+  if(!hid){
+    ctx.textContent='';
+    tb.innerHTML='<tr class="empty"><td colspan="10">\u2190 HAWB\uB97C \uC120\uD0DD\uD558\uBA74 \uC218\uCD9C\uC2E0\uACE0 \uC815\uBCF4\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4.</td></tr>';
+    return;
+  }
+  var hawb=null;
+  for(var key in hawbData){hawb=hawbData[key].find(function(d){return d.id===hid;});if(hawb)break;}
+  ctx.textContent=hawb?'(HAWB: '+hawb.hawbNo+')':'';
+  var d=ediData[hid];
+  if(!d){tb.innerHTML='<tr class="empty"><td colspan="10">\uC218\uCD9C\uC2E0\uACE0 \uC815\uBCF4\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';return;}
+  tb.innerHTML='<tr>'+
+    '<td>'+d.expDeclNo+'</td>'+
+    '<td class="right">'+d.pkgQty+'</td><td>'+d.pkgUnit+'</td>'+
+    '<td class="right">'+(typeof d.grossWt==='number'?d.grossWt.toFixed(1):d.grossWt)+'</td><td>'+d.gwUnit+'</td>'+
+    '<td class="center">'+d.samePkgCode+'</td>'+
+    '<td class="right">'+d.samePkgQty+'</td><td>'+d.samePkgUnit+'</td>'+
+    '<td class="center">'+d.splitShipment+'</td>'+
+    '<td class="right">'+d.splitOrderBy+'</td></tr>';
+}
+
+/* ── SORT ── */
+function sortTable(grid,col){
+  var st=grid==='mawb'?mawbSort:hawbSort;
+  var dir=st.col===col&&st.dir==='asc'?'desc':'asc';
+  st.col=col; st.dir=dir;
+  setSortIcon((grid==='mawb'?'mawb-':'hawb-'),col,dir);
+  if(grid==='mawb') renderMawb(); else renderHawb(selectedMawbId);
+}
+
+/* ── TOGGLE ALL ── */
+function toggleAll(grid,checked){
+  if(grid==='mawb'){filteredMawb.forEach(function(d){d.checked=checked;});renderMawb();}
+  else{(hawbData[selectedMawbId]||[]).forEach(function(d){d.checked=checked;});renderHawb(selectedMawbId);}
+}
+
+/* ── ACTION BUTTONS ── */
+function getCheckedMawb(){return filteredMawb.filter(function(d){return d.checked;});}
+function getCheckedHawb(){return(hawbData[selectedMawbId]||[]).filter(function(d){return d.checked;});}
+
+function fwbFhlSend(){
+  var sel=getCheckedMawb();
+  if(!sel.length){toast('\uC804\uC1A1\uD560 \uD56D\uBAA9\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}
+  if(sel.some(function(d){return d.ediStatus==='Processing';})){toast('\uC774\uBBF8 \uC804\uC1A1 \uC911\uC778 \uAC74\uC774 \uC788\uC2B5\uB2C8\uB2E4.','error');return;}
+  sel.forEach(function(d){d.ediStatus='Processing';d.status='FWB/FHL Sent';});
+  renderMawb();
+  setTimeout(function(){sel.forEach(function(d){d.ediStatus='Complete';});renderMawb();toast('Manifest has been sent.','success');},1800);
+  toast('\uC804\uC1A1 \uC911...','');
+}
+function epninfSend(){
+  var sel=getCheckedMawb();
+  if(!sel.length){toast('\uC804\uC1A1\uD560 \uD56D\uBAA9\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}
+  sel.forEach(function(d){d.ediStatus='Processing';d.status='EPNINF Sent';});
+  renderMawb();
+  setTimeout(function(){sel.forEach(function(d){d.ediStatus='Complete';});renderMawb();toast('EPNINF has been sent.','success');},1800);
+}
+
+
+function amendManifest(){
+  var s=getCheckedHawb();
+  if(!s.length){toast('HAWB\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}
+  if(s.length>1){toast('\uB2E8\uAC74\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}
+  toast('\uC815\uC815\uD654\uBA74: '+s[0].hawbNo,'');
+}
+function addressAmend(){
+  var s=getCheckedHawb();
+  if(!s.length){toast('HAWB\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}
+  if(s.length>1){toast('\uB2E8\uAC74\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}
+  toast('Address Amend: '+s[0].hawbNo,'');
+}
+
+/* ── EXCEL DOWNLOAD ── */
+function csvDown(hdr,rows,fn){
+  var bom='\uFEFF';
+  var csv=bom+[hdr.join(',')].concat(rows.map(function(r){
+    return r.map(function(v){return '"'+String(v!=null?v:'').replace(/"/g,'""')+'"';}).join(',');
+  })).join('\r\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=fn+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast(fn+' \uB2E4\uC6B4\uB85C\uB4DC \uC644\uB8CC','success');
+}
+function downloadExcel(grid){
+  if(grid==='mawb'){
+    csvDown(['Status','EDI Send Status','Need Resend','MAWB No.','Carrier','Flight Name','POL','POD','ETD','Pkg Qty.','Gross Wt','Chg Wt','Rate Class','Charge Rate','OC Code1','OC Amt1','OC Code2','OC Amt2','OC Code3','OC Amt3'],
+      filteredMawb.map(function(d){return[d.status,d.ediStatus,d.needResend,d.mawbNo,d.carrier,d.flightName,d.pol,d.pod,d.etd,d.pkgQty,d.grossWt,d.chgWt,d.rateClass,d.chargeRate,d.ocCode1,d.ocAmt1,d.ocCode2,d.ocAmt2,d.ocCode3,d.ocAmt3];}),
+      'MAWB_Info');
+  } else {
+    if(!selectedMawbId){toast('MAWB\uB97C \uBA3C\uC800 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.','error');return;}
+    csvDown(['Business Type','HAWB No.','Status','EDI Send Status','Need Resend','Pkg Qty.','Pkg Unit','Gross Wt','GW Unit','Cargo Description','Send Date','Send Person','Shipper','Consignee','Notify'],
+      (hawbData[selectedMawbId]||[]).map(function(d){return[d.bizType,d.hawbNo,d.status,d.ediStatus,d.needResend,d.pkgQty,d.pkgUnit,d.grossWt,d.gwUnit,d.cargoDesc,d.sendDate,d.sendPerson,d.shipper,d.consignee,d.notify];}),
+      'HAWB_Info');
+  }
+}
+
+/* ════════════════════════════════
+   CARRIER TAB
+════════════════════════════════ */
+function toggleType(btn){btn.classList.toggle('sel');}
+function getSelTypes(){
+  return Array.from(document.querySelectorAll('#ctype-group .type-btn.sel')).map(function(b){return b.dataset.val;});
+}
+function addChip(e,key){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  var val=e.target.value.trim().toUpperCase();
+  if(!val||chips[key].indexOf(val)>=0){e.target.value='';return;}
+  chips[key].push(val);
+  renderChips(key);
+  e.target.value='';
+}
+function removeChip(key,val){
+  chips[key]=chips[key].filter(function(v){return v!==val;});
+  renderChips(key);
+}
+function renderChips(key){
+  var wrapId={carrier:'tw-carrier',cid:'tw-cid',scac:'tw-scac'}[key];
+  var wrap=document.getElementById(wrapId);
+  Array.from(wrap.querySelectorAll('.chip')).forEach(function(el){el.remove();});
+  var input=wrap.querySelector('input');
+  chips[key].forEach(function(v){
+    var chip=document.createElement('span');
+    chip.className='chip';
+    var txt=document.createTextNode(v);
+    var x=document.createElement('span');
+    x.className='chip-x';
+    x.textContent='\u2715';
+    x.setAttribute('onclick','removeChip("'+key+'","'+v+'")');
+    chip.appendChild(txt);
+    chip.appendChild(x);
+    wrap.insertBefore(chip,input);
+  });
+}
+function doCarrierSearch(){
+  var types=getSelTypes();
+  var r=carrierMaster.map(function(d){return Object.assign({},d);});
+  if(types.length) r=r.filter(function(d){return types.indexOf(d.typeCode)>=0;});
+  if(chips.carrier.length) r=r.filter(function(d){return chips.carrier.some(function(t){return d.carrier.toUpperCase().indexOf(t)>=0;});});
+  if(chips.cid.length)     r=r.filter(function(d){return chips.cid.some(function(t){return d.carrierId.toUpperCase().indexOf(t)>=0;});});
+  if(chips.scac.length)    r=r.filter(function(d){return chips.scac.some(function(t){return d.scac.toUpperCase().indexOf(t)>=0;});});
+  filteredCarrier=r;
+  renderCarrier();
+}
+function resetCarrierSearch(){
+  Array.from(document.querySelectorAll('#ctype-group .type-btn')).forEach(function(b){b.classList.remove('sel');});
+  document.querySelector('#ctype-group .type-btn[data-val="AIR"]').classList.add('sel');
+  ['carrier','cid','scac'].forEach(function(k){chips[k]=[];renderChips(k);});
+  doCarrierSearch();
+}
+function renderCarrier(){
+  var tb=document.getElementById('carrier-tbody');
+  document.getElementById('carrier-count').textContent='\uCD1D '+filteredCarrier.length+'\uAC74';
+  var visCols=carrierCols.filter(function(c){return c.visible;});
+  var colspan=visCols.length+1;
+  if(!filteredCarrier.length){
+    tb.innerHTML='<tr class="empty"><td colspan="'+colspan+'">\uC870\uD68C\uB41C Carrier\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.</td></tr>';
+    return;
+  }
+  var sorted=sortArr(filteredCarrier,carrierSort.col,carrierSort.dir);
+  tb.innerHTML=sorted.map(function(d){
+    var tdMap={
+      typeCode:    '<td>'+badge(d.typeCode)+'</td>',
+      carrier:     '<td>'+d.carrier+'</td>',
+      carrierName: '<td>'+d.carrierName+'</td>',
+      carrierId:   '<td>'+d.carrierId+'</td>',
+      scac:        '<td>'+d.scac+'</td>',
+    };
+    return '<tr data-id="'+d.id+'">'+
+      '<td class="center"><input type="checkbox" class="chk"'+(d.checked?' checked':'')+'></td>'+
+      visibleTds(carrierCols, tdMap)+
+      '</tr>';
+  }).join('');
+}
+function sortCarrier(col){
+  var dir=carrierSort.col===col&&carrierSort.dir==='asc'?'desc':'asc';
+  carrierSort={col:col,dir:dir};
+  setSortIcon('c-',col,dir);
+  renderCarrier();
+}
+function toggleCarrierAll(checked){
+  filteredCarrier.forEach(function(d){d.checked=checked;});
+  renderCarrier();
+}
+function downloadCarrierExcel(){
+  csvDown(['Carrier Type Code','Carrier','Carrier Name','Carrier ID','SCAC'],
+    filteredCarrier.map(function(d){return[d.typeCode,d.carrier,d.carrierName,d.carrierId,d.scac];}),
+    'Carrier');
+}
+
+/* ════════════════════════════════
+   PERSONALIZATION
+════════════════════════════════ */
+var mawbCols=[
+  {key:'status',    label:'Status',          visible:true},
+  {key:'ediStatus', label:'EDI Send Status',  visible:true},
+  {key:'needResend',label:'Need Resend',      visible:true},
+  {key:'mawbNo',    label:'MAWB No.',         visible:true},
+  {key:'carrier',   label:'Carrier',          visible:true},
+  {key:'flightName',label:'Flight Name',      visible:true},
+  {key:'pol',       label:'POL',              visible:true},
+  {key:'pod',       label:'POD',              visible:true},
+  {key:'etd',       label:'ETD',              visible:true},
+  {key:'pkgQty',    label:'Pkg Qty.',         visible:true},
+  {key:'grossWt',   label:'Gross Wt',         visible:true},
+  {key:'chgWt',     label:'Chg Wt',           visible:true},
+  {key:'rateClass', label:'Rate Class',       visible:true},
+  {key:'chargeRate',label:'Charge Rate',      visible:true},
+  {key:'ocCode1',   label:'OC Code1',         visible:true},
+  {key:'ocAmt1',    label:'OC Amt1',          visible:true},
+  {key:'ocCode2',   label:'OC Code2',         visible:true},
+  {key:'ocAmt2',    label:'OC Amt2',          visible:true},
+  {key:'ocCode3',   label:'OC Code3',         visible:true},
+  {key:'ocAmt3',    label:'OC Amt3',          visible:true},
+].map(function(c){return Object.assign({visible:true},c);});
+var hawbCols=[
+  {key:'bizType',label:'Business Type'},{key:'hawbNo',label:'HAWB No.'},{key:'status',label:'Status'},
+  {key:'ediStatus',label:'EDI Send Status'},{key:'needResend',label:'Need Resend'},{key:'pkgQty',label:'Pkg Qty.'},
+  {key:'pkgUnit',label:'Pkg Unit'},{key:'grossWt',label:'Gross Wt'},{key:'gwUnit',label:'GW Unit'},
+  {key:'cargoDesc',label:'Cargo Description'},{key:'sendDate',label:'Send Date'},{key:'sendPerson',label:'Send Person'},
+  {key:'shipper',label:'Shipper'},{key:'consignee',label:'Consignee'},{key:'notify',label:'Notify'},
+].map(function(c){return Object.assign({visible:true},c);});
+var carrierCols=[
+  {key:'typeCode',label:'Carrier Type Code'},{key:'carrier',label:'Carrier'},{key:'carrierName',label:'Carrier Name'},
+  {key:'carrierId',label:'Carrier ID'},{key:'scac',label:'SCAC'},
+].map(function(c){return Object.assign({visible:true},c);});
+
+function openPersonalize(grid){
+  pmGrid=grid;
+  var src = grid==='mawb' ? mawbCols
+          : grid==='hawb' ? hawbCols
+          : carrierCols;  /* carrier, cpop 모두 carrierCols 사용 */
+  pmTmp=src.map(function(c){return Object.assign({},c);});
+  var titleMap = {mawb:'MAWB', hawb:'HAWB', carrier:'Carrier', cpop:'Carrier (\uD31D\uC5C5)'};
+  document.getElementById('modal-title').textContent=(titleMap[grid]||grid)+' \uCEEC\uB7FC \uC124\uC815';
+  renderModalCols();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closePersonalize(){
+  /* X / Cancel / 배경클릭으로 닫을 때도 변경사항 적용 */
+  if(pmGrid && pmTmp.length){
+    var tgt = pmGrid==='mawb' ? mawbCols
+             : pmGrid==='hawb' ? hawbCols
+             : carrierCols;
+    tgt.length = 0;
+    pmTmp.forEach(function(pc){
+      tgt.push({ key:pc.key, label:pc.label, visible:pc.visible });
+    });
+    if(pmGrid==='mawb'){ rebuildMawbThead(); renderMawb(); }
+    else if(pmGrid==='hawb'){ rebuildHawbThead(); renderHawb(selectedMawbId); }
+    else if(pmGrid==='carrier'){ rebuildCarrierThead(); renderCarrier(); }
+    else if(pmGrid==='cpop'){ rebuildCpopThead(); renderCpopTable(); }
+  }
+  document.getElementById('modal-overlay').classList.remove('open');
+  pmGrid = null;
+  pmTmp  = [];
+}
+function resetPersonalize(){
+  var defaults = pmGrid==='mawb' ? mawbColsDefault
+               : pmGrid==='hawb' ? hawbColsDefault
+               : carrierColsDefault;
+  pmTmp = defaults.map(function(c){ return Object.assign({}, c, {visible:true}); });
+  renderModalCols();
+}
+function applyPersonalize(){
+  var tgt = pmGrid==='mawb' ? mawbCols
+           : pmGrid==='hawb' ? hawbCols
+           : carrierCols;
+  tgt.length = 0;
+  pmTmp.forEach(function(pc){
+    tgt.push({ key:pc.key, label:pc.label, visible:pc.visible });
+  });
+  /* rebuild + render 먼저, 그 다음 닫기 */
+  if(pmGrid==='mawb'){ rebuildMawbThead(); renderMawb(); }
+  else if(pmGrid==='hawb'){ rebuildHawbThead(); renderHawb(selectedMawbId); }
+  else if(pmGrid==='carrier'){ rebuildCarrierThead(); renderCarrier(); }
+  else if(pmGrid==='cpop'){ rebuildCpopThead(); renderCpopTable(); }
+  /* pmGrid 초기화 방지를 위해 닫기 직전에 grid 저장 */
+  document.getElementById('modal-overlay').classList.remove('open');
+  pmGrid = null;
+  pmTmp  = [];
+  toast('\ucf5c\ub7fc \uc124\uc815\uc774 \uc801\uc6a9\ub418\uc5c8\uc2b5\ub2c8\ub2e4.', 'success');
+}
+function renderModalCols(){
+  document.getElementById('modal-col-list').innerHTML=pmTmp.map(function(c,i){
+    return '<div class="col-item" draggable="true" ondragstart="dragStart(event,'+i+')" ondragover="event.preventDefault()" ondrop="dragDrop(event,'+i+')" ondragend="dragEnd(event)">'+
+      '<span class="drag-handle">&#x283F;</span>'+
+      '<input type="checkbox" id="pck'+i+'"'+(c.visible?' checked':'')+' onchange="pmTmp['+i+'].visible=this.checked">'+
+      '<label for="pck'+i+'">'+c.label+'</label></div>';
+  }).join('');
+}
+function dragStart(e,i){dragIdx=i;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function dragDrop(e,i){
+  e.preventDefault();
+  if(dragIdx===null||dragIdx===i)return;
+  var m=pmTmp.splice(dragIdx,1)[0];pmTmp.splice(i,0,m);dragIdx=null;renderModalCols();
+}
+function dragEnd(e){e.currentTarget.classList.remove('dragging');dragIdx=null;}
+
+/* ════════════════════════════════
+   CARRIER SEARCH POPUP
+════════════════════════════════ */
+var cpopChips = {carrier:[], cid:[]};
+var cpopFiltered = [];
+var cpopSort = {col:'carrier', dir:'asc'};
+
+/* 팝업 열기 */
+function openCarrierPopup() {
+  resetCpopSearch();
+  document.getElementById('cpop-overlay').classList.add('open');
+  // ESC 닫기
+  document.addEventListener('keydown', cpopEscHandler);
+}
+function closeCarrierPopup() {
+  document.getElementById('cpop-overlay').classList.remove('open');
+  document.removeEventListener('keydown', cpopEscHandler);
+}
+function cpopEscHandler(e) {
+  if (e.key === 'Escape') closeCarrierPopup();
+}
+/* 배경 클릭 닫기 */
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('cpop-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCarrierPopup();
+  });
+});
+
+/* 팝업 내 태그 입력 */
+function addCpopChip(e, key) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  var val = e.target.value.trim().toUpperCase();
+  if (!val || cpopChips[key].indexOf(val) >= 0) { e.target.value = ''; return; }
+  cpopChips[key].push(val);
+  renderCpopChips(key);
+  e.target.value = '';
+}
+function removeCpopChip(key, val) {
+  cpopChips[key] = cpopChips[key].filter(function(v) { return v !== val; });
+  renderCpopChips(key);
+}
+function renderCpopChips(key) {
+  var wrapId = {carrier:'cpop-tw-carrier', cid:'cpop-tw-cid'}[key];
+  var wrap = document.getElementById(wrapId);
+  Array.from(wrap.querySelectorAll('.chip')).forEach(function(el) { el.remove(); });
+  var input = wrap.querySelector('input');
+  cpopChips[key].forEach(function(v) {
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    var txt = document.createTextNode(v);
+    var x = document.createElement('span');
+    x.className = 'chip-x';
+    x.textContent = '✕';
+    x.setAttribute('onclick', 'removeCpopChip("' + key + '","' + v + '")');
+    chip.appendChild(txt);
+    chip.appendChild(x);
+    wrap.insertBefore(chip, input);
+  });
+}
+
+/* 팝업 검색 */
+function doCpopSearch() {
+  var types = Array.from(document.querySelectorAll('#cpop-type-group .type-btn.sel')).map(function(b) { return b.dataset.val; });
+  var r = carrierMaster.map(function(d) { return Object.assign({}, d, {cpopChecked: false}); });
+  if (types.length) r = r.filter(function(d) { return types.indexOf(d.typeCode) >= 0; });
+  if (cpopChips.carrier.length) r = r.filter(function(d) {
+    return cpopChips.carrier.some(function(t) { return d.carrier.toUpperCase().indexOf(t) >= 0; });
+  });
+  if (cpopChips.cid.length) r = r.filter(function(d) {
+    return cpopChips.cid.some(function(t) { return d.carrierId.toUpperCase().indexOf(t) >= 0; });
+  });
+  cpopFiltered = r;
+  renderCpopTable();
+}
+function resetCpopSearch() {
+  // 타입 버튼: AIR만 선택
+  Array.from(document.querySelectorAll('#cpop-type-group .type-btn')).forEach(function(b) { b.classList.remove('sel'); });
+  document.querySelector('#cpop-type-group .type-btn[data-val="AIR"]').classList.add('sel');
+  // 태그 초기화
+  cpopChips.carrier = []; cpopChips.cid = [];
+  renderCpopChips('carrier'); renderCpopChips('cid');
+  // 전체 선택 체크박스 해제
+  var allChk = document.getElementById('cpop-chk-all');
+  if (allChk) allChk.checked = false;
+  doCpopSearch();
+}
+
+/* 팝업 테이블 렌더링 */
+function renderCpopTable() {
+  var tb = document.getElementById('cpop-tbody');
+  document.getElementById('cpop-count').textContent = '총 ' + cpopFiltered.length + '건';
+  if (!cpopFiltered.length) {
+    tb.innerHTML = '<tr class="empty"><td colspan="6">조회된 Carrier가 없습니다.</td></tr>';
+    return;
+  }
+  var sorted = sortArr(cpopFiltered, cpopSort.col, cpopSort.dir);
+  tb.innerHTML = sorted.map(function(d) {
+    return '<tr data-id="' + d.id + '">' +
+      '<td class="center"><input type="checkbox" class="chk cpop-row-chk"' + (d.cpopChecked ? ' checked' : '') + '></td>' +
+      '<td>' + badge(d.typeCode) + '</td>' +
+      '<td>' + d.carrier + '</td>' +
+      '<td>' + d.carrierName + '</td>' +
+      '<td>' + d.carrierId + '</td>' +
+      '<td>' + d.scac + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+/* 팝업 테이블 이벤트 위임 */
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('cpop-tbody').addEventListener('change', function(e) {
+    if (!e.target.classList.contains('cpop-row-chk')) return;
+    var tr = e.target.closest('tr[data-id]');
+    if (!tr) return;
+    var id = Number(tr.dataset.id);
+    var item = cpopFiltered.find(function(d) { return d.id === id; });
+    if (item) item.cpopChecked = e.target.checked;
+  });
+});
+
+/* 전체 선택 */
+function cpopToggleAll(checked) {
+  cpopFiltered.forEach(function(d) { d.cpopChecked = checked; });
+  renderCpopTable();
+  var allChk = document.getElementById('cpop-chk-all');
+  if (allChk) allChk.checked = checked;
+}
+
+/* 팝업 정렬 */
+function sortCpop(col) {
+  var dir = cpopSort.col === col && cpopSort.dir === 'asc' ? 'desc' : 'asc';
+  cpopSort = {col: col, dir: dir};
+  setSortIcon('cpop-', col, dir);
+  renderCpopTable();
+}
+
+/* Confirm: 두 곳 모두 반영 */
+function confirmCarrierPopup() {
+  var selected = cpopFiltered.filter(function(d) { return d.cpopChecked; });
+  if (!selected.length) {
+    toast('Carrier를 선택해 주세요.', 'error');
+    return;
+  }
+  var codes = selected.map(function(d) { return d.carrier; });
+
+  /* [1] Manifest 탭 Carrier 검색조건: 첫 번째 값 반영 (단건 input) */
+  var manifestInput = document.getElementById('s-carrier');
+  if (manifestInput) manifestInput.value = codes.join(', ');
+
+  /* [2] Carrier 탭 Carrier 태그 입력: 기존 태그 교체 */
+  chips.carrier = codes.slice();
+  renderChips('carrier');
+
+  closeCarrierPopup();
+  toast(codes.length + '개 Carrier 선택 반영 완료', 'success');
+}
+
+
+/* ════════════════════════════════
+   HAWB HISTORY POPUP
+════════════════════════════════ */
+
+/* Mock History 데이터: HAWB id → 전송이력 배열 */
+var hawbHistoryData = {
+  1: [
+    {
+      sendDt: '2026-05-30 09:12',
+      mawbNo: '180-12345678', carrier: 'KE',
+      bizType: 'E', hawbNo: 'SELA001', pkgQty: 3, pkgUnit: 'PCS',
+      grossWt: 75.0, volume: 0.42, cargoDesc: 'ELECTRONIC', loadingPlace: 'INCHEON',
+      shipper: 'Samsung Co., Ltd.\n12, Seocho-daero 74-gil\nSeocho-gu, Seoul 06620\nKOREA\nTEL: +82-2-2255-0114',
+      consignee: 'ABC Corporation\n1234 Commerce Street\nLos Angeles, CA 90001\nUSA\nTEL: +1-213-555-0100',
+      notify: 'SAME AS CONSIGNEE',
+      edi: {expDeclNo:'12345-26-1234567X',pkgQty:3,pkgUnit:'PCS',grossWt:75.0,gwUnit:'KG',samePkgCode:'A',samePkgQty:3,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1}
+    },
+    {
+      sendDt: '2026-05-29 17:44',
+      mawbNo: '180-12345678', carrier: 'KE',
+      bizType: 'E', hawbNo: 'SELA001', pkgQty: 3, pkgUnit: 'PCS',
+      grossWt: 74.5, volume: 0.40, cargoDesc: 'ELECTRONIC PARTS', loadingPlace: 'INCHEON',
+      shipper: 'Samsung Co., Ltd.\n12, Seocho-daero 74-gil\nSeocho-gu, Seoul 06620\nKOREA',
+      consignee: 'ABC Corporation\n1234 Commerce Street\nLos Angeles, CA 90001\nUSA',
+      notify: 'ABC Corporation\n1234 Commerce Street\nLos Angeles, CA 90001\nUSA',
+      edi: {expDeclNo:'12345-26-1234567X',pkgQty:3,pkgUnit:'PCS',grossWt:74.5,gwUnit:'KG',samePkgCode:'A',samePkgQty:3,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:1}
+    }
+  ],
+  2: [
+    {
+      sendDt: '2026-05-30 09:15',
+      mawbNo: '180-12345678', carrier: 'KE',
+      bizType: 'E', hawbNo: 'SELA002', pkgQty: 5, pkgUnit: 'PCS',
+      grossWt: 120.0, volume: 1.20, cargoDesc: 'MACHINERY', loadingPlace: 'INCHEON',
+      shipper: 'LG Electronics Inc.\n128, Yeoui-daero\nYeongdeungpo-gu, Seoul 07336\nKOREA\nTEL: +82-2-3777-1114',
+      consignee: 'XYZ Ltd.\n56 Business Park\nLondon EC2A 4BX\nUNITED KINGDOM\nTEL: +44-20-7946-0100',
+      notify: 'XYZ Ltd.\n56 Business Park\nLondon EC2A 4BX\nUNITED KINGDOM',
+      edi: {expDeclNo:'12346-26-2345678Y',pkgQty:5,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'}
+    },
+    {
+      sendDt: '2026-05-29 15:30',
+      mawbNo: '180-12345678', carrier: 'KE',
+      bizType: 'E', hawbNo: 'SELA002', pkgQty: 5, pkgUnit: 'PCS',
+      grossWt: 119.0, volume: 1.18, cargoDesc: 'MACHINERY PARTS', loadingPlace: 'INCHEON',
+      shipper: 'LG Electronics Inc.\n128, Yeoui-daero\nYeongdeungpo-gu, Seoul 07336\nKOREA',
+      consignee: 'XYZ Ltd.\n56 Business Park\nLondon EC2A 4BX\nUNITED KINGDOM',
+      notify: 'SAME AS CONSIGNEE',
+      edi: {expDeclNo:'12346-26-2345678Y',pkgQty:5,pkgUnit:'PCS',grossWt:119.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'}
+    }
+  ],
+  3: [
+    {
+      sendDt: '2026-05-30 10:05',
+      mawbNo: '180-12345678', carrier: 'KE',
+      bizType: 'R', hawbNo: 'SELA003', pkgQty: 2, pkgUnit: 'PCS',
+      grossWt: 55.0, volume: 0.30, cargoDesc: 'GENERAL CARGO', loadingPlace: 'INCHEON',
+      shipper: 'Hanon Corp.\n95, Pangyo-ro 255beon-gil\nBundang-gu, Seongnam 13486\nKOREA',
+      consignee: 'DEF Inc.\n789 Industrial Ave\nFrankfurt 60313\nGERMANY\nTEL: +49-69-1234-5678',
+      notify: 'DEF Inc.\n789 Industrial Ave\nFrankfurt 60313\nGERMANY',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    },
+    {
+      sendDt: '2026-05-28 14:20',
+      mawbNo: '180-12345678', carrier: 'KE',
+      bizType: 'R', hawbNo: 'SELA003', pkgQty: 2, pkgUnit: 'PCS',
+      grossWt: 54.0, volume: 0.28, cargoDesc: 'GENERAL CARGO', loadingPlace: 'ICN',
+      shipper: 'Hanon Corp.\n95, Pangyo-ro 255beon-gil\nBundang-gu, Seongnam 13486\nKOREA',
+      consignee: 'DEF Inc.\n789 Industrial Ave\nFrankfurt 60313\nGERMANY',
+      notify: 'N/A',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    }
+  ],
+  4: [
+    {
+      sendDt: '2026-05-31 10:00',
+      mawbNo: '180-87654321', carrier: 'OZ',
+      bizType: 'E', hawbNo: 'SELB001', pkgQty: 5, pkgUnit: 'PCS',
+      grossWt: 80.5, volume: 0.95, cargoDesc: 'AUTO PARTS', loadingPlace: 'INCHEON',
+      shipper: 'Hyundai Motor Company\n12, Heolleung-ro\nSeocho-gu, Seoul 06797\nKOREA\nTEL: +82-2-3464-1114',
+      consignee: 'TYO Motors Co. Ltd.\n1-1 Nihonbashi Muromachi\nChuo-ku, Tokyo 103-0022\nJAPAN\nTEL: +81-3-1234-5678',
+      notify: 'SAME AS CONSIGNEE',
+      edi: {expDeclNo:'12347-26-3456789Z',pkgQty:5,pkgUnit:'PCS',grossWt:80.5,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'}
+    },
+    {
+      sendDt: '2026-05-30 18:55',
+      mawbNo: '180-87654321', carrier: 'OZ',
+      bizType: 'E', hawbNo: 'SELB001', pkgQty: 5, pkgUnit: 'PCS',
+      grossWt: 79.0, volume: 0.90, cargoDesc: 'AUTO SPARE PARTS', loadingPlace: 'INCHEON',
+      shipper: 'Hyundai Motor Company\n12, Heolleung-ro\nSeocho-gu, Seoul 06797\nKOREA',
+      consignee: 'TYO Motors Co. Ltd.\n1-1 Nihonbashi Muromachi\nChuo-ku, Tokyo 103-0022\nJAPAN',
+      notify: 'TYO Motors Co. Ltd.\n1-1 Nihonbashi Muromachi\nChuo-ku, Tokyo 103-0022\nJAPAN',
+      edi: {expDeclNo:'12347-26-3456789Z',pkgQty:5,pkgUnit:'PCS',grossWt:79.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'}
+    }
+  ],
+  5: [
+    {
+      sendDt: '2026-06-01 08:10',
+      mawbNo: '180-11223344', carrier: 'LH',
+      bizType: 'E', hawbNo: 'SELC001', pkgQty: 10, pkgUnit: 'PCS',
+      grossWt: 200.0, volume: 2.10, cargoDesc: 'SEMICONDUCTOR', loadingPlace: 'INCHEON',
+      shipper: 'SK Hynix Inc.\n2091, Gyeongchung-daero\nIcheon-si, Gyeonggi 17336\nKOREA\nTEL: +82-31-5185-4114',
+      consignee: 'Intel Corporation\n2200 Mission College Blvd\nSanta Clara, CA 95054\nUSA\nTEL: +1-408-765-8080',
+      notify: 'SAME AS CONSIGNEE',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    },
+    {
+      sendDt: '2026-05-31 22:45',
+      mawbNo: '180-11223344', carrier: 'LH',
+      bizType: 'E', hawbNo: 'SELC001', pkgQty: 10, pkgUnit: 'PCS',
+      grossWt: 198.0, volume: 2.05, cargoDesc: 'SEMICONDUCTOR CHIP', loadingPlace: 'INCHEON',
+      shipper: 'SK Hynix Inc.\n2091, Gyeongchung-daero\nIcheon-si, Gyeonggi 17336\nKOREA',
+      consignee: 'Intel Corporation\n2200 Mission College Blvd\nSanta Clara, CA 95054\nUSA',
+      notify: 'Intel Corporation\n2200 Mission College Blvd\nSanta Clara, CA 95054\nUSA',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    }
+  ],
+  6: [
+    {
+      sendDt: '2026-06-01 08:20',
+      mawbNo: '180-11223344', carrier: 'LH',
+      bizType: 'E', hawbNo: 'SELC002', pkgQty: 10, pkgUnit: 'PCS',
+      grossWt: 300.0, volume: 3.50, cargoDesc: 'DISPLAY PANEL', loadingPlace: 'INCHEON',
+      shipper: 'LG Display Co., Ltd.\n128, Yeoui-daero\nYeongdeungpo-gu, Seoul 07336\nKOREA\nTEL: +82-2-3777-0010',
+      consignee: 'Apple Inc.\nOne Apple Park Way\nCupertino, CA 95014\nUSA\nTEL: +1-408-996-1010',
+      notify: 'SAME AS CONSIGNEE',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    },
+    {
+      sendDt: '2026-05-31 20:30',
+      mawbNo: '180-11223344', carrier: 'LH',
+      bizType: 'E', hawbNo: 'SELC002', pkgQty: 10, pkgUnit: 'PCS',
+      grossWt: 298.0, volume: 3.40, cargoDesc: 'DISPLAY', loadingPlace: 'ICN',
+      shipper: 'LG Display Co., Ltd.\n128, Yeoui-daero\nYeongdeungpo-gu, Seoul 07336\nKOREA',
+      consignee: 'Apple Inc.\nOne Apple Park Way\nCupertino, CA 95014\nUSA',
+      notify: 'Apple Inc.\nOne Apple Park Way\nCupertino, CA 95014\nUSA',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    }
+  ],
+  7: [
+    {
+      sendDt: '2026-06-02 08:30',
+      mawbNo: '180-55667788', carrier: 'CX',
+      bizType: 'E', hawbNo: 'SELD001', pkgQty: 8, pkgUnit: 'PCS',
+      grossWt: 120.0, volume: 0.85, cargoDesc: 'COSMETICS', loadingPlace: 'INCHEON',
+      shipper: 'AmorePacific Corporation\n100, Hangang-daero\nYongsan-gu, Seoul 04386\nKOREA\nTEL: +82-2-709-5114',
+      consignee: 'Sephora HK Limited\n3/F One Island East\n18 Westlands Road\nQuarry Bay, HONG KONG\nTEL: +852-2880-9988',
+      notify: 'SAME AS CONSIGNEE',
+      edi: {expDeclNo:'12348-26-4567890A',pkgQty:8,pkgUnit:'PCS',grossWt:120.0,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'}
+    },
+    {
+      sendDt: '2026-06-01 16:10',
+      mawbNo: '180-55667788', carrier: 'CX',
+      bizType: 'E', hawbNo: 'SELD001', pkgQty: 8, pkgUnit: 'PCS',
+      grossWt: 118.5, volume: 0.82, cargoDesc: 'COSMETIC PRODUCTS', loadingPlace: 'INCHEON',
+      shipper: 'AmorePacific Corporation\n100, Hangang-daero\nYongsan-gu, Seoul 04386\nKOREA',
+      consignee: 'Sephora HK Limited\n3/F One Island East\n18 Westlands Road\nQuarry Bay, HONG KONG',
+      notify: 'Sephora HK Limited\n3/F One Island East\nQuarry Bay, HONG KONG',
+      edi: {expDeclNo:'12348-26-4567890A',pkgQty:8,pkgUnit:'PCS',grossWt:118.5,gwUnit:'KG',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'N',splitOrderBy:'-'}
+    }
+  ],
+  8: [
+    {
+      sendDt: '2026-06-03 07:15',
+      mawbNo: '180-99887766', carrier: 'JL',
+      bizType: 'E', hawbNo: 'SELE001', pkgQty: 2, pkgUnit: 'PCS',
+      grossWt: 25.0, volume: 0.18, cargoDesc: 'MEDICAL DEVICE', loadingPlace: 'INCHEON',
+      shipper: 'Medtronic Korea Ltd.\n14F, 131 Teheran-ro\nGangnam-gu, Seoul 06212\nKOREA\nTEL: +82-2-3404-3600',
+      consignee: 'Medtronic Japan Co., Ltd.\n4-1-6 Takanawa\nMinato-ku, Tokyo 108-0074\nJAPAN\nTEL: +81-3-6894-0000',
+      notify: 'SAME AS CONSIGNEE',
+      edi: {expDeclNo:'12349-26-5678901B',pkgQty:2,pkgUnit:'PCS',grossWt:25.0,gwUnit:'KG',samePkgCode:'B',samePkgQty:2,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:2}
+    },
+    {
+      sendDt: '2026-06-02 21:00',
+      mawbNo: '180-99887766', carrier: 'JL',
+      bizType: 'E', hawbNo: 'SELE001', pkgQty: 2, pkgUnit: 'PCS',
+      grossWt: 24.5, volume: 0.17, cargoDesc: 'MEDICAL EQUIPMENT', loadingPlace: 'ICN',
+      shipper: 'Medtronic Korea Ltd.\n14F, 131 Teheran-ro\nGangnam-gu, Seoul 06212\nKOREA',
+      consignee: 'Medtronic Japan Co., Ltd.\n4-1-6 Takanawa\nMinato-ku, Tokyo 108-0074\nJAPAN',
+      notify: 'Medtronic Japan Co., Ltd.\n4-1-6 Takanawa\nMinato-ku, Tokyo 108-0074\nJAPAN',
+      edi: {expDeclNo:'12349-26-5678901B',pkgQty:2,pkgUnit:'PCS',grossWt:24.5,gwUnit:'KG',samePkgCode:'B',samePkgQty:2,samePkgUnit:'PCS',splitShipment:'Y',splitOrderBy:2}
+    }
+  ],
+  9: [
+    {
+      sendDt: '2026-06-03 07:18',
+      mawbNo: '180-99887766', carrier: 'JL',
+      bizType: 'R', hawbNo: 'SELE002', pkgQty: 1, pkgUnit: 'PCS',
+      grossWt: 15.0, volume: 0.12, cargoDesc: 'LITHIUM BATTERY', loadingPlace: 'INCHEON',
+      shipper: 'Samsung SDI Co., Ltd.\n150, Jamsil-ro\nSongpa-gu, Seoul 05759\nKOREA\nTEL: +82-2-2255-0114',
+      consignee: 'CATL Japan Co., Ltd.\n1-1-1 Nishi-shinjuku\nShinjuku-ku, Tokyo 163-0123\nJAPAN\nTEL: +81-3-5678-9012',
+      notify: 'CATL Japan Co., Ltd.\n1-1-1 Nishi-shinjuku\nShinjuku-ku, Tokyo 163-0123\nJAPAN',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    },
+    {
+      sendDt: '2026-06-02 22:50',
+      mawbNo: '180-99887766', carrier: 'JL',
+      bizType: 'R', hawbNo: 'SELE002', pkgQty: 1, pkgUnit: 'PCS',
+      grossWt: 14.8, volume: 0.11, cargoDesc: 'BATTERY MODULE', loadingPlace: 'ICN',
+      shipper: 'Samsung SDI Co., Ltd.\n150, Jamsil-ro\nSongpa-gu, Seoul 05759\nKOREA',
+      consignee: 'CATL Japan Co., Ltd.\n1-1-1 Nishi-shinjuku\nShinjuku-ku, Tokyo 163-0123\nJAPAN',
+      notify: 'CATL Japan Co., Ltd.\n1-1-1 Nishi-shinjuku\nJAPAN',
+      edi: {expDeclNo:'-',pkgQty:'-',pkgUnit:'-',grossWt:'-',gwUnit:'-',samePkgCode:'-',samePkgQty:'-',samePkgUnit:'-',splitShipment:'-',splitOrderBy:'-'}
+    }
+  ]
+};
+
+/* 팝업 열기 */
+function hawbHistory() {
+  var sel = getCheckedHawb();
+  if (!sel.length) { toast('HAWB\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.', 'error'); return; }
+  if (sel.length > 1) { toast('\uB2E8\uAC74\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.', 'error'); return; }
+  var hawb = sel[0];
+  var histList = hawbHistoryData[hawb.id];
+  if (!histList || !histList.length) {
+    toast('History \ub370\uc774\ud130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.', 'error');
+    return;
+  }
+
+  /* 날짜 드롭다운 구성 */
+  var sel2 = document.getElementById('hpop-date-sel');
+  sel2.innerHTML = '';
+  histList.forEach(function(h, i) {
+    var opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = h.sendDt + (i === 0 ? '  (최신)' : '');
+    sel2.appendChild(opt);
+  });
+
+  /* 팝업 오픈 후 첫 번째 이력 로드 */
+  document.getElementById('hpop-overlay').classList.add('open');
+  document.addEventListener('keydown', hpopEscHandler);
+  loadHawbHistory('0');
+
+  /* 배경 클릭 닫기 */
+  document.getElementById('hpop-overlay').onclick = function(e) {
+    if (e.target === this) closeHawbHistory();
+  };
+}
+
+function closeHawbHistory() {
+  document.getElementById('hpop-overlay').classList.remove('open');
+  document.removeEventListener('keydown', hpopEscHandler);
+}
+function hpopEscHandler(e) { if (e.key === 'Escape') closeHawbHistory(); }
+
+/* 날짜 선택 시 데이터 로드 */
+function loadHawbHistory(idx) {
+  var selEl = document.getElementById('hpop-date-sel');
+  /* idx가 없으면 select 현재값 사용 */
+  var i = (idx !== undefined && idx !== null) ? Number(idx) : Number(selEl.value);
+  /* 현재 팝업에서 보여주는 hawb id 찾기 */
+  var sel = getCheckedHawb();
+  if (!sel.length) return;
+  var histList = hawbHistoryData[sel[0].id];
+  if (!histList || !histList[i]) return;
+  var h = histList[i];
+
+  /* MAWB */
+  document.getElementById('hpop-mawb-tbody').innerHTML =
+    '<tr><td>' + h.mawbNo + '</td><td>' + h.carrier + '</td></tr>';
+
+  /* HAWB */
+  document.getElementById('hpop-hawb-tbody').innerHTML =
+    '<tr>' +
+    '<td>' + h.bizType + '</td>' +
+    '<td>' + h.hawbNo + '</td>' +
+    '<td class="right">' + h.pkgQty + '</td>' +
+    '<td>' + h.pkgUnit + '</td>' +
+    '<td class="right">' + (typeof h.grossWt === 'number' ? h.grossWt.toFixed(1) : h.grossWt) + '</td>' +
+    '<td class="right">' + (typeof h.volume === 'number' ? h.volume.toFixed(2) : h.volume) + '</td>' +
+    '<td>' + h.cargoDesc + '</td>' +
+    '<td>' + h.loadingPlace + '</td>' +
+    '</tr>';
+
+  /* Party */
+  document.getElementById('hpop-shipper').textContent   = h.shipper;
+  document.getElementById('hpop-consignee').textContent = h.consignee;
+  document.getElementById('hpop-notify').textContent    = h.notify;
+
+  /* EDI */
+  var e2 = h.edi;
+  document.getElementById('hpop-edi-tbody').innerHTML =
+    '<tr>' +
+    '<td>' + e2.expDeclNo + '</td>' +
+    '<td class="right">' + e2.pkgQty + '</td>' +
+    '<td>' + e2.pkgUnit + '</td>' +
+    '<td class="right">' + (typeof e2.grossWt === 'number' ? e2.grossWt.toFixed(1) : e2.grossWt) + '</td>' +
+    '<td>' + e2.gwUnit + '</td>' +
+    '<td class="center">' + e2.samePkgCode + '</td>' +
+    '<td class="right">' + e2.samePkgQty + '</td>' +
+    '<td>' + e2.samePkgUnit + '</td>' +
+    '<td class="center">' + e2.splitShipment + '</td>' +
+    '<td class="right">' + e2.splitOrderBy + '</td>' +
+    '</tr>';
+}
+
+
+/* ════════════════════════════════
+   MAWB HISTORY POPUP
+════════════════════════════════ */
+var mawbHistoryData = {
+  1: [
+    {
+      sendDt:'2026-05-30 09:12',
+      mawbNo:'180-12345678',carrier:'KE',flightName:'KE123',pol:'ICN',pod:'LAX',
+      pkgQty:10,grossWt:250.0,chgWt:300.0,
+      rateClass:'Q',chargeRate:5.5,
+      ocCode1:'PP',ocAmt1:100.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'Korean Air Cargo\n260, Haneul-gil\nGangseo-gu, Seoul 07505\nKOREA\nTEL: +82-2-2656-2001',
+      consignee:'LAX Logistics Inc.\n5900 Century Blvd\nLos Angeles, CA 90045\nUSA\nTEL: +1-310-215-5500',
+      notify:'SAME AS CONSIGNEE'
+    },
+    {
+      sendDt:'2026-05-29 18:00',
+      mawbNo:'180-12345678',carrier:'KE',flightName:'KE123',pol:'ICN',pod:'LAX',
+      pkgQty:10,grossWt:248.5,chgWt:298.0,
+      rateClass:'Q',chargeRate:5.3,
+      ocCode1:'PP',ocAmt1:95.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'Korean Air Cargo\n260, Haneul-gil\nGangseo-gu, Seoul 07505\nKOREA',
+      consignee:'LAX Logistics Inc.\n5900 Century Blvd\nLos Angeles, CA 90045\nUSA',
+      notify:'LAX Logistics Inc.\n5900 Century Blvd\nLos Angeles, CA 90045\nUSA'
+    }
+  ],
+  2: [
+    {
+      sendDt:'2026-05-31 10:00',
+      mawbNo:'180-87654321',carrier:'OZ',flightName:'OZ201',pol:'ICN',pod:'NRT',
+      pkgQty:5,grossWt:80.5,chgWt:95.0,
+      rateClass:'N',chargeRate:3.2,
+      ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'Asiana Cargo Center\n496, Gonghang-daero\nGangseo-gu, Seoul 07560\nKOREA\nTEL: +82-2-2669-8000',
+      consignee:'NRT Express Co., Ltd.\n1-1 Furugome\nNarita-shi, Chiba 282-0004\nJAPAN\nTEL: +81-476-33-0000',
+      notify:'SAME AS CONSIGNEE'
+    },
+    {
+      sendDt:'2026-05-30 21:30',
+      mawbNo:'180-87654321',carrier:'OZ',flightName:'OZ201',pol:'ICN',pod:'NRT',
+      pkgQty:5,grossWt:79.0,chgWt:93.0,
+      rateClass:'N',chargeRate:3.0,
+      ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'Asiana Cargo Center\n496, Gonghang-daero\nGangseo-gu, Seoul 07560\nKOREA',
+      consignee:'NRT Express Co., Ltd.\n1-1 Furugome\nNarita-shi, Chiba 282-0004\nJAPAN',
+      notify:'NRT Express Co., Ltd.\n1-1 Furugome\nNarita-shi, Chiba 282-0004\nJAPAN'
+    }
+  ],
+  3: [
+    {
+      sendDt:'2026-06-01 07:50',
+      mawbNo:'180-11223344',carrier:'LH',flightName:'LH712',pol:'ICN',pod:'FRA',
+      pkgQty:20,grossWt:500.0,chgWt:520.0,
+      rateClass:'M',chargeRate:4.8,
+      ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'Korea Export Hub\n55, Mapo-daero\nMapo-gu, Seoul 04162\nKOREA\nTEL: +82-2-3271-0000',
+      consignee:'Frankfurt Cargo GmbH\nGateway Gardens 1\n60549 Frankfurt am Main\nGERMANY\nTEL: +49-69-6900-6900',
+      notify:'SAME AS CONSIGNEE'
+    },
+    {
+      sendDt:'2026-05-31 23:10',
+      mawbNo:'180-11223344',carrier:'LH',flightName:'LH712',pol:'ICN',pod:'FRA',
+      pkgQty:20,grossWt:498.0,chgWt:518.0,
+      rateClass:'M',chargeRate:4.6,
+      ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'Korea Export Hub\n55, Mapo-daero\nMapo-gu, Seoul 04162\nKOREA',
+      consignee:'Frankfurt Cargo GmbH\nGateway Gardens 1\n60549 Frankfurt am Main\nGERMANY',
+      notify:'Frankfurt Cargo GmbH\nGateway Gardens 1\n60549 Frankfurt am Main\nGERMANY'
+    }
+  ],
+  4: [
+    {
+      sendDt:'2026-06-02 08:30',
+      mawbNo:'180-55667788',carrier:'CX',flightName:'CX418',pol:'ICN',pod:'HKG',
+      pkgQty:8,grossWt:120.0,chgWt:135.0,
+      rateClass:'Q',chargeRate:6.0,
+      ocCode1:'CC',ocAmt1:50.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'ICN Forwarder Co.\n22, Gonghang-ro\nJung-gu, Incheon 22382\nKOREA\nTEL: +82-32-741-2200',
+      consignee:'HKG Freight Ltd.\n7/F Tower 1, Kowloon Commerce Centre\n51 Kwai Cheong Road\nKwai Chung, HONG KONG',
+      notify:'SAME AS CONSIGNEE'
+    },
+    {
+      sendDt:'2026-06-01 17:45',
+      mawbNo:'180-55667788',carrier:'CX',flightName:'CX418',pol:'ICN',pod:'HKG',
+      pkgQty:8,grossWt:118.0,chgWt:132.0,
+      rateClass:'Q',chargeRate:5.8,
+      ocCode1:'CC',ocAmt1:48.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',
+      shipper:'ICN Forwarder Co.\n22, Gonghang-ro\nJung-gu, Incheon 22382\nKOREA',
+      consignee:'HKG Freight Ltd.\n7/F Tower 1, Kowloon Commerce Centre\n51 Kwai Cheong Road\nKwai Chung, HONG KONG',
+      notify:'HKG Freight Ltd.\n51 Kwai Cheong Road\nKwai Chung, HONG KONG'
+    }
+  ],
+  5: [
+    {
+      sendDt:'2026-06-03 07:20',
+      mawbNo:'180-99887766',carrier:'JL',flightName:'JL092',pol:'ICN',pod:'NRT',
+      pkgQty:3,grossWt:40.0,chgWt:45.0,
+      rateClass:'C',chargeRate:7.2,
+      ocCode1:'CA',ocAmt1:30.0,ocCode2:'PX',ocAmt2:10.0,ocCode3:'',ocAmt3:'',
+      shipper:'Seoul Air Express\n10, Teheran-ro 7-gil\nGangnam-gu, Seoul 06130\nKOREA\nTEL: +82-2-555-7700',
+      consignee:'Japan Air Cargo Ltd.\n3-5-1 Hanedakuko\nOta-ku, Tokyo 144-0041\nJAPAN\nTEL: +81-3-5757-8100',
+      notify:'SAME AS CONSIGNEE'
+    },
+    {
+      sendDt:'2026-06-02 20:15',
+      mawbNo:'180-99887766',carrier:'JL',flightName:'JL092',pol:'ICN',pod:'NRT',
+      pkgQty:3,grossWt:39.5,chgWt:44.0,
+      rateClass:'C',chargeRate:7.0,
+      ocCode1:'CA',ocAmt1:28.0,ocCode2:'PX',ocAmt2:9.0,ocCode3:'',ocAmt3:'',
+      shipper:'Seoul Air Express\n10, Teheran-ro 7-gil\nGangnam-gu, Seoul 06130\nKOREA',
+      consignee:'Japan Air Cargo Ltd.\n3-5-1 Hanedakuko\nOta-ku, Tokyo 144-0041\nJAPAN',
+      notify:'Japan Air Cargo Ltd.\n3-5-1 Hanedakuko\nOta-ku, Tokyo 144-0041\nJAPAN'
+    }
+  ]
+,
+  6: [
+    {sendDt:'2026-06-04 10:30',mawbNo:'180-22334455',carrier:'AA',flightName:'AA280',pol:'ICN',pod:'JFK',pkgQty:15,grossWt:340.0,chgWt:360.0,rateClass:'Q',chargeRate:5.9,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'AA Cargo Korea\n132 Gonghang-daero\nGangseo-gu, Seoul\nKOREA',consignee:'JFK Air Freight\n151-20 Baisley Blvd\nJamaica, NY 11434\nUSA',notify:'SAME AS CONSIGNEE'},
+    {sendDt:'2026-06-03 22:15',mawbNo:'180-22334455',carrier:'AA',flightName:'AA280',pol:'ICN',pod:'JFK',pkgQty:15,grossWt:338.0,chgWt:358.0,rateClass:'Q',chargeRate:5.7,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'AA Cargo Korea\n132 Gonghang-daero\nGangseo-gu, Seoul\nKOREA',consignee:'JFK Air Freight\n151-20 Baisley Blvd\nJamaica, NY 11434\nUSA',notify:'JFK Air Freight\n151-20 Baisley Blvd\nJamaica, NY 11434\nUSA'}
+  ],
+  7: [
+    {sendDt:'2026-06-05 08:50',mawbNo:'180-33445566',carrier:'EK',flightName:'EK322',pol:'ICN',pod:'DXB',pkgQty:12,grossWt:280.0,chgWt:295.0,rateClass:'N',chargeRate:4.2,ocCode1:'CC',ocAmt1:80.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Emirates SkyCargo Agent\n88 Daechi-dong\nGangnam-gu, Seoul\nKOREA',consignee:'Dubai World Central\nJebel Ali Free Zone\nDubai, UAE',notify:'SAME AS CONSIGNEE'},
+    {sendDt:'2026-06-04 19:40',mawbNo:'180-33445566',carrier:'EK',flightName:'EK322',pol:'ICN',pod:'DXB',pkgQty:12,grossWt:277.0,chgWt:292.0,rateClass:'N',chargeRate:4.0,ocCode1:'CC',ocAmt1:75.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Emirates SkyCargo Agent\n88 Daechi-dong\nGangnam-gu, Seoul\nKOREA',consignee:'Dubai World Central\nJebel Ali Free Zone\nDubai, UAE',notify:'Dubai World Central\nJebel Ali Free Zone\nDubai, UAE'}
+  ],
+  8: [
+    {sendDt:'2026-06-06 09:00',mawbNo:'180-44556677',carrier:'KE',flightName:'KE017',pol:'ICN',pod:'CDG',pkgQty:7,grossWt:155.0,chgWt:168.0,rateClass:'M',chargeRate:5.1,ocCode1:'PP',ocAmt1:60.0,ocCode2:'CA',ocAmt2:20.0,ocCode3:'',ocAmt3:'',shipper:'Korean Air Cargo CDG\n260 Haneul-gil\nGangseo-gu, Seoul\nKOREA',consignee:'CDG Cargo SAS\nAeroport Paris CDG\nBP 20101, 95711 Roissy\nFRANCE',notify:'SAME AS CONSIGNEE'},
+    {sendDt:'2026-06-05 17:20',mawbNo:'180-44556677',carrier:'KE',flightName:'KE017',pol:'ICN',pod:'CDG',pkgQty:7,grossWt:153.0,chgWt:165.0,rateClass:'M',chargeRate:4.9,ocCode1:'PP',ocAmt1:55.0,ocCode2:'CA',ocAmt2:18.0,ocCode3:'',ocAmt3:'',shipper:'Korean Air Cargo CDG\n260 Haneul-gil\nGangseo-gu, Seoul\nKOREA',consignee:'CDG Cargo SAS\nAeroport Paris CDG\nBP 20101, 95711 Roissy\nFRANCE',notify:'CDG Cargo SAS\nAeroport Paris CDG\nFRANCE'}
+  ],
+  9: [
+    {sendDt:'2026-06-07 07:30',mawbNo:'180-55778899',carrier:'OZ',flightName:'OZ541',pol:'ICN',pod:'SYD',pkgQty:25,grossWt:620.0,chgWt:650.0,rateClass:'Q',chargeRate:6.5,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Asiana Cargo SYD\n496 Gonghang-daero\nGangseo-gu, Seoul\nKOREA',consignee:'Sydney Air Cargo\n2 Arrival Court\nMascot NSW 2020\nAUSTRALIA',notify:'SAME AS CONSIGNEE'},
+    {sendDt:'2026-06-06 21:50',mawbNo:'180-55778899',carrier:'OZ',flightName:'OZ541',pol:'ICN',pod:'SYD',pkgQty:25,grossWt:615.0,chgWt:645.0,rateClass:'Q',chargeRate:6.3,ocCode1:'',ocAmt1:'',ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Asiana Cargo SYD\n496 Gonghang-daero\nGangseo-gu, Seoul\nKOREA',consignee:'Sydney Air Cargo\n2 Arrival Court\nMascot NSW 2020\nAUSTRALIA',notify:'Sydney Air Cargo\n2 Arrival Court\nAUSTRALIA'}
+  ],
+  10: [
+    {sendDt:'2026-06-08 08:45',mawbNo:'180-66889900',carrier:'LH',flightName:'LH714',pol:'ICN',pod:'MUC',pkgQty:18,grossWt:410.0,chgWt:430.0,rateClass:'C',chargeRate:4.5,ocCode1:'CX',ocAmt1:35.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Lufthansa Cargo ICN\n296 Gonghang-daero\nGangseo-gu, Seoul\nKOREA',consignee:'Lufthansa Cargo MUC\nFrachtgebaeude 452\n85356 Muenchen\nGERMANY',notify:'SAME AS CONSIGNEE'},
+    {sendDt:'2026-06-07 23:10',mawbNo:'180-66889900',carrier:'LH',flightName:'LH714',pol:'ICN',pod:'MUC',pkgQty:18,grossWt:408.0,chgWt:428.0,rateClass:'C',chargeRate:4.3,ocCode1:'CX',ocAmt1:32.0,ocCode2:'',ocAmt2:'',ocCode3:'',ocAmt3:'',shipper:'Lufthansa Cargo ICN\n296 Gonghang-daero\nGangseo-gu, Seoul\nKOREA',consignee:'Lufthansa Cargo MUC\nFrachtgebaeude 452\n85356 Muenchen\nGERMANY',notify:'Lufthansa Cargo MUC\nFrachtgebaeude 452\nGERMANY'}
+  ]
+};
+
+function mawbHistory() {
+  var sel = getCheckedMawb();
+  if (!sel.length) { toast('MAWB\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.', 'error'); return; }
+  if (sel.length > 1) { toast('\uB2E8\uAC74\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.', 'error'); return; }
+  var mawb = sel[0];
+  var histList = mawbHistoryData[mawb.id];
+  if (!histList || !histList.length) { toast('History \ub370\uc774\ud130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.', 'error'); return; }
+
+  var selEl = document.getElementById('mpop-date-sel');
+  selEl.innerHTML = '';
+  histList.forEach(function(h, i) {
+    var opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = h.sendDt + (i === 0 ? '  (\uCD5C\uC2E0)' : '');
+    selEl.appendChild(opt);
+  });
+
+  document.getElementById('mpop-overlay').classList.add('open');
+  document.addEventListener('keydown', mpopEscHandler);
+  document.getElementById('mpop-overlay').onclick = function(e) { if (e.target === this) closeMawbHistory(); };
+  loadMawbHistory('0');
+}
+
+function closeMawbHistory() {
+  document.getElementById('mpop-overlay').classList.remove('open');
+  document.removeEventListener('keydown', mpopEscHandler);
+}
+function mpopEscHandler(e) { if (e.key === 'Escape') closeMawbHistory(); }
+
+function loadMawbHistory(idx) {
+  var sel = getCheckedMawb();
+  if (!sel.length) return;
+  var histList = mawbHistoryData[sel[0].id];
+  if (!histList) return;
+  var h = histList[Number(idx)];
+  if (!h) return;
+
+  document.getElementById('mpop-mawb-tbody').innerHTML =
+    '<tr>' +
+    '<td>' + h.mawbNo + '</td>' +
+    '<td>' + h.carrier + '</td>' +
+    '<td>' + h.flightName + '</td>' +
+    '<td>' + h.pol + '</td>' +
+    '<td>' + h.pod + '</td>' +
+    '<td class="right">' + h.pkgQty + '</td>' +
+    '<td class="right">' + (typeof h.grossWt === 'number' ? h.grossWt.toFixed(1) : h.grossWt) + '</td>' +
+    '<td class="right">' + (typeof h.chgWt === 'number' ? h.chgWt.toFixed(1) : h.chgWt) + '</td>' +
+    '</tr>';
+
+  document.getElementById('mpop-rate-tbody').innerHTML =
+    '<tr>' +
+    '<td>' + h.rateClass + '</td>' +
+    '<td class="right">' + h.chargeRate + '</td>' +
+    '<td>' + h.ocCode1 + '</td>' +
+    '<td class="right">' + (h.ocAmt1 !== '' ? h.ocAmt1 : '-') + '</td>' +
+    '<td>' + h.ocCode2 + '</td>' +
+    '<td class="right">' + (h.ocAmt2 !== '' ? h.ocAmt2 : '-') + '</td>' +
+    '<td>' + h.ocCode3 + '</td>' +
+    '<td class="right">' + (h.ocAmt3 !== '' ? h.ocAmt3 : '-') + '</td>' +
+    '</tr>';
+
+  document.getElementById('mpop-shipper').textContent   = h.shipper;
+  document.getElementById('mpop-consignee').textContent = h.consignee;
+  document.getElementById('mpop-notify').textContent    = h.notify;
+}
+
+
+</script>
+</body>
+</html>
