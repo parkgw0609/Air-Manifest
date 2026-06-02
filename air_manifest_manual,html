@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Air Manifest Send (KR) — User Manual</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR','Apple SD Gothic Neo',Arial,sans-serif;background:#F0F3F8;color:#1a1a2e;min-height:100vh}
+
+/* ── 상단 네비게이션 ── */
+.top-nav{background:#fff;border-bottom:1px solid #dde3f0;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(98,131,246,.07)}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:0;height:52px;padding:0 24px}
+.nav-logo{display:flex;align-items:center;gap:8px;margin-right:20px;flex-shrink:0}
+.nav-logo-badge{background:#6283F6;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.5px}
+.nav-logo-title{font-size:13px;font-weight:700;color:#1a1a2e}
+.nav-tabs{display:flex;gap:0;overflow-x:auto;flex:1}
+.nav-tabs::-webkit-scrollbar{height:0}
+.nav-tab{padding:0 14px;height:52px;display:flex;align-items:center;font-size:12px;font-weight:600;color:#83888D;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;text-decoration:none}
+.nav-tab:hover{color:#6283F6}
+.nav-tab.active{color:#6283F6;border-bottom-color:#6283F6}
+
+/* ── ⭐ User Manual 버튼 ── */
+.nav-manual-btn{
+  display:flex;align-items:center;gap:5px;
+  margin-left:auto;flex-shrink:0;
+  height:30px;padding:0 12px;
+  background:#1A2233;
+  border:1px solid #2C323B;
+  border-radius:4px;
+  cursor:pointer;
+  text-decoration:none;
+  outline:1.5px solid #3a4a60;
+  outline-offset:-1.5px;
+  transition:background .15s,outline-color .15s;
+  position:relative;
+}
+.nav-manual-btn:hover{background:#1E2736;outline-color:#4a90d9}
+.nav-manual-btn:hover .manual-star{filter:drop-shadow(0 0 4px #ffd700)}
+.manual-star{font-size:13px;line-height:1;transition:filter .2s}
+.manual-label{
+  font-size:10px;font-weight:700;
+  color:#18A6C6;letter-spacing:.3px;
+  white-space:nowrap;line-height:1;
+}
+.manual-tooltip{
+  position:absolute;bottom:-34px;right:0;
+  background:#1A2233;color:#ccd6f0;
+  font-size:10px;font-weight:500;
+  padding:4px 9px;border-radius:3px;
+  white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .15s;
+  border:1px solid #2C323B;
+  z-index:200;
+}
+.manual-tooltip::before{
+  content:'';position:absolute;top:-5px;right:14px;
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-bottom:5px solid #2C323B;
+}
+.nav-manual-btn:hover .manual-tooltip{opacity:1}
+
+.nav-pgnum{font-size:11px;color:#C4D4FF;font-weight:700;margin-left:12px;flex-shrink:0}
+
+/* ── 페이지 공통 ── */
+.page{display:none;max-width:900px;margin:0 auto;padding:36px 24px 48px}
+.page.active{display:block}
+
+.pg-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.eyebrow-badge{background:#6283F6;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+.eyebrow-tab{font-size:12px;color:#6283F6;font-weight:700}
+.eyebrow-num{font-size:11px;color:#83888D;margin-left:auto}
+.pg-title{font-size:26px;font-weight:700;color:#1a1a2e;margin-bottom:4px;line-height:1.25}
+.pg-sub{font-size:13px;color:#83888D;margin-bottom:28px}
+
+/* ── 레이아웃 ── */
+.body-row{display:flex;gap:28px;align-items:flex-start}
+.col-left{flex-shrink:0}
+.col-right{flex:1;min-width:0}
+
+/* ── 화면 모형 공통 ── */
+.screen-wrap{position:relative}
+.screen-frame{background:#fff;border:1.5px solid #dde3f0;border-radius:10px;overflow:hidden;font-size:10px;box-shadow:0 2px 12px rgba(98,131,246,.08)}
+.topbar{background:#1a2233;display:flex;height:28px;align-items:center;padding:0 8px;gap:0}
+.tb-item{display:flex;align-items:center;padding:0 12px;height:28px;font-size:9px;color:#aab;border-right:1px solid #2a3450;white-space:nowrap}
+.tb-item.active{background:#fff;color:#1a2233;font-weight:700}
+.breadcrumb{padding:4px 10px;background:#fff;border-bottom:1px solid #eaecf0;font-size:8px;color:#888}
+.breadcrumb .cur{color:#1a2233;font-weight:600}
+.search-wrap{background:#fff;border:1px solid #d8dce3;margin:6px;border-radius:3px;padding:6px 8px 8px}
+.s-actions{display:flex;justify-content:flex-end;gap:4px;margin-bottom:5px;align-items:center}
+.s-grid{display:grid;gap:4px 6px}
+.sf{display:flex;flex-direction:column;gap:2px}
+.sf label{font-size:7px;color:#555;font-weight:600}
+.sf-h{height:18px;border:1px solid #c8cdd6;border-radius:2px;font-size:8px;padding:0 4px;background:#fff;width:100%;display:flex;align-items:center;color:#2c3e50;gap:3px}
+.sf-h input{border:none;outline:none;font-size:8px;flex:1;min-width:0;background:transparent;color:#2c3e50;font-family:inherit}
+.sf-h select{border:none;outline:none;font-size:8px;flex:1;background:transparent;color:#2c3e50;font-family:inherit}
+.sf-h .plus{background:#e8edf4;border:1px solid #c8cdd6;border-radius:2px;font-size:7px;padding:0 3px;color:#555;flex-shrink:0}
+.sf-h .ico{color:#888;font-size:10px;flex-shrink:0}
+.sf-h .sep{color:#bbb;flex-shrink:0}
+.btn-xs{height:16px;padding:0 5px;border-radius:2px;font-size:7px;display:inline-flex;align-items:center;border:1px solid #c8cdd6;background:#fff;color:#333;white-space:nowrap;cursor:pointer}
+.btn-xs.search{background:#181F29;border-color:#2C323B;color:#18A6C6;font-weight:700;outline:1.5px solid #BABCBF;outline-offset:-1.5px}
+.btn-xs.blue{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.btn-xs.icon{width:16px;padding:0;justify-content:center}
+
+/* ── 탑바 내 User Manual 미니 버튼 (화면 모형용) ── */
+.tb-manual-btn{
+  margin-left:auto;
+  display:flex;align-items:center;gap:3px;
+  height:18px;padding:0 7px;
+  background:#181F29;
+  border:1px solid #2C323B;
+  border-radius:3px;
+  outline:1px solid #3a4a60;
+  outline-offset:-1px;
+  flex-shrink:0;
+}
+.tb-manual-star{font-size:9px;line-height:1}
+.tb-manual-label{font-size:7px;font-weight:700;color:#18A6C6;letter-spacing:.2px}
+
+.grid-panel{margin:0 6px 6px;border:1px solid #d8dce3;border-radius:3px;overflow:hidden}
+.grid-hd{background:#D9EBFF;padding:4px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d0d5dd}
+.grid-hd-link{background:#f7f8fa;padding:2px 8px;text-align:right;border-bottom:1px solid #e8eaed;font-size:7px;color:#3FA2E4}
+.grid-title{font-size:8px;font-weight:700;color:#1a2233}
+.grid-btns{display:flex;gap:2px;align-items:center}
+.tbl-hd{background:#D9EBFF;padding:3px 7px;display:flex;gap:4px;font-size:7px;font-weight:700;color:#3a4a5c;border-bottom:1px solid #d0d5dd}
+.tbl-row{padding:3px 7px;display:flex;gap:4px;font-size:7px;color:#2c3e50;border-bottom:1px solid #eef0f3;align-items:center}
+.tbl-row:last-child{border-bottom:none}
+.tbl-row.alt{background:#fff}
+.tbl-row.sel{background:#e8f4ff}
+.chkb{width:10px;height:10px;flex-shrink:0}
+.connector{display:flex;align-items:center;gap:6px;padding:3px 12px;font-size:7px;color:#aaa}
+.connector::before,.connector::after{content:'';flex:1;border-top:1px dashed #d0d5e0}
+
+/* ── 뱃지 ── */
+.b{display:inline-flex;align-items:center;border-radius:2px;font-size:7px;padding:0 4px;font-weight:700;white-space:nowrap;height:14px}
+.b-new{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+.b-epninf{background:#e3f0fc;color:#0d5bab;border:1px solid #aaceed}
+.b-fwb{background:#c5dff8;color:#083b80;border:1px solid #7ab3e8}
+.b-na{background:#f0f0f0;color:#555;border:1px solid #ddd}
+.b-proc{background:#fff4e0;color:#8a5700;border:1px solid #f0c070}
+.b-ok{background:#e6f4ea;color:#1e7e34;border:1px solid #b7dfbf}
+.b-err{background:#fce8e6;color:#b31412;border:1px solid #f0a8a6}
+.b-resend{background:#fce8e6;color:#b31412;border:1px solid #f0a8a6}
+
+/* ── 하이라이트 테두리 ── */
+.hl{position:absolute;pointer-events:none;border-radius:3px}
+.hl-red{border:2px solid #e83e3e}
+.hl-blue{border:2px dashed #6283F6}
+.hl-gold{border:2px solid #f0b429;border-radius:3px}
+
+/* ── 화살표 svg ── */
+.arr{position:absolute;pointer-events:none;overflow:visible}
+
+/* ── 콜아웃 공통 ── */
+.callout-list{display:flex;flex-direction:column;gap:14px}
+.c-item{display:flex;gap:12px;align-items:flex-start}
+.c-num{width:24px;height:24px;border-radius:50%;background:#6283F6;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.c-num.red{background:#e83e3e}
+.c-num.gold{background:#e9a800}
+.c-num.gray{background:#83888D}
+.c-body{}
+.c-tag{display:inline-block;background:#C4D4FF;color:#3a5bd9;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:4px}
+.c-tag.gray{background:#eaeef0;color:#4a5568}
+.c-tag.gold{background:#fff3cd;color:#7a5800}
+.c-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:3px}
+.c-desc{font-size:11px;color:#83888D;line-height:1.65}
+
+/* ── 정보 박스 ── */
+.tip-box{background:#fff;border:1.5px solid #C4D4FF;border-left:4px solid #6283F6;border-radius:0 8px 8px 0;padding:10px 14px;margin-top:6px}
+.tip-lbl{font-size:10px;font-weight:700;color:#6283F6;margin-bottom:3px}
+.tip-txt{font-size:11px;color:#83888D;line-height:1.65}
+.warn-box{background:#fff8e1;border:1.5px solid #ffe082;border-left:4px solid #ffa000;border-radius:0 8px 8px 0;padding:10px 14px;margin-top:6px}
+.warn-lbl{font-size:10px;font-weight:700;color:#e65100;margin-bottom:3px}
+.warn-txt{font-size:11px;color:#5a4000;line-height:1.65}
+.gold-box{background:#fffbf0;border:1.5px solid #ffd060;border-left:4px solid #e9a800;border-radius:0 8px 8px 0;padding:10px 14px;margin-top:6px}
+.gold-lbl{font-size:10px;font-weight:700;color:#7a5800;margin-bottom:3px}
+.gold-txt{font-size:11px;color:#5a4000;line-height:1.65}
+
+/* ── 구분선 ── */
+.divider{height:1px;background:#dde3f0;margin:24px 0 18px}
+
+/* ── 흐름도 ── */
+.flow-row{display:flex;align-items:center;gap:0}
+.flow-step{background:#fff;border:1.5px solid #C4D4FF;border-radius:10px;padding:10px 8px;text-align:center;flex:1}
+.flow-step.accent{border-color:#6283F6}
+.flow-lbl{font-size:10px;color:#83888D;margin-bottom:2px}
+.flow-val{font-size:11px;font-weight:700;color:#6283F6}
+.flow-val.dark{color:#1a1a2e}
+.flow-arr{width:32px;flex-shrink:0;position:relative;height:32px}
+.flow-arr::before{content:'';position:absolute;top:50%;left:4px;right:12px;height:0;border-top:2px dashed #e83e3e;transform:translateY(-50%)}
+.flow-arrh{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #e83e3e}
+
+/* ── 필드 정의 테이블 ── */
+.def-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.def-table th{background:#eef1fb;color:#3a5bd9;font-size:11px;font-weight:700;padding:8px 12px;text-align:left;border-bottom:2px solid #C4D4FF}
+.def-table td{padding:8px 12px;border-bottom:1px solid #edf0f8;color:#2d3748;vertical-align:top;line-height:1.5}
+.def-table tr:last-child td{border-bottom:none}
+.def-table tr:hover td{background:#f8f9ff}
+.def-table td:first-child{font-weight:600;color:#1a1a2e;white-space:nowrap}
+
+/* ── API 박스 ── */
+.api-box{background:#0d1526;border-radius:8px;padding:10px 14px;margin-bottom:8px}
+.api-method{display:inline-block;padding:2px 8px;border-radius:4px;font-weight:700;font-size:10px;margin-right:8px;font-family:monospace}
+.api-method.get{background:#0f3020;color:#4ade80}
+.api-method.post{background:#0a2040;color:#60a5fa}
+.api-url{color:#90bcf8;font-family:monospace;font-size:11px}
+.api-desc{color:#6878a0;font-size:11px;margin-top:5px}
+
+/* ── 섹션 타이틀 ── */
+.sec-title{font-size:12px;font-weight:700;color:#83888D;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #dde3f0}
+
+/* ── 팝업 카드 ── */
+.popup-card{background:#fff;border:1.5px solid #dde3f0;border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.popup-card-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.popup-card-sub{font-size:11px;color:#83888D;line-height:1.6;margin-bottom:10px}
+.popup-step-row{display:flex;gap:8px;align-items:flex-start;margin-top:8px}
+.popup-step-num{width:20px;height:20px;border-radius:50%;background:#C4D4FF;color:#3a5bd9;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.popup-step-txt{font-size:11px;color:#4a5568;line-height:1.6}
+
+/* ── 규칙 목록 ── */
+.rule-list{list-style:none;padding:0}
+.rule-list li{font-size:12px;color:#2d3748;padding:7px 0 7px 20px;border-bottom:1px solid #edf0f8;position:relative;line-height:1.55}
+.rule-list li:before{content:'▸';position:absolute;left:4px;color:#6283F6;font-size:10px;top:9px}
+.rule-list li:last-child{border-bottom:none}
+
+code{background:#eaeef8;color:#3a5bd9;font-size:10px;padding:1px 5px;border-radius:3px;font-family:monospace}
+
+/* ── 상태 흐름 ── */
+.status-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0}
+.status-arrow{color:#83888D;font-size:14px}
+
+/* 카드 그리드 */
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.info-card{background:#fff;border:1.5px solid #dde3f0;border-radius:10px;padding:12px 14px}
+.info-card-title{font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.info-card-desc{font-size:11px;color:#83888D;line-height:1.6}
+
+/* 개요 페이지 특수 */
+.overview-feature{background:#fff;border:1.5px solid #dde3f0;border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.ov-num{width:32px;height:32px;border-radius:50%;background:#6283F6;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ov-row{display:flex;gap:14px;align-items:flex-start}
+.ov-title{font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:5px}
+.ov-desc{font-size:12px;color:#83888D;line-height:1.7}
+.ov-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ov-chip{background:#F0F3F8;border:1px solid #C4D4FF;border-radius:20px;padding:3px 10px;font-size:10px;color:#6283F6;font-weight:600}
+
+/* ── User Manual 버튼 소개 카드 ── */
+.btn-preview-wrap{
+  display:flex;align-items:center;gap:16px;
+  background:#1A2233;border-radius:8px;
+  padding:14px 18px;margin:12px 0;
+}
+.btn-preview-live{
+  display:flex;align-items:center;gap:5px;
+  height:30px;padding:0 12px;
+  background:#181F29;
+  border:1px solid #2C323B;
+  border-radius:4px;
+  outline:1.5px solid #3a4a60;
+  outline-offset:-1.5px;
+  flex-shrink:0;
+  cursor:default;
+}
+.btn-preview-star{font-size:13px;line-height:1}
+.btn-preview-label{font-size:10px;font-weight:700;color:#18A6C6;letter-spacing:.3px}
+.btn-preview-desc{font-size:11px;color:#7a8faa;line-height:1.6}
+.btn-preview-desc strong{color:#aac4e0}
+
+/* ── 위치 설명 박스 ── */
+.position-box{
+  display:flex;align-items:flex-start;gap:12px;
+  background:#f8f9ff;border:1.5px solid #C4D4FF;border-radius:10px;
+  padding:12px 16px;margin-top:8px;
+}
+.pos-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.pos-title{font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:3px}
+.pos-desc{font-size:11px;color:#83888D;line-height:1.65}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP NAV ═══ -->
+<div class="top-nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <span class="nav-logo-badge">매뉴얼</span>
+      <span class="nav-logo-title">Air Manifest Send (KR)</span>
+    </div>
+    <div class="nav-tabs">
+      <a class="nav-tab active" onclick="showPage('overview',this)">개요</a>
+      <a class="nav-tab" onclick="showPage('search',this)">조회조건</a>
+      <a class="nav-tab" onclick="showPage('fields',this)">필드정의</a>
+      <a class="nav-tab" onclick="showPage('buttons',this)">버튼</a>
+      <a class="nav-tab" onclick="showPage('usermanual',this)">⭐ User Manual 버튼</a>
+      <a class="nav-tab" onclick="showPage('api',this)">API</a>
+      <a class="nav-tab" onclick="showPage('popup',this)">팝업</a>
+      <a class="nav-tab" onclick="showPage('rules',this)">규칙·제약</a>
+    </div>
+
+    <!-- ⭐ User Manual 버튼 -->
+    <a class="nav-manual-btn" href="air_manifest_manual.html" target="_blank" rel="noopener">
+      <span class="manual-star">⭐</span>
+      <span class="manual-label">User Manual</span>
+      <span class="manual-tooltip">새 탭에서 매뉴얼 열기</span>
+    </a>
+
+    <span class="nav-pgnum" id="pg-num">01 / 08</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 1 — 개요
+═══════════════════════════════════════ -->
+<div class="page active" id="page-overview">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">개요</span>
+    <span class="eyebrow-num">01 / 08</span>
+  </div>
+  <div class="pg-title">Air Manifest Send (KR) 란?</div>
+  <div class="pg-sub">한국 세관에 항공 화물 EDI 전문을 전송하고, MAWB·HAWB 단위로 전송 상태를 관리하는 화면이에요</div>
+
+  <div class="body-row">
+    <div class="col-right">
+
+      <div class="overview-feature">
+        <div class="ov-row">
+          <div class="ov-num">1</div>
+          <div>
+            <div class="ov-title">화면 4-Layer 구조</div>
+            <div class="ov-desc">화면은 위에서 아래로 4개 영역이 순서대로 연결돼요. 위 영역에서 항목을 선택하면 아래 영역이 자동으로 업데이트됩니다.</div>
+            <div class="ov-chips">
+              <span class="ov-chip">① 검색 필터</span>
+              <span class="ov-chip">② MAWB 그리드</span>
+              <span class="ov-chip">③ HAWB 그리드</span>
+              <span class="ov-chip">④ 수출신고 정보</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-feature">
+        <div class="ov-row">
+          <div class="ov-num">2</div>
+          <div>
+            <div class="ov-title">EDI 전송 순서</div>
+            <div class="ov-desc">전송은 반드시 순서를 지켜야 해요. EPNINF를 먼저 보내야 FWB/FHL 전송이 가능합니다.</div>
+            <div class="status-flow" style="margin-top:10px">
+              <span class="b b-na">New</span>
+              <span class="status-arrow">→</span>
+              <span class="b b-epninf">EPNINF Sent</span>
+              <span class="status-arrow">→</span>
+              <span class="b b-fwb">FWB/FHL Sent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-feature">
+        <div class="ov-row">
+          <div class="ov-num">3</div>
+          <div>
+            <div class="ov-title">EDI 전송 결과 상태</div>
+            <div class="ov-desc">전송 버튼을 누르면 즉시 <code>Processing</code> 상태가 되고, KTNET 서버 응답 후 최종 상태로 바뀌어요.</div>
+            <div class="card-grid" style="margin-top:10px">
+              <div class="info-card">
+                <div class="info-card-title"><span class="b b-na">N/A</span></div>
+                <div class="info-card-desc">전송 전 초기 상태</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-title"><span class="b b-proc">Processing</span></div>
+                <div class="info-card-desc">전송 요청 후 응답 대기 중</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-title"><span class="b b-ok">Complete</span></div>
+                <div class="info-card-desc">전송 성공 확인</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-title"><span class="b b-err">Error</span></div>
+                <div class="info-card-desc">전송 실패 → Need Resend 자동 Yes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-feature">
+        <div class="ov-row">
+          <div class="ov-num">4</div>
+          <div>
+            <div class="ov-title">탭 구성</div>
+            <div class="ov-desc">화면은 2개 탭으로 구성돼요.</div>
+            <div class="card-grid" style="margin-top:10px">
+              <div class="info-card">
+                <div class="info-card-title">🛫 Air Manifest Send (KR)</div>
+                <div class="info-card-desc">메인 업무 화면. 검색·MAWB·HAWB·수출신고 4개 영역</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-title">🚢 Carrier</div>
+                <div class="info-card-desc">항공사 마스터 조회. AIR·SHIP·FWDR·ROAD 타입 필터</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="tip-lbl">🔗 외부 시스템 연계</div>
+        <div class="tip-txt">우측 상단 <strong>KTNET/uLogisHub</strong> 링크를 클릭하면 EDI 전문 처리 포털로 바로 이동할 수 있어요. 전송 결과 이력을 직접 확인할 때 사용합니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 2 — 조회조건
+═══════════════════════════════════════ -->
+<div class="page" id="page-search">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">조회조건</span>
+    <span class="eyebrow-num">02 / 08</span>
+  </div>
+  <div class="pg-title">조회조건 — 원하는 화물만 빠르게 찾기</div>
+  <div class="pg-sub">화면 상단 검색 필터 7개 조건을 조합해서 MAWB·HAWB를 조회하세요</div>
+
+  <div class="body-row">
+    <div class="col-left">
+      <div class="screen-wrap" style="width:300px">
+        <div class="screen-frame">
+          <div class="topbar">
+            <div class="tb-item active">Air Manifest Send (KR) ✕</div>
+            <div class="tb-item">Carrier ✕</div>
+          </div>
+          <div class="breadcrumb">Global Freight › Air Forwarding › <span class="cur">Air Manifest Send (KR)</span></div>
+          <div class="search-wrap">
+            <div class="s-actions">
+              <span class="btn-xs">∧</span>
+              <span class="btn-xs" style="font-size:11px">↺</span>
+              <span class="btn-xs search">Search</span>
+            </div>
+            <div class="s-grid" style="grid-template-columns:repeat(2,1fr)">
+              <div class="sf"><label>MAWB Status</label><div class="sf-h"><select><option>All</option></select></div></div>
+              <div class="sf"><label>MAWB No.</label><div class="sf-h"><input placeholder="MAWB No."><span class="plus">+</span></div></div>
+              <div class="sf"><label>HAWB No.</label><div class="sf-h"><input placeholder="HAWB No."><span class="plus">+</span></div></div>
+              <div class="sf"><label>Carrier</label><div class="sf-h"><input placeholder="ID/Name"><span class="ico">🔍</span></div></div>
+              <div class="sf" style="grid-column:span 2"><label>ETD</label><div class="sf-h"><input type="text" value="2026-05-29" style="width:80px"><span class="sep">~</span><input type="text" value="2026-06-12" style="width:80px"></div></div>
+              <div class="sf"><label>EDI Send Status</label><div class="sf-h"><select><option>All</option></select></div></div>
+              <div class="sf"><label>Need Resend</label><div class="sf-h"><select><option>All</option></select></div></div>
+            </div>
+          </div>
+          <div style="background:#D9EBFF;padding:4px 8px;margin:0 6px 6px;border-radius:3px;border:1px solid #d8dce3;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:8px;font-weight:700;color:#1a2233">MAWB Info. <span style="color:#666;font-weight:400">총 10건</span></span>
+            <div style="display:flex;gap:2px">
+              <span class="btn-xs">History</span><span class="btn-xs">EPNINF</span><span class="btn-xs blue">FWB/FHL</span>
+            </div>
+          </div>
+          <div style="margin:0 6px 6px;border:1px solid #d8dce3;border-radius:3px;overflow:hidden">
+            <div class="tbl-hd"><span class="chkb">☐</span><span style="flex:1.2">Status</span><span style="flex:1">EDI</span><span style="flex:1.5">MAWB No.</span><span style="flex:.8">ETD</span></div>
+            <div class="tbl-row sel"><span class="chkb">☑</span><span style="flex:1.2"><span class="b b-fwb">FWB/FHL</span></span><span style="flex:1"><span class="b b-ok">OK</span></span><span style="flex:1.5;font-size:7px">180-12345678</span><span style="flex:.8;font-size:6.5px">05-30</span></div>
+            <div class="tbl-row alt"><span class="chkb">☐</span><span style="flex:1.2"><span class="b b-epninf">EPNINF</span></span><span style="flex:1"><span class="b b-err">Err</span></span><span style="flex:1.5;font-size:7px">180-87654321</span><span style="flex:.8;font-size:6.5px">05-31</span></div>
+            <div class="tbl-row"><span class="chkb">☐</span><span style="flex:1.2"><span class="b b-na">New</span></span><span style="flex:1"><span class="b b-na">N/A</span></span><span style="flex:1.5;font-size:7px">180-11223344</span><span style="flex:.8;font-size:6.5px">06-01</span></div>
+          </div>
+        </div>
+        <div class="hl hl-red" style="top:47px;left:8px;width:128px;height:20px"></div>
+        <div class="hl hl-red" style="top:47px;left:142px;width:128px;height:20px"></div>
+        <div class="hl hl-red" style="top:71px;left:8px;width:128px;height:20px"></div>
+        <div class="hl hl-red" style="top:71px;left:142px;width:128px;height:20px"></div>
+        <div class="hl hl-blue" style="top:96px;left:8px;width:258px;height:20px"></div>
+        <div class="hl hl-blue" style="top:121px;left:8px;width:128px;height:20px"></div>
+        <div class="hl hl-blue" style="top:121px;left:142px;width:128px;height:20px"></div>
+        <div class="hl hl-red" style="top:26px;left:222px;width:72px;height:18px"></div>
+        <svg class="arr" style="top:54px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <defs><marker id="m1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#e83e3e" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#e83e3e" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m1)"/>
+        </svg>
+        <svg class="arr" style="top:78px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#e83e3e" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m1)"/>
+        </svg>
+        <svg class="arr" style="top:103px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#6283F6" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m1)"/>
+        </svg>
+        <svg class="arr" style="top:128px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#6283F6" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m1)"/>
+        </svg>
+        <svg class="arr" style="top:32px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#e83e3e" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m1)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="callout-list">
+        <div class="c-item">
+          <div class="c-num red">1</div>
+          <div class="c-body">
+            <span class="c-tag">MAWB Status · MAWB No.</span>
+            <div class="c-title">MAWB 단위 기본 조건</div>
+            <div class="c-desc">Status 드롭다운으로 전송 단계를 필터하거나, MAWB 번호를 직접 입력하세요. <code>+</code> 버튼으로 여러 번호를 한 번에 검색할 수 있어요.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num red">2</div>
+          <div class="c-body">
+            <span class="c-tag">HAWB No. · Carrier</span>
+            <div class="c-title">HAWB No. 입력 시 MAWB No.·ETD 비활성</div>
+            <div class="c-desc">HAWB 번호를 입력하면 관련 MAWB를 역방향으로 찾아줘요. Carrier 필드 옆 🔍 클릭 시 검색 팝업이 열려요.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num">3</div>
+          <div class="c-body">
+            <span class="c-tag" style="background:#eaeef8;color:#3a5bd9">ETD 범위</span>
+            <div class="c-title">출발 예정일 범위로 기간 조회</div>
+            <div class="c-desc">기본값은 오늘 기준 ±14일이에요. MAWB No. 또는 HAWB No. 입력 시에는 ETD 조건이 비활성화됩니다.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num">4</div>
+          <div class="c-body">
+            <span class="c-tag" style="background:#eaeef8;color:#3a5bd9">EDI Send Status · Need Resend</span>
+            <div class="c-title">재전송 필요 건만 빠르게 솎아내기</div>
+            <div class="c-desc"><code>EDI Send Status = Error</code> + <code>Need Resend = Yes</code>를 함께 선택하면 실패 건만 바로 확인할 수 있어요.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num red">5</div>
+          <div class="c-body">
+            <span class="c-tag">Search · 초기화 · 접기</span>
+            <div class="c-title">버튼 3종 역할</div>
+            <div class="c-desc"><strong>Search</strong> — 현재 조건으로 조회 &nbsp;|&nbsp; <strong>↺</strong> — 전체 조건 초기화 후 재조회 &nbsp;|&nbsp; <strong>∧</strong> — 검색 영역 접기/펼치기</div>
+          </div>
+        </div>
+      </div>
+      <div class="tip-box" style="margin-top:16px">
+        <div class="tip-lbl">💡 Carrier 검색 팝업</div>
+        <div class="tip-txt">🔍 클릭 → AIR / SHIP / FWDR / ROAD 타입 토글 선택 → 이름 또는 ID 입력 → Confirm 클릭하면 검색 필터에 자동 반영됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:10px">검색 흐름</div>
+  <div class="flow-row">
+    <div class="flow-step"><div class="flow-lbl">조건 설정</div><div class="flow-val">Status · ETD 선택</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step"><div class="flow-lbl">번호 입력 (선택)</div><div class="flow-val">MAWB 또는 HAWB No.</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step"><div class="flow-lbl">Search 클릭</div><div class="flow-val">MAWB 목록 표시</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step accent"><div class="flow-lbl">행 선택</div><div class="flow-val">HAWB 자동 연계</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 3 — 필드정의
+═══════════════════════════════════════ -->
+<div class="page" id="page-fields">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">필드정의</span>
+    <span class="eyebrow-num">03 / 08</span>
+  </div>
+  <div class="pg-title">필드정의 — 각 컬럼이 담고 있는 정보</div>
+  <div class="pg-sub">MAWB·HAWB 그리드와 수출신고 영역의 주요 필드를 설명해요</div>
+
+  <div class="sec-title">MAWB Info. 그리드 — 주요 컬럼</div>
+  <table class="def-table">
+    <thead><tr><th style="width:130px">컬럼명</th><th style="width:90px">타입</th><th style="width:80px">편집 가능</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>Status</td><td>배지</td><td>—</td><td>MAWB의 EDI 전송 단계. <span class="b b-na">New</span> → <span class="b b-epninf">EPNINF Sent</span> → <span class="b b-fwb">FWB/FHL Sent</span> 순서로 진행</td></tr>
+      <tr><td>EDI Send Status</td><td>배지</td><td>—</td><td>전송 처리 상태. <span class="b b-na">N/A</span> <span class="b b-proc">Processing</span> <span class="b b-ok">Complete</span> <span class="b b-err">Error</span></td></tr>
+      <tr><td>Need Resend</td><td>배지</td><td>—</td><td>재전송 필요 여부. Error 발생 시 자동으로 <span class="b b-resend">Need Resend</span> 표시</td></tr>
+      <tr><td>MAWB No.</td><td>링크</td><td>—</td><td>Master AWB 번호. 클릭하면 하단 HAWB 그리드가 연계 조회됨</td></tr>
+      <tr><td>Carrier</td><td>텍스트</td><td>—</td><td>항공사 코드 (예: KE, OZ, LH)</td></tr>
+      <tr><td>Flight Name</td><td>텍스트</td><td>—</td><td>편명 (예: KE123)</td></tr>
+      <tr><td>POL / POD</td><td>텍스트</td><td>—</td><td>출발/도착 공항 코드 (예: ICN, LAX)</td></tr>
+      <tr><td>ETD</td><td>날짜</td><td>—</td><td>항공편 출발 예정일. 기본 정렬 기준 컬럼 (오름차순)</td></tr>
+      <tr><td>Pkg Qty. / Gross Wt / Chg Wt</td><td>숫자</td><td>—</td><td>포장 수량, 총 중량(KG), 운임 중량(KG). 소수점 1자리 표시</td></tr>
+      <tr><td>Rate Class</td><td>드롭다운</td><td>✓</td><td>운임 클래스. Q · N · M · C · R · U · B · X 중 선택</td></tr>
+      <tr><td>Charge Rate</td><td>입력</td><td>✓</td><td>운임 단가</td></tr>
+      <tr><td>OC Code 1~3 / OC Amt 1~3</td><td>드롭다운·입력</td><td>✓</td><td>기타 요금 코드(PP·CC·CA·CX·PX)와 금액. 동일 코드 중복 입력 불가</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sec-title">HAWB Info. 그리드 — 주요 컬럼</div>
+  <table class="def-table">
+    <thead><tr><th style="width:130px">컬럼명</th><th style="width:90px">타입</th><th style="width:80px">편집 가능</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>Business Type</td><td>드롭다운</td><td>✓</td><td><code>E</code>(Export 수출) 또는 <code>R</code>(Transshipment 환적) 선택</td></tr>
+      <tr><td>HAWB No.</td><td>링크</td><td>—</td><td>House AWB 번호. 클릭 시 수출신고 정보 연계. 기본 정렬 기준 (오름차순)</td></tr>
+      <tr><td>Status / EDI Send Status</td><td>배지</td><td>—</td><td>MAWB와 동일한 상태 구조</td></tr>
+      <tr><td>Pkg Qty. / Pkg Unit</td><td>숫자·텍스트</td><td>—</td><td>포장 수량과 단위</td></tr>
+      <tr><td>Gross Wt / GW Unit</td><td>숫자·텍스트</td><td>—</td><td>총 중량과 단위</td></tr>
+      <tr><td>Cargo Description</td><td>입력</td><td>✓</td><td>화물 품목 설명. 최대 20자 입력 가능</td></tr>
+      <tr><td>Send Date / Send Person</td><td>텍스트</td><td>—</td><td>최종 EDI 전송 일시와 담당자</td></tr>
+      <tr><td>Shipper / Consignee / Notify</td><td>텍스트</td><td>—</td><td>송하인·수하인·통지처 이름</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sec-title">Export Declaration Info. — 수출신고 필드 (Read Only)</div>
+  <div class="warn-box">
+    <div class="warn-lbl">⚠ 이 영역은 읽기 전용이에요</div>
+    <div class="warn-txt">수출신고 정보는 <strong>HBL Detail &gt; Others 탭</strong>에서만 수정할 수 있어요. 이 화면에서는 조회만 가능합니다.</div>
+  </div>
+  <table class="def-table" style="margin-top:10px">
+    <thead><tr><th style="width:160px">필드명</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>Export Declaration No.</td><td>수출신고번호</td></tr>
+      <tr><td>Pkg Qty. / Pkg Unit</td><td>포장 수량·단위</td></tr>
+      <tr><td>Gross Weight / GW Unit</td><td>총 중량·단위</td></tr>
+      <tr><td>Same Pkg Code · Qty · Unit</td><td>동일 포장 코드·수량·단위</td></tr>
+      <tr><td>Split Shipment</td><td>분할 선적 여부 (Y/N)</td></tr>
+      <tr><td>Split Order By</td><td>분할 순번</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 4 — 버튼
+═══════════════════════════════════════ -->
+<div class="page" id="page-buttons">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">버튼</span>
+    <span class="eyebrow-num">04 / 08</span>
+  </div>
+  <div class="pg-title">버튼 — EDI 전송부터 이력 조회까지</div>
+  <div class="pg-sub">MAWB·HAWB 그리드 버튼의 역할과 사용 조건을 확인하세요</div>
+
+  <div class="body-row">
+    <div class="col-left">
+      <div class="screen-wrap" style="width:300px">
+        <div class="screen-frame">
+          <div class="topbar"><div class="tb-item active">Air Manifest Send (KR) ✕</div></div>
+          <div class="breadcrumb">Global Freight › <span class="cur">Air Manifest Send (KR)</span></div>
+          <div style="background:#f7f8fa;padding:2px 8px;border-bottom:1px solid #eaecf0;text-align:right"><a style="font-size:7px;color:#3FA2E4">🔗 KTNET/uLogisHub</a></div>
+          <div class="grid-hd" style="margin:5px 6px 0;border-radius:3px 3px 0 0;border:1px solid #d8dce3;border-bottom:none">
+            <span class="grid-title">MAWB Info. <span style="color:#666;font-weight:400">총 10건</span></span>
+            <div class="grid-btns">
+              <span class="btn-xs">MAWB History</span>
+              <span class="btn-xs">EPNINF Send</span>
+              <span class="btn-xs blue">FWB/FHL Send</span>
+              <span class="btn-xs icon">⬇</span>
+              <span class="btn-xs icon">⚙</span>
+            </div>
+          </div>
+          <div style="margin:0 6px;border:1px solid #d8dce3;border-top:none;overflow:hidden">
+            <div class="tbl-hd"><span class="chkb">☐</span><span style="flex:1.2">Status</span><span style="flex:1">EDI</span><span style="flex:1.5">MAWB No.</span><span style="flex:.8">Carrier</span></div>
+            <div class="tbl-row sel"><span class="chkb">☑</span><span style="flex:1.2"><span class="b b-fwb">FWB/FHL</span></span><span style="flex:1"><span class="b b-ok">OK</span></span><span style="flex:1.5;font-size:7px">180-12345678</span><span style="flex:.8">KE</span></div>
+            <div class="tbl-row alt"><span class="chkb">☐</span><span style="flex:1.2"><span class="b b-epninf">EPNINF</span></span><span style="flex:1"><span class="b b-err">Err</span></span><span style="flex:1.5;font-size:7px">180-87654321</span><span style="flex:.8">OZ</span></div>
+            <div class="tbl-row"><span class="chkb">☐</span><span style="flex:1.2"><span class="b b-na">New</span></span><span style="flex:1"><span class="b b-na">N/A</span></span><span style="flex:1.5;font-size:7px">180-11223344</span><span style="flex:.8">LH</span></div>
+          </div>
+          <div class="connector">▼ MAWB 선택 시 HAWB 연계 조회</div>
+          <div class="grid-hd" style="margin:0 6px;border-radius:3px 3px 0 0;border:1px solid #d8dce3;border-bottom:none">
+            <span class="grid-title">HAWB Info. <span style="color:#666;font-weight:400">총 3건</span></span>
+            <div class="grid-btns">
+              <span class="btn-xs">HAWB History</span>
+              <span class="btn-xs">Amend</span>
+              <span class="btn-xs">Addr Amend</span>
+              <span class="btn-xs icon">⬇</span>
+            </div>
+          </div>
+          <div style="margin:0 6px 6px;border:1px solid #d8dce3;border-top:none;overflow:hidden">
+            <div class="tbl-hd"><span class="chkb">☐</span><span style="flex:1">Type</span><span style="flex:1.2">HAWB No.</span><span style="flex:1">Status</span><span style="flex:1">EDI</span></div>
+            <div class="tbl-row sel"><span class="chkb">☑</span><span style="flex:1">E</span><span style="flex:1.2;font-size:7px">SELA001</span><span style="flex:1"><span class="b b-fwb">FWB</span></span><span style="flex:1"><span class="b b-ok">OK</span></span></div>
+            <div class="tbl-row alt"><span class="chkb">☐</span><span style="flex:1">E</span><span style="flex:1.2;font-size:7px">SELA002</span><span style="flex:1"><span class="b b-fwb">FWB</span></span><span style="flex:1"><span class="b b-ok">OK</span></span></div>
+          </div>
+        </div>
+        <div class="hl hl-red" style="top:32px;left:62px;width:232px;height:18px"></div>
+        <div class="hl hl-blue" style="top:51px;left:8px;width:286px;height:16px"></div>
+        <div class="hl hl-red" style="top:118px;left:44px;width:250px;height:16px"></div>
+        <div class="hl hl-blue" style="top:135px;left:8px;width:286px;height:15px"></div>
+        <svg class="arr" style="top:38px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <defs><marker id="m2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#e83e3e" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#e83e3e" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m2)"/>
+        </svg>
+        <svg class="arr" style="top:56px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#6283F6" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m2)"/>
+        </svg>
+        <svg class="arr" style="top:123px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#e83e3e" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m2)"/>
+        </svg>
+        <svg class="arr" style="top:140px;left:304px" width="40" height="14" viewBox="0 0 40 14">
+          <path d="M0 7 Q20 2 38 7" fill="none" stroke="#6283F6" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#m2)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="callout-list">
+        <div class="c-item">
+          <div class="c-num red">1</div>
+          <div class="c-body">
+            <span class="c-tag">MAWB — EPNINF Send · FWB/FHL Send</span>
+            <div class="c-title">전송은 반드시 EPNINF → FWB/FHL 순서</div>
+            <div class="c-desc">EPNINF를 먼저 전송해야 FWB/FHL 버튼이 활성화돼요. 여러 건을 체크해서 일괄 전송도 가능합니다.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num">2</div>
+          <div class="c-body">
+            <span class="c-tag" style="background:#eaeef8;color:#3a5bd9">MAWB — 체크 선택 규칙</span>
+            <div class="c-title">전송은 다건, History는 단건만</div>
+            <div class="c-desc">EPNINF · FWB/FHL 전송은 여러 건 일괄 처리 가능해요. 단, <code>MAWB History</code>는 반드시 1건만 선택해야 합니다.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num red">3</div>
+          <div class="c-body">
+            <span class="c-tag">HAWB — Amend · Address Amend</span>
+            <div class="c-title">수정 전송은 FWB/FHL 완료 후에만</div>
+            <div class="c-desc"><code>Amend Manifest</code>는 화물 정보 전체를, <code>Address Amend</code>는 Shipper·Consignee·Notify 주소만 수정해서 재전송해요.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num">4</div>
+          <div class="c-body">
+            <span class="c-tag" style="background:#eaeef8;color:#3a5bd9">공통 — ⬇ · ⚙</span>
+            <div class="c-title">엑셀 다운로드 · 컬럼 설정</div>
+            <div class="c-desc"><strong>⬇</strong> — 현재 그리드 데이터를 CSV로 내보내기 &nbsp;|&nbsp; <strong>⚙</strong> — 표시할 컬럼 선택 및 순서 변경</div>
+          </div>
+        </div>
+      </div>
+      <div class="warn-box" style="margin-top:10px">
+        <div class="warn-lbl">⚠ 주의</div>
+        <div class="warn-txt"><code>Processing</code> 상태 건이 포함된 채로 일괄 전송을 누르면 전송이 차단됩니다. 상태가 <code>Complete</code> 또는 <code>Error</code>로 바뀐 뒤 다시 시도하세요.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:10px">EDI 전송 전체 흐름</div>
+  <div class="flow-row">
+    <div class="flow-step"><div class="flow-lbl">MAWB 체크</div><div class="flow-val">New 또는<br>Need Resend</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step"><div class="flow-lbl">EPNINF Send</div><div class="flow-val">전송 요청<br>→ Processing</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step"><div class="flow-lbl">Complete 확인</div><div class="flow-val">KTNET 응답<br>수신</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step accent"><div class="flow-lbl">FWB/FHL Send</div><div class="flow-val">최종 전송<br>완료</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 5 — ⭐ USER MANUAL 버튼 (신규)
+═══════════════════════════════════════ -->
+<div class="page" id="page-usermanual">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">⭐ User Manual 버튼</span>
+    <span class="eyebrow-num">05 / 08</span>
+  </div>
+  <div class="pg-title">⭐ User Manual 버튼</div>
+  <div class="pg-sub">화면 우측 상단의 별 아이콘 버튼을 클릭하면 이 매뉴얼이 브라우저 새 탭으로 열려요</div>
+
+  <!-- 버튼 실제 미리보기 -->
+  <div class="btn-preview-wrap">
+    <div class="btn-preview-live">
+      <span class="btn-preview-star">⭐</span>
+      <span class="btn-preview-label">User Manual</span>
+    </div>
+    <div class="btn-preview-desc">
+      <strong>실제 버튼 모습</strong> — 탑바 우측에 이렇게 표시돼요.<br>
+      클릭하면 브라우저의 새 탭에서 이 매뉴얼이 열립니다.
+    </div>
+  </div>
+
+  <!-- 위치 설명 -->
+  <div class="sec-title">버튼 위치</div>
+  <div class="body-row" style="gap:24px;align-items:flex-start">
+    <div class="col-left">
+      <div class="screen-wrap" style="width:320px">
+        <div class="screen-frame">
+          <div class="topbar" style="justify-content:space-between">
+            <div style="display:flex">
+              <div class="tb-item active">Air Manifest Send (KR) ✕</div>
+              <div class="tb-item">Carrier ✕</div>
+            </div>
+            <div class="tb-manual-btn">
+              <span class="tb-manual-star">⭐</span>
+              <span class="tb-manual-label">User Manual</span>
+            </div>
+          </div>
+          <div class="breadcrumb">Global Freight › Air Forwarding › <span class="cur">Air Manifest Send (KR)</span></div>
+          <div class="search-wrap" style="opacity:.5">
+            <div class="s-actions">
+              <span class="btn-xs">∧</span>
+              <span class="btn-xs">↺</span>
+              <span class="btn-xs search">Search</span>
+            </div>
+            <div style="height:32px;background:#f5f5f5;border-radius:2px;margin-top:4px;border:1px dashed #d0d5dd"></div>
+          </div>
+          <div style="height:60px;margin:0 6px 6px;border:1px dashed #d0d5dd;border-radius:3px;background:#fafafa;display:flex;align-items:center;justify-content:center">
+            <span style="font-size:8px;color:#bbb">MAWB / HAWB 그리드</span>
+          </div>
+        </div>
+        <!-- 하이라이트 — 탑바 우측 버튼 -->
+        <div class="hl hl-gold" style="top:5px;right:5px;width:82px;height:18px"></div>
+        <svg class="arr" style="top:8px;right:92px" width="0" height="0"></svg>
+      </div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+        <div style="width:12px;height:12px;border:2px solid #f0b429;border-radius:2px;flex-shrink:0"></div>
+        <span style="font-size:11px;color:#7a5800;font-weight:600">⭐ User Manual 버튼 위치</span>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="callout-list">
+        <div class="c-item">
+          <div class="c-num gold">1</div>
+          <div class="c-body">
+            <span class="c-tag gold">위치</span>
+            <div class="c-title">탑바 우측 끝 — 항상 고정</div>
+            <div class="c-desc">시스템 탭([Air Manifest Send (KR)] [Carrier])과 동일한 탑바 줄에 위치하되, 우측 끝에 고정 배치돼요. 어느 탭을 보더라도 항상 같은 자리에 있습니다.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num gold">2</div>
+          <div class="c-body">
+            <span class="c-tag gold">동작</span>
+            <div class="c-title">브라우저 새 탭으로 열기</div>
+            <div class="c-desc">클릭하면 현재 업무 화면은 그대로 유지된 채 브라우저의 새 탭에서 이 매뉴얼이 열려요. 작업을 멈추지 않고 매뉴얼을 참고할 수 있습니다.</div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-num gold">3</div>
+          <div class="c-body">
+            <span class="c-tag gold">디자인</span>
+            <div class="c-title">탑바 톤에 맞는 다크 스타일</div>
+            <div class="c-desc">탑바 배경(#1A2233)과 어울리는 다크 버튼으로 제작됐어요. 별(⭐) 아이콘과 <strong style="color:#18A6C6">"User Manual"</strong> 텍스트로 기능을 직관적으로 표시합니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gold-box" style="margin-top:8px">
+        <div class="gold-lbl">⭐ 호버 시 툴팁</div>
+        <div class="gold-txt">버튼에 마우스를 올리면 <strong>"새 탭에서 매뉴얼 열기"</strong> 툴팁이 표시돼요. 버튼 기능을 처음 보는 사용자도 바로 알 수 있게 안내합니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 사용 흐름 -->
+  <div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:10px">사용 흐름</div>
+  <div class="flow-row">
+    <div class="flow-step"><div class="flow-lbl">업무 화면 사용 중</div><div class="flow-val">Air Manifest Send</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step"><div class="flow-lbl">버튼 클릭</div><div class="flow-val">⭐ User Manual</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step accent"><div class="flow-lbl">브라우저 새 탭</div><div class="flow-val">매뉴얼 오픈</div></div>
+    <div class="flow-arr"><div class="flow-arrh"></div></div>
+    <div class="flow-step"><div class="flow-lbl">업무 화면 유지</div><div class="flow-val">중단 없이 참조</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 6 — API
+═══════════════════════════════════════ -->
+<div class="page" id="page-api">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">API</span>
+    <span class="eyebrow-num">06 / 08</span>
+  </div>
+  <div class="pg-title">API — 화면이 서버와 통신하는 방식</div>
+  <div class="pg-sub">각 동작이 어떤 API를 호출하는지 확인하세요. 개발·연동 담당자용 참고 정보예요</div>
+
+  <div class="sec-title">조회 API</div>
+  <div class="api-box"><span class="api-method get">GET</span><span class="api-url">/api/air-manifest/mawb/list</span><div class="api-desc">MAWB 목록 조회 — 검색 필터 조건 전체 전달 (mawbStatus, mawbNo[], hawbNo[], carrier, etdFrom, etdTo, ediSendStatus, needResend)</div></div>
+  <div class="api-box"><span class="api-method get">GET</span><span class="api-url">/api/air-manifest/hawb/list?mawbId={id}</span><div class="api-desc">MAWB 행 선택 시 연계 HAWB 목록 조회 — mawbId 필수</div></div>
+  <div class="api-box"><span class="api-method get">GET</span><span class="api-url">/api/air-manifest/export-declaration?hawbId={id}</span><div class="api-desc">HAWB 행 선택 시 수출신고 정보 조회 — hawbId 필수</div></div>
+
+  <div class="sec-title">EDI 전송 API</div>
+  <div class="api-box"><span class="api-method post">POST</span><span class="api-url">/api/air-manifest/epninf/send</span><div class="api-desc">EPNINF 전문 전송 — Body: <code>{ mawbIds: string[] }</code> · 응답 즉시 Processing, 이후 Complete/Error 비동기 업데이트</div></div>
+  <div class="api-box"><span class="api-method post">POST</span><span class="api-url">/api/air-manifest/fwb-fhl/send</span><div class="api-desc">FWB + FHL 전문 동시 전송 — Body: <code>{ hawbIds: string[] }</code></div></div>
+  <div class="api-box"><span class="api-method post">POST</span><span class="api-url">/api/air-manifest/amend/send</span><div class="api-desc">Amend Manifest 수정 전문 전송</div></div>
+  <div class="api-box"><span class="api-method post">POST</span><span class="api-url">/api/air-manifest/address-amend/send</span><div class="api-desc">Address Amend 주소 수정 전문 전송</div></div>
+
+  <div class="sec-title">이력 조회 API</div>
+  <div class="api-box"><span class="api-method get">GET</span><span class="api-url">/api/air-manifest/mawb/history/{mawbId}</span><div class="api-desc">MAWB 전송 이력 — 시점별 스냅샷 목록 반환</div></div>
+  <div class="api-box"><span class="api-method get">GET</span><span class="api-url">/api/air-manifest/hawb/history/{hawbId}</span><div class="api-desc">HAWB 전송 이력 — 시점별 스냅샷 목록 반환</div></div>
+
+  <div class="sec-title">마스터 데이터 API</div>
+  <div class="api-box"><span class="api-method get">GET</span><span class="api-url">/api/master/carrier/search</span><div class="api-desc">Carrier 검색 팝업용 — Carrier Type · 명칭 · ID 조건으로 검색</div></div>
+
+  <div class="tip-box" style="margin-top:20px">
+    <div class="tip-lbl">💡 비동기 전송 처리</div>
+    <div class="tip-txt">전송 버튼 클릭 후 즉시 <code>Processing</code>으로 바뀌고, KTNET 서버 응답에 따라 <code>Complete</code> 또는 <code>Error</code>로 자동 업데이트돼요.</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 7 — 팝업
+═══════════════════════════════════════ -->
+<div class="page" id="page-popup">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">팝업</span>
+    <span class="eyebrow-num">07 / 08</span>
+  </div>
+  <div class="pg-title">팝업 — 이력 조회·Carrier 검색·컬럼 설정</div>
+  <div class="pg-sub">버튼 클릭으로 열리는 4가지 팝업의 사용법을 확인하세요</div>
+
+  <div class="popup-card">
+    <div class="popup-card-title">📋 MAWB Manifest History<span class="b b-na" style="font-size:9px;height:18px;padding:0 8px">단건 선택</span></div>
+    <div class="popup-card-sub">MAWB 그리드에서 1건 체크 → <strong>MAWB History</strong> 버튼 클릭</div>
+    <div class="popup-step-row"><div class="popup-step-num">1</div><div class="popup-step-txt">상단 <strong>Manifest Send Date</strong> 드롭다운에서 확인할 전송 시점 선택</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">2</div><div class="popup-step-txt">MAWB Info.(MAWB No.·Carrier·Flight·POL·POD·중량), Rate/OC 정보, Shipper·Consignee·Notify 주소 확인</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">3</div><div class="popup-step-txt">Close 버튼, ESC 키, 배경 클릭으로 닫기</div></div>
+  </div>
+
+  <div class="popup-card">
+    <div class="popup-card-title">📋 HAWB Manifest History<span class="b b-na" style="font-size:9px;height:18px;padding:0 8px">단건 선택</span></div>
+    <div class="popup-card-sub">HAWB 그리드에서 1건 체크 → <strong>HAWB History</strong> 버튼 클릭</div>
+    <div class="popup-step-row"><div class="popup-step-num">1</div><div class="popup-step-txt">전송 시점 드롭다운 선택 → 최신 이력이 기본 표시</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">2</div><div class="popup-step-txt">MAWB Info. / HAWB Info.(Business Type·HAWB No.·수량·중량·품목·Loading Place) 확인</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">3</div><div class="popup-step-txt">Shipper·Consignee·Notify 주소 + 수출신고 정보(분할선적 등) 확인</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">4</div><div class="popup-step-txt">Close 버튼, ESC 키, 배경 클릭으로 닫기</div></div>
+  </div>
+
+  <div class="popup-card">
+    <div class="popup-card-title">🔍 Carrier 검색 팝업</div>
+    <div class="popup-card-sub">검색 필터 Carrier 필드 옆 🔍 아이콘 클릭</div>
+    <div class="popup-step-row"><div class="popup-step-num">1</div><div class="popup-step-txt">Carrier Type 토글 버튼으로 AIR · SHIP · FWDR · ROAD 선택 (복수 선택 가능)</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">2</div><div class="popup-step-txt">Carrier 명칭 또는 Carrier ID 입력 후 Enter — 태그 형태로 추가됨</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">3</div><div class="popup-step-txt">Search 클릭 → 결과 목록에서 원하는 Carrier 체크</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">4</div><div class="popup-step-txt"><strong>Confirm</strong> 클릭 → 검색 필터 Carrier 필드에 자동 반영. Cancel 또는 배경 클릭 시 반영 없이 닫힘</div></div>
+  </div>
+
+  <div class="popup-card">
+    <div class="popup-card-title">⚙ 컬럼 설정</div>
+    <div class="popup-card-sub">MAWB 또는 HAWB 그리드 우측 ⚙ 버튼 클릭</div>
+    <div class="popup-step-row"><div class="popup-step-num">1</div><div class="popup-step-txt">체크박스로 표시할 컬럼 선택 / 해제</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">2</div><div class="popup-step-txt">드래그 앤 드롭으로 컬럼 순서 변경</div></div>
+    <div class="popup-step-row"><div class="popup-step-num">3</div><div class="popup-step-txt"><strong>적용</strong> — 즉시 그리드에 반영 &nbsp;|&nbsp; <strong>초기화</strong> — 기본 컬럼 순서로 복원 &nbsp;|&nbsp; <strong>닫기</strong> — 변경사항 적용 후 닫힘</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     PAGE 8 — 규칙·제약
+═══════════════════════════════════════ -->
+<div class="page" id="page-rules">
+  <div class="pg-eyebrow">
+    <span class="eyebrow-badge">사용자 매뉴얼</span>
+    <span class="eyebrow-tab">규칙·제약</span>
+    <span class="eyebrow-num">08 / 08</span>
+  </div>
+  <div class="pg-title">규칙·제약 — 알아두면 실수를 막을 수 있어요</div>
+  <div class="pg-sub">화면을 사용할 때 반드시 지켜야 하는 동작 규칙과 제약 사항이에요</div>
+
+  <div class="sec-title">EDI 전송 규칙</div>
+  <ul class="rule-list">
+    <li>EPNINF 전송은 Status가 <span class="b b-na">New</span> 이거나 <span class="b b-resend">Need Resend</span> 인 MAWB에만 가능해요</li>
+    <li>FWB/FHL 전송은 Status가 <span class="b b-epninf">EPNINF Sent</span> 이상인 경우에만 가능 — EPNINF 미전송 시 버튼 비활성화</li>
+    <li>전송 버튼 클릭 후 즉시 <span class="b b-proc">Processing</span> → KTNET 응답에 따라 <span class="b b-ok">Complete</span> 또는 <span class="b b-err">Error</span> 자동 업데이트</li>
+    <li>Error 발생 시 <span class="b b-resend">Need Resend</span> 자동 설정 — 재전송 시 동일 흐름 반복</li>
+    <li><span class="b b-proc">Processing</span> 상태 건이 포함된 일괄 전송은 차단되며 오류 메시지가 표시돼요</li>
+    <li>EPNINF · FWB/FHL 전송은 다건 일괄 처리 지원 / MAWB History · HAWB History · Amend · Address Amend는 단건만 가능</li>
+  </ul>
+
+  <div class="sec-title">화면 연동 규칙</div>
+  <ul class="rule-list">
+    <li>MAWB 행 클릭 → HAWB 그리드 자동 연계 조회 (MAWB 미선택 시 HAWB 그리드 빈 상태)</li>
+    <li>HAWB 행 클릭 → 수출신고(Export Declaration) 정보 자동 연계 표시</li>
+    <li>수출신고 영역은 Read Only — 수정은 <strong>HBL Detail &gt; Others 탭</strong>에서만 가능</li>
+    <li>MAWB No. 입력 시 HAWB No. · ETD 필드 자동 비활성 / HAWB No. 입력 시 MAWB No. · ETD 비활성</li>
+  </ul>
+
+  <div class="sec-title">수정 전송 규칙 (Amend)</div>
+  <ul class="rule-list">
+    <li>Amend Manifest — <span class="b b-fwb">FWB/FHL Sent</span> 완료 이후에만 활성화. 단건 선택 필수</li>
+    <li>Address Amend — Shipper · Consignee · Notify 주소 필드만 수정 전송. 화물 정보 변경 불가. 단건 선택 필수</li>
+    <li>Amend 전송도 EDI Send Status 흐름 동일 적용 (Processing → Complete / Error)</li>
+  </ul>
+
+  <div class="sec-title">그리드 동작 규칙</div>
+  <ul class="rule-list">
+    <li>MAWB 그리드 기본 정렬 — ETD 오름차순 / HAWB 그리드 기본 정렬 — HAWB No. 오름차순</li>
+    <li>OC Code 1~3 동일 코드 중복 입력 불가 — 같은 코드 선택 시 오류 메시지 표시</li>
+    <li>Cargo Description — 최대 20자 입력 제한</li>
+    <li>컬럼 설정은 사용자별 개별 저장</li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <div class="warn-box" style="margin-top:0">
+      <div class="warn-lbl">⚠ 자주 하는 실수</div>
+      <div class="warn-txt">
+        · EPNINF 전송 전에 FWB/FHL 버튼 클릭 → 비활성이라 클릭 불가<br>
+        · History/Amend에서 2건 이상 선택 → 오류 토스트 표시<br>
+        · Processing 포함 일괄 전송 → 전체 차단<br>
+        · OC Code 중복 선택 → 이전 값으로 자동 복원
+      </div>
+    </div>
+    <div class="tip-box" style="margin-top:0">
+      <div class="tip-lbl">💡 효율적인 사용 팁</div>
+      <div class="tip-txt">
+        · Need Resend = Yes 필터로 재처리 건만 모아보기<br>
+        · 컬럼 설정으로 불필요한 컬럼 숨겨 그리드 간결하게<br>
+        · History 팝업으로 수정 전·후 데이터 비교 가능<br>
+        · ⭐ User Manual 버튼으로 언제든 이 매뉴얼 재열람
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+var PAGE_NUMS = {
+  overview:'01', search:'02', fields:'03', buttons:'04',
+  usermanual:'05', api:'06', popup:'07', rules:'08'
+};
+var TOTAL = 8;
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('pg-num').textContent = (PAGE_NUMS[id] || '01') + ' / 0' + TOTAL;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* URL 파라미터로 진입 시 해당 탭 자동 이동 */
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var page = params.get('page');
+  if (page && document.getElementById('page-' + page)) {
+    var tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(function(t) {
+      if (t.getAttribute('onclick') && t.getAttribute('onclick').indexOf("'" + page + "'") !== -1) {
+        showPage(page, t);
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
